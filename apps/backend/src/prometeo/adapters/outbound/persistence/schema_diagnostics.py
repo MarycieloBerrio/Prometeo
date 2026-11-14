@@ -11,12 +11,18 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Protocol
 
-# Markers expected after a successful fresh init (0001_init.sql + 0002_knowledge_base.sql).
+# All BASE TABLEs from 0001_init.sql. A "fresh" volume must have every one;
+# checking only a subset previously let incomplete catalogs look compatible.
 REQUIRED_TABLES: tuple[str, ...] = (
     "investigations",
+    "investigation_relations",
     "sources",
     "assets",
+    "raw_test_records",
     "trials",
+    "media",
+    "flame_tracks",
+    "flame_track_samples",
     "measurements",
     "document_chunks",
 )
