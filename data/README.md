@@ -53,6 +53,14 @@
 [{ "id": "bass2-summary-p12-1", "text": "…", "provenance": { "reference": "…", "page": "12", "url": "…" } }]
 ```
 
+## Knowledge base (Postgres)
+
+`prometeo build-knowledge-base` loads the PSI catalog and document chunks into Postgres
+(see `apps/backend/README.md`). The files it downloads (experimental tables, reports) are cached
+in `raw/psi/<accession>/`. `curated/document_chunks.json` stays as the offline fallback for
+tests and CI. Experimental-table rows land in `raw_test_records` as text; turning a row into a
+trial is still the reviewed curation described above.
+
 ## Primary sources
 
 - **BASS-II** (MVP): NASA Physical Sciences Informatics (PSI) repository + BASS-II Summary Report (NTRS).

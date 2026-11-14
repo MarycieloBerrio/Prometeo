@@ -58,11 +58,13 @@ apps/
   backend/                FastAPI · Python 3.12 · uv — Evidence Engine API (hexagonal)
     src/prometeo/
       domain/             PURE: units (Quantity), Trial model, filters, physics metrics,
-                          compatibility (Physics Validator), EvidenceRank, coverage, FlameVision model
+                          compatibility (Physics Validator), EvidenceRank, coverage, FlameVision model,
+                          knowledge (PSI catalog records, text chunking)
       application/        use_cases/ + ports/outbound.py (Protocols)
       adapters/
         inbound/http/     FastAPI routers, DTOs (schemas.py) = public API contract
-        outbound/         persistence (JSON, Postgres), retrieval, llm (Claude, offline), vision (OpenCV), nasa (NTRS)
+        outbound/         persistence (JSON, Postgres), retrieval (keyword, pgvector), embeddings, documents,
+                          llm (Claude, offline), vision (OpenCV), nasa (PSI, NTRS)
       bootstrap/          settings, container (composition root), api.py (ASGI), cli.py
     tests/                unit/domain, unit/application, api
   frontend/               Next.js 16 · React 19 · TypeScript · pnpm
@@ -94,7 +96,16 @@ pnpm check:api                                 # ruff + mypy (strict) + import-l
 pnpm lint:web && pnpm typecheck:web && pnpm build:web
 pnpm contracts                                 # regenerate API types after changing backend DTOs
 (cd apps/backend && uv run prometeo validate-data)   # parse curated data through the domain
+
+# Knowledge base (offline job: NASA PSI catalog + document chunks → Postgres/pgvector)
+(cd apps/backend && uv sync --extra knowledge) # local embeddings (ONNX) + PDF text extraction
+pnpm kb:build                                  # all PSI "combustion" hits in Combustion Science
+pnpm kb:build --only PSI-25                    # one investigation (BASS-II)
+pnpm kb:search "flame spread vs flow speed"    # hybrid full-text + vector search
 ```
+
+The Research Assistant reads the knowledge base when `PROMETEO_DOCUMENT_STORE=postgres`
+(default `json` = keyword search over `data/curated/document_chunks.json`, used by tests and CI).
 
 UI work without curated data: `pnpm dev:api:synthetic` (= `uv run prometeo serve --synthetic`).
 The team develops on Windows/PowerShell, so don't document bash-only `VAR=value cmd` syntax.
@@ -167,8 +178,10 @@ is an **offline preparation job**, never done per request.
   (deterministic, the default).
 - Select with `PROMETEO_EXPLAINER=anthropic|offline`. Credentials come from `ANTHROPIC_API_KEY`
   or an `ant auth login` profile. Never hardcode keys or commit `.env`.
+- Semantic Retrieval is built: `PgVectorRetriever` (hybrid full-text + pgvector) over the knowledge
+  base loaded by `BuildKnowledgeBase`; embeddings are local (`TextEmbedder` port, fastembed/ONNX).
 - Planned components behind their own ports: Document Intelligence (report extraction → `extracted`
-  records for human review), Semantic Retrieval (pgvector hybrid search), Evidence Ranker.
+  records for human review), Evidence Ranker.
 
 ## 9. Conventions
 

@@ -17,6 +17,7 @@ def client() -> TestClient:
         trial_files="fixtures/synthetic_trials.json",
         include_synthetic=True,
         explainer="offline",
+        document_store="json",  # never depend on a local .env pointing at Postgres
     )
     return TestClient(build_app(build_container(settings)))
 

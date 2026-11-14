@@ -19,6 +19,8 @@ dependencies = [
 [project.optional-dependencies]
 # Offline data-preparation pipelines (document extraction, dataframes, signal processing).
 science = ["pandas>=2.2", "scipy>=1.14"]
+# Knowledge base: local embeddings (ONNX) and PDF text extraction.
+knowledge = ["fastembed>=0.4", "pypdf>=5.0"]
 # FlameVision video processing.
 vision = ["opencv-python-headless>=4.10"]
 
@@ -62,7 +64,7 @@ mypy_path = "src"
 packages = ["prometeo"]
 
 [[tool.mypy.overrides]]
-module = ["cv2", "cv2.*"]
+module = ["cv2", "cv2.*", "fastembed", "fastembed.*", "pypdf", "pypdf.*"]
 ignore_missing_imports = true
 
 # ---------------------------------------------------------------------------
@@ -88,7 +90,7 @@ type = "forbidden"
 source_modules = ["prometeo.domain"]
 forbidden_modules = [
   "fastapi", "pydantic", "pydantic_settings", "httpx", "anthropic",
-  "psycopg", "cv2", "pandas", "typer", "uvicorn",
+  "psycopg", "cv2", "pandas", "typer", "uvicorn", "fastembed", "pypdf",
 ]
 
 [[tool.importlinter.contracts]]
@@ -96,5 +98,5 @@ name = "Application layer does not depend on frameworks or vendors"
 type = "forbidden"
 source_modules = ["prometeo.application"]
 forbidden_modules = [
-  "fastapi", "httpx", "anthropic", "psycopg", "cv2", "typer", "uvicorn",
+  "fastapi", "httpx", "anthropic", "psycopg", "cv2", "typer", "uvicorn", "fastembed", "pypdf",
 ]

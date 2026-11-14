@@ -13,9 +13,11 @@ from prometeo.adapters.outbound.retrieval.keyword_retriever import KeywordRetrie
 from prometeo.application.ports.outbound import (
     DocumentRetriever,
     ExplanationGenerator,
+    TextEmbedder,
     TrialRepository,
 )
 from prometeo.application.use_cases.ask_research_assistant import AskResearchAssistant
+from prometeo.application.use_cases.build_knowledge_base import BuildKnowledgeBase
 from prometeo.application.use_cases.compare_trials import CompareTrials
 from prometeo.application.use_cases.coverage_map import BuildCoverageMap
 from prometeo.application.use_cases.explore_experiments import ExploreExperiments
@@ -40,7 +42,7 @@ def build_container(
 ) -> Container:
     """Build the object graph. Keyword overrides exist for tests."""
     trials = trials or _trial_repository(settings)
-    documents = documents or KeywordRetriever(settings.data_dir / settings.document_chunks_file)
+    documents = documents or document_retriever(settings)
     explainer = explainer or _explainer(settings)
     return Container(
         settings=settings,
@@ -49,6 +51,40 @@ def build_container(
         coverage=BuildCoverageMap(trials),
         assistant=AskResearchAssistant(trials, documents, explainer),
     )
+
+
+def document_retriever(settings: Settings) -> DocumentRetriever:
+    if settings.document_store == "postgres":
+        from prometeo.adapters.outbound.retrieval.pgvector_retriever import PgVectorRetriever
+
+        return PgVectorRetriever(settings.database_url, _embedder(settings))
+    return KeywordRetriever(settings.data_dir / settings.document_chunks_file)
+
+
+def build_knowledge_base_job(settings: Settings) -> BuildKnowledgeBase:
+    """Offline ingestion job (CLI only). Kept out of `Container`: the API never runs it."""
+    from prometeo.adapters.outbound.documents.text_extractor import DocumentTextExtractor
+    from prometeo.adapters.outbound.nasa.psi_client import PsiClient
+    from prometeo.adapters.outbound.persistence.postgres_knowledge_store import (
+        PostgresKnowledgeStore,
+    )
+
+    return BuildKnowledgeBase(
+        catalog=PsiClient(
+            settings.psi_base_url,
+            cache_dir=settings.raw_dir / "psi",
+            cache_root=settings.raw_dir,
+        ),
+        store=PostgresKnowledgeStore(settings.database_url),
+        embedder=_embedder(settings),
+        extractor=DocumentTextExtractor(),
+    )
+
+
+def _embedder(settings: Settings) -> TextEmbedder:
+    from prometeo.adapters.outbound.embeddings.fastembed_embedder import FastEmbedEmbedder
+
+    return FastEmbedEmbedder(settings.embedding_model)
 
 
 def _trial_repository(settings: Settings) -> TrialRepository:
