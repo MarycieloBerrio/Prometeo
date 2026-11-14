@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CompareResponse, Trial } from "@prometeo/contracts";
 
 import { SourceLine } from "@/components/trials/SourceLine";
@@ -44,19 +45,20 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
         <div><span className="eyebrow">CHECKED AS CONTROLLED</span><span>{VARIABLES.filter((variable) => !result.varied.includes(variable.key)).map((variable) => variable.label).join(" · ") || "None"}</span></div>
       </div>
 
-      <Section title="Trial records" hint="Identity and provenance of both experimental setups">
-        <div className="grid">
+      <details className="comparison-sources">
+        <summary>Record identity and provenance <Icon name="plus" size={16} /></summary>
+        <div className="comparison-source-pair">
           {[a, b].map((trial, index) => (
-            <article className="card trial-summary comparison-record" key={trial.id}>
+            <div className="comparison-record" key={trial.id}>
               <div className="comparison-record-heading"><span className="slot-letter">{index === 0 ? "A" : "B"}</span><span className="eyebrow">EXPERIMENT RECORD</span><strong className="mono">{trial.id}</strong></div>
               <h3>{trial.material}</h3>
               <span className="small muted">{trial.investigation}{trial.composition ? ` · ${trial.composition}` : ""} · {trial.geometry}</span>
               <span className="small muted">Sample {trial.sample_id ?? "not recorded"} · {trial.phenomena.length ? trial.phenomena.map(humanize).join(", ") : "phenomena not recorded"}</span>
               <SourceLine provenance={trial.provenance} />
-            </article>
+            </div>
           ))}
         </div>
-      </Section>
+      </details>
 
       {result.issues.length > 0 && (
         <Section title="Physics checks" hint="Messages returned by the Evidence Engine">
@@ -134,6 +136,12 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
           </div>
         )}
       </Section>
+
+      <div className="comparison-continue">
+        <span>Continue the investigation</span>
+        <Link href="/flamevision">Inspect available flame media <Icon name="arrowRight" size={15} /></Link>
+        <Link href={{ pathname: "/assistant", query: { q: `What does the evidence show about ${a.material} flame spread in microgravity?` } }}>Ask about {a.material} <Icon name="arrowRight" size={15} /></Link>
+      </div>
     </>
   );
 }

@@ -9,11 +9,13 @@ export function TrialFilters({ query }: { query: TrialQuery }) {
   const hasFilters = Object.values(query).some(Boolean);
   return (
     <section className="filter-panel" aria-label="Filter experiment records">
-      <div className="filter-heading">
-        <div><p className="eyebrow">QUERY THE EVIDENCE INDEX</p><h2>Refine the record</h2></div>
-        <span className="small muted">Filters use recorded trial fields only</span>
-      </div>
-      <Form action="/explorer" className="filter-grid">
+      <details className="filter-disclosure" open={hasFilters}>
+        <summary>
+          <span><Icon name="search" size={17} /> Filter recorded trials</span>
+          <small>{hasFilters ? "Filters active" : "Material · investigation · geometry · flow"}</small>
+          <Icon name="plus" size={17} />
+        </summary>
+        <Form action="/explorer" className="filter-grid">
         <label className="filter-field filter-material">
           <span>MATERIAL</span>
           <span className="field"><Icon name="flame" size={16} /><input name="material" placeholder="e.g. PMMA" defaultValue={query.material} aria-label="Material" /></span>
@@ -26,7 +28,8 @@ export function TrialFilters({ query }: { query: TrialQuery }) {
           <button type="submit" className="btn btn-primary"><Icon name="search" size={16} /> Search records</button>
           {hasFilters && <Link href="/explorer" className="btn btn-ghost">Reset</Link>}
         </div>
-      </Form>
+        </Form>
+      </details>
     </section>
   );
 }

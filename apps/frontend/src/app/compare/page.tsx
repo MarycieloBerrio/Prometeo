@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Suspense } from "react";
 
 import type { CompareRequest, CompareResponse, CoverageResponse, Trial } from "@prometeo/contracts";
@@ -6,16 +5,13 @@ import type { CompareRequest, CompareResponse, CoverageResponse, Trial } from "@
 import { CompareForm } from "@/components/compare/CompareForm";
 import { ComparisonResult } from "@/components/compare/ComparisonResult";
 import { CoverageMap } from "@/components/compare/CoverageMap";
-import {
-  ObservationalSpreadChart,
-  observationalSpreadPoints,
-} from "@/components/compare/ObservationalSpreadChart";
+import { ObservationalSpreadChart } from "@/components/compare/ObservationalSpreadChart";
 import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
-import { Icon } from "@/components/ui/Icon";
 import { PageHeader, Section } from "@/components/ui/PageHeader";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { allParams, firstParam, VARIABLES } from "@/domain/format";
+import { observationalSpreadPoints } from "@/domain/observational-spread";
 import { gateway } from "@/infrastructure/gateway";
 
 type SearchParams = PageProps<"/compare">["searchParams"];
@@ -106,24 +102,7 @@ async function CompareLab({ searchParams }: { searchParams: SearchParams }) {
       )}
       {compareError && <Callout tone="danger" title="Comparison failed">{compareError}</Callout>}
 
-      {result ? (
-        <ComparisonResult result={result} metric={metric} />
-      ) : (
-        !compareError && (
-          trials.length >= 2 && <EmptyState
-            icon="compare"
-            title="Pick trial A and trial B"
-            action={
-              <Link href="/explorer" className="btn">
-                <Icon name="search" size={16} />
-                Browse trials
-              </Link>
-            }
-          >
-            Prometeo first checks that the two trials can be compared. Only then it shows a difference.
-          </EmptyState>
-        )
-      )}
+      {result && <ComparisonResult result={result} metric={metric} />}
 
       {observationalSpreadPoints(trials).length >= 2 && (
         <Section

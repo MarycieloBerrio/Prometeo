@@ -8,26 +8,15 @@ import { ApiDown } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { Steps, type Step } from "@/components/ui/Steps";
 import { firstParam } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
 
 type SearchParams = PageProps<"/assistant">["searchParams"];
 
-/** The fixed Evidence Engine pipeline. The model only writes the last step. */
-const PIPELINE: Step[] = [
-  { icon: "search", title: "Retrieve", note: "trials + documents" },
-  { icon: "shield", title: "Validate", note: "physics match" },
-  { icon: "sigma", title: "Compute", note: "no AI numbers" },
-  { icon: "check", title: "Audit", note: "evidence tier" },
-  { icon: "pen", title: "Explain", note: "or refuse" },
-];
-
 export default function AssistantPage({ searchParams }: PageProps<"/assistant">) {
   return (
     <div className="page">
       <PageHeader slug="assistant" />
-      <div className="assistant-pipeline"><span className="eyebrow">AUDIT TRAIL / FIVE STAGES</span><Steps steps={PIPELINE} /></div>
       <Suspense fallback={<LoadingState label="Auditing the evidence packet" />}>
         <Assistant searchParams={searchParams} />
       </Suspense>

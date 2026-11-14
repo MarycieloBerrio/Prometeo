@@ -1,49 +1,18 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
 import type { Trial } from "@prometeo/contracts";
 
-import { formatQuantity } from "@/domain/format";
+import { observationalSpreadPoints, type SeriesId } from "@/domain/observational-spread";
 
 const SERIES = ["B16", "B19"] as const;
-type SeriesId = (typeof SERIES)[number];
-
-type Point = {
-  trialId: string;
-  series: SeriesId;
-  flow: number;
-  flowUnit: string;
-  spread: number;
-  spreadUnit: string;
-  oxygenLabel: string | null;
-};
 
 const SERIES_STYLE: Record<SeriesId, { stroke: string; label: string }> = {
   B16: { stroke: "var(--accent)", label: "B16 · 18.2% O₂" },
   B19: { stroke: "var(--info)", label: "B19 · 17.5% O₂" },
 };
-
-function measurement(trial: Trial, name: string) {
-  return trial.results.find((item) => item.name === name);
-}
-
-/** Collect curated B16/B19 points that already carry both ventilation and flame-spread rate. */
-export function observationalSpreadPoints(trials: Trial[]): Point[] {
-  const points: Point[] = [];
-  for (const trial of trials) {
-    if (trial.sample_id !== "B16" && trial.sample_id !== "B19") continue;
-    if (!trial.flow_speed) continue;
-    const fsr = measurement(trial, "flame_spread_rate");
-    if (!fsr) continue;
-    points.push({
-      trialId: trial.id,
-      series: trial.sample_id,
-      flow: trial.flow_speed.value,
-      flowUnit: trial.flow_speed.unit,
-      spread: fsr.value.value,
-      spreadUnit: fsr.value.unit,
-      oxygenLabel: formatQuantity(trial.oxygen),
-    });
-  }
-  return points.sort((a, b) => a.flow - b.flow || a.series.localeCompare(b.series));
-}
 
 /**
  * Observed Vf vs Vg for BASS-II B16/B19 condition points.
@@ -58,7 +27,10 @@ export function ObservationalSpreadChart({
   highlight?: string[];
 }) {
   const points = observationalSpreadPoints(trials);
+  const [activeId, setActiveId] = useState(highlight[0] ?? points[0]?.trialId ?? "");
   if (points.length < 2) return null;
+  const active = points.find((point) => point.trialId === activeId) ?? points[0];
+  const activeTrial = trials.find((trial) => trial.id === active.trialId);
 
   const width = 640;
   const height = 320;
@@ -91,7 +63,9 @@ export function ObservationalSpreadChart({
 
   return (
     <figure className="obs-chart">
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Observed flame spread rate versus ventilation for BASS-II B16 and B19">
+      <div className="obs-workbench">
+      <div className="obs-plot">
+      <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label="Select an observed BASS-II condition point">
         <title>Observed flame spread vs ventilation (B16 / B19)</title>
 
         {yTicks.map((tick) => (
@@ -158,9 +132,20 @@ export function ObservationalSpreadChart({
               <circle
                 cx={xScale(p.flow)}
                 cy={yScale(p.spread)}
-                r={selected ? 7 : 5}
+                r={active.trialId === p.trialId ? 9 : selected ? 7 : 6}
                 fill={SERIES_STYLE[p.series].stroke}
-                className={selected ? "obs-point obs-point-hl" : "obs-point"}
+                className={"obs-point" + (selected ? " obs-point-hl" : "") + (active.trialId === p.trialId ? " obs-point-active" : "")}
+                role="button"
+                tabIndex={0}
+                aria-label={`${p.trialId}: ventilation ${p.flow} ${p.flowUnit}, flame spread ${p.spread} ${p.spreadUnit}`}
+                aria-pressed={active.trialId === p.trialId}
+                onClick={() => setActiveId(p.trialId)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setActiveId(p.trialId);
+                  }
+                }}
               >
                 <title>
                   {p.trialId}: Vg={p.flow} {p.flowUnit}, Vf={p.spread} {p.spreadUnit}
@@ -181,6 +166,23 @@ export function ObservationalSpreadChart({
           );
         })}
       </svg>
+      </div>
+      <aside className="obs-inspector" aria-live="polite">
+        <p className="eyebrow">SELECTED CONDITION POINT</p>
+        <strong className="mono">{active.trialId}</strong>
+        <span className="small muted">BASS-II / physical sample {active.series}</span>
+        <dl>
+          <div><dt>VENTILATION</dt><dd>{active.flow} {active.flowUnit}</dd></div>
+          <div><dt>FLAME SPREAD</dt><dd>{active.spread} {active.spreadUnit}</dd></div>
+          <div><dt>OXYGEN</dt><dd>{active.oxygenLabel ?? "Not recorded"}</dd></div>
+        </dl>
+        <p className="small muted">{activeTrial?.results.find((item) => item.name === "flame_spread_rate")?.quality ?? "Recorded"} result. This point is a condition on sample {active.series}, not an independent ignition.</p>
+        <div className="obs-inspector-actions">
+          <Link href={"/explorer/" + encodeURIComponent(active.trialId)} className="btn btn-small">Inspect source</Link>
+          <Link href={"/compare?a=" + encodeURIComponent(active.trialId)} className="btn btn-small">Use as trial A</Link>
+        </div>
+      </aside>
+      </div>
 
       <figcaption className="legend">
         {SERIES.map((series) =>

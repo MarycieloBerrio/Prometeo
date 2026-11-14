@@ -1,5 +1,7 @@
 # Prometeo: 30-second jury walkthrough
 
+> This file preserves the earlier demo and verification record. The current interface direction and route map are in [redesign-ignition-workbench.md](redesign-ignition-workbench.md); descriptions of the old thermal field, cards and no-signal viewer below are historical.
+
 This is a live walkthrough, not a prerecorded claim. Select only records that the current API actually returns. Use a pair with the same material, geometry, thermal regime, and flow direction when available. Check the Physics Validator verdict before speaking about a difference. Never describe `SYN-*` records as NASA experiments.
 
 | Time | Screen / transition | English narration |
@@ -63,3 +65,11 @@ The frontend now uses a dark observatory palette, warm thermal accents, fine mea
 The layout has tablet and narrow-screen rules, keyboard focus styling, a skip link, and reduced-motion handling. CSS-only animation adds no dependency. The redesign was checked with `pnpm lint:web`, `pnpm typecheck:web`, `pnpm build:web`, and `git diff --check` on 14 November 2026. Browser visual inspection of localhost was denied by the Browser Use origin-permission gate, so no screenshot or measured viewport result is claimed for this revision.
 
 The redesign branch is based on the later `main`, which already includes curated BASS-II records, the observed-spread chart, and the static FlameVision processed-run gallery. The earlier empty-curated-data check above describes an earlier repository state; it is retained as an empty-state verification record, not a claim about the current dataset.
+
+## Instrument workbench iteration
+
+The interface now supports investigation inside each major visualization. Explorer is a condition-point ledger with one synchronized trial inspector and an independent two-record comparison queue. The observed B16/B19 plot exposes each recorded point to pointer and keyboard selection, with an inspector showing the selected condition and a link to its source record. Every oxygen × airflow coverage cell can be selected; its panel shows its interval, trial IDs, observed labels, or the explicit absence of recorded evidence. FlameVision's static processed-run track has a frame scrubber over the recorded observations, synchronized to frame number, time, edge position in pixels, and detection status. The exported curve and raw log remain available behind disclosure controls.
+
+These views read existing gateway responses or static published artifacts. Plot lines connect recorded observations for readability; they do not infer intermediate values, calibration, independent ignition replicates, or a validated flame-front track. The new client components stay inside server-rendered data boundaries, and no API or generated contract changed.
+
+Verification for this iteration on updated `main`: `pnpm check` passed using an isolated uv environment (Ruff, mypy, three import contracts, 275 pytest tests passed, three skipped, frontend ESLint and TypeScript); `pnpm build:web` passed. Browser screenshots and measured desktop/tablet/mobile layout review remain blocked by the saved Browser Use origin permission for localhost.
