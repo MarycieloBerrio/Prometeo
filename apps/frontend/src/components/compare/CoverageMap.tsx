@@ -2,7 +2,7 @@ import type { CoverageResponse } from "@prometeo/contracts";
 
 import { Icon } from "@/components/ui/Icon";
 
-const percent = (fraction: number) => `${Math.round(fraction * 100)}%`;
+const percent = (fraction: number) => `${Number((fraction * 100).toPrecision(4))}%`;
 
 /**
  * O₂ × airflow grid. A filled cell means trials exist there. An empty cell means
@@ -11,6 +11,9 @@ const percent = (fraction: number) => `${Math.round(fraction * 100)}%`;
 export function CoverageMap({ coverage, highlight = [] }: { coverage: CoverageResponse; highlight?: string[] }) {
   const flowBins = coverage.flow_edges_cm_s.length - 1;
   const oxygenBins = coverage.oxygen_edges.length - 1;
+  if (flowBins < 1 || oxygenBins < 1) {
+    return <p className="muted">No recorded evidence is mapped to oxygen and airflow intervals.</p>;
+  }
   // Cells arrive row-major by oxygen bin. Show the highest oxygen at the top, like a chart.
   const rows = Array.from({ length: oxygenBins }, (_, i) =>
     coverage.cells.slice(i * flowBins, (i + 1) * flowBins),
@@ -77,9 +80,10 @@ function Row({ cells, highlight }: { cells: CoverageResponse["cells"]; highlight
             key={c.flow_range_cm_s.join("-")}
             className={`cell${c.has_evidence ? " cell-on" : ""}${selected ? " cell-hl" : ""}`}
             title={label}
-            aria-label={label}
+            role="img"
+            aria-label={`Oxygen ${percent(low)} to ${percent(high)}, airflow ${c.flow_range_cm_s[0]} to ${c.flow_range_cm_s[1]} cm/s: ${label}${c.observed.length ? `; observed ${c.observed.join(", ")}` : ""}`}
           >
-            {c.has_evidence ? c.trial_ids.length : ""}
+            {c.has_evidence ? c.trial_ids.length : "—"}
           </span>
         );
       })}

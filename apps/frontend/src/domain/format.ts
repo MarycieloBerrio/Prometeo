@@ -19,6 +19,26 @@ export function humanize(value: string): string {
 export const GEOMETRIES = ["sheet", "cylinder", "sphere", "droplet", "other"] as const;
 export const FLOW_DIRECTIONS = ["concurrent", "opposed", "quiescent"] as const;
 export const PHENOMENA = ["ignition", "spread", "extinction"] as const;
+export const INVESTIGATIONS = ["BASS-II", "FLEX", "SAFFIRE-I", "FLAME-SPREAD-MODELING", "SYNTHETIC"] as const;
+
+/** Only links to web sources or media are accepted from API records. */
+export function externalUrl(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+/** A trial media reference may point to a public asset in this app. */
+export function mediaUrl(value: string | null | undefined): string | null {
+  if (value?.startsWith("/") && !value.startsWith("//") && !value.split("/").includes("..")) {
+    return value;
+  }
+  return externalUrl(value);
+}
 
 export const PHENOMENON_ICON: Record<string, IconName> = {
   ignition: "zap",
