@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import type { Trial } from "@prometeo/contracts";
 
+import { ProcessedRunGallery } from "@/components/flamevision/ProcessedRunGallery";
 import { SourceLine } from "@/components/trials/SourceLine";
 import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
@@ -27,6 +28,14 @@ export default function FlameVisionPage() {
       <Suspense fallback={<p className="muted">Checking trial media…</p>}>
         <TrialMedia />
       </Suspense>
+      <Section
+        title="Processed run gallery"
+        hint="Static artifacts under /experiments/flamevision · luminous edge · px until validated"
+      >
+        <Suspense fallback={<p className="muted">Loading processed runs…</p>}>
+          <ProcessedRunGallery />
+        </Suspense>
+      </Section>
       <Section title="What the track means">
         <div className="principles">
           <div className="principle">
@@ -80,8 +89,9 @@ async function TrialMedia() {
           </div>
         </Section>
       )}
-      <Callout tone="info" title="No overlay API in the current contract">
-        Flame-front overlays and validation can be shown after their source-linked artifacts are integrated.
+      <Callout tone="info" title="No live overlay API in the current contract">
+        The gallery below shows offline processed artifacts (keyframes, curve, track log). Live video
+        overlays are still outside the Evidence Engine HTTP contract.
       </Callout>
     </>
   );
