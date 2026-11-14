@@ -200,20 +200,48 @@ def search_knowledge_base(
 def derive_bass2_flow(
     out: Annotated[
         Path | None,
-        typer.Option(help="Write the worksheet as JSON. Default: data/processed/."),
+        typer.Option(
+            help="JSON worksheet path under data/processed/ only. "
+            "Default: data/processed/bass2_flow_speeds.json."
+        ),
     ] = None,
+    overwrite: Annotated[
+        bool,
+        typer.Option(
+            "--overwrite",
+            help="Replace an existing derived worksheet under data/processed/. "
+            "Never writes curated evidence.",
+        ),
+    ] = False,
 ) -> None:
     """Estimate BASS-II flow speeds from the PSI-25 table and NASA's fan calibration.
 
     Produces a worksheet for the curator: every speed is `derived` and needs review before it
     goes into a curated trial. Free-text readings are listed, not interpreted.
+
+    Output is restricted to ``data/processed/`` so estimated speeds cannot overwrite
+    curated trials, sources, fixtures, or other protected paths.
     """
     from prometeo.bootstrap.container import derive_bass2_flow_job
+    from prometeo.bootstrap.safe_output import (
+        UnsafeOutputPathError,
+        atomic_write_text,
+        resolve_processed_json_output,
+    )
     from prometeo.domain.physics.fan_calibration import FlowDerivationKind
 
     settings = get_settings()
+    try:
+        target = resolve_processed_json_output(
+            out,
+            data_dir=settings.data_dir,
+            overwrite=overwrite,
+        )
+    except UnsafeOutputPathError as exc:
+        typer.secho(str(exc), fg="red", err=True)
+        raise typer.Exit(code=2) from exc
+
     report = derive_bass2_flow_job(settings).execute()
-    target = out or settings.data_dir / "processed" / "bass2_flow_speeds.json"
     payload = {
         "status": "DERIVED ESTIMATES FOR HUMAN REVIEW. Not curated evidence.",
         "source": {
@@ -252,8 +280,7 @@ def derive_bass2_flow(
             for t in report.tests
         ],
     }
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    atomic_write_text(target, json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
 
     for t in report.tests:
         if t.derivation.kind is FlowDerivationKind.NOT_DERIVABLE:

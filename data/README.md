@@ -62,7 +62,9 @@ tests and CI. Experimental-table rows land in `raw_test_records` as text; turnin
 trial is still the reviewed curation described above.
 
 `prometeo derive-bass2-flow` estimates BASS-II flow speeds from the table's "Air display" column
-and NASA's fan calibration, and writes `processed/bass2_flow_speeds.json`. Those values are
+and NASA's fan calibration, and writes only under `processed/` (default
+`processed/bass2_flow_speeds.json`). `--out` paths outside `processed/` — including
+`curated/`, `sources/`, `fixtures/`, and `.env` — are refused. Those values are
 `derived` estimates for the curator to review; they are not curated evidence.
 
 ## Primary sources

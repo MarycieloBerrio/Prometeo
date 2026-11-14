@@ -77,7 +77,9 @@ calibration file (PSI-25, Reference Data, `Fan calibration data.xlsx`) gives
 `U [cm/s] = 1.0066 x Air display`, implemented in `domain/physics/fan_calibration.py`.
 
 ```bash
-uv run prometeo derive-bass2-flow     # writes data/processed/bass2_flow_speeds.json
+uv run prometeo derive-bass2-flow     # writes data/processed/bass2_flow_speeds.json only
+# --out must stay under data/processed/; curated/sources/fixtures/.env are refused.
+# Pass --overwrite to replace an existing derived worksheet.
 ```
 
 The output is a worksheet for the curator, not evidence. Every speed is `derived`, is an
