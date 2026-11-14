@@ -1,10 +1,17 @@
 /** The five product modules of Prometeo (see AGENTS.md § Product modules). */
+import type { IconName } from "@/components/ui/Icon";
+
 export interface ProductModule {
   slug: string;
   number: string;
   name: string;
-  summary: string;
-  mvp: string;
+  /** Short nav label. */
+  label: string;
+  icon: IconName;
+  /** One line: what the user does here. */
+  purpose: string;
+  /** Part of the guided Explore → Compare → Watch → Ask flow. */
+  inFlow: boolean;
 }
 
 export const MODULES: ProductModule[] = [
@@ -12,40 +19,51 @@ export const MODULES: ProductModule[] = [
     slug: "explorer",
     number: "01",
     name: "Experiment Explorer",
-    summary:
-      "Filter NASA microgravity combustion trials by fuel, oxygen, ventilation, geometry and phenomenon. Every trial shows its conditions, measurements, media and provenance.",
-    mvp: "Curated, verifiable BASS-II sample",
+    label: "Explore",
+    icon: "search",
+    purpose: "Find trials by fuel, oxygen and airflow.",
+    inFlow: true,
   },
   {
     slug: "compare",
     number: "02",
-    name: "Combustion Comparison Lab",
-    summary:
-      "Compare two or more trials. The Physics Validator flags incompatible conditions and withholds deltas when trials are not comparable.",
-    mvp: "Pairwise comparison + O₂ × ventilation coverage map",
+    name: "Comparison Lab",
+    label: "Compare",
+    icon: "compare",
+    purpose: "Check if two trials can be compared, then see the difference.",
+    inFlow: true,
   },
   {
     slug: "flamevision",
     number: "03",
     name: "FlameVision",
-    summary:
-      "Overlay the tracked luminous flame front on real NASA video and derive spread velocity — always stating what feature is measured and whether it is validated.",
-    mvp: "One processed and validated video",
+    label: "Watch",
+    icon: "video",
+    purpose: "Track the flame edge on NASA video and derive spread rate.",
+    inFlow: true,
   },
   {
     slug: "assistant",
     number: "04",
     name: "Research Assistant",
-    summary:
-      "Ask in natural language. Answers carry evidence tier, trials, computed facts, sources and limitations — and the engine refuses to extrapolate beyond the data.",
-    mvp: "Cited answers with rule-based EvidenceRank",
+    label: "Ask",
+    icon: "chat",
+    purpose: "Ask a question. Get an answer with its evidence and limits.",
+    inFlow: true,
   },
   {
     slug: "mission-safety",
     number: "05",
     name: "Mission Safety Explorer",
-    summary:
-      "Pick a mission scenario and see which experimental evidence applies and where the gaps are. Not a certification or risk predictor.",
-    mvp: "Post-MVP",
+    label: "Mission",
+    icon: "rocket",
+    purpose: "See which evidence applies to a mission scenario, and the gaps.",
+    inFlow: false,
   },
 ];
+
+export function moduleBySlug(slug: string): ProductModule {
+  const found = MODULES.find((m) => m.slug === slug);
+  if (!found) throw new Error(`Unknown module: ${slug}`);
+  return found;
+}

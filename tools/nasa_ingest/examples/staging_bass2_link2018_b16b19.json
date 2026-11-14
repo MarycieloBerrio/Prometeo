@@ -1,0 +1,39 @@
+[
+  {
+    "id": "BASS-II-B16-Vg755",
+    "investigation": "BASS-II",
+    "sample_id": "B16",
+    "fuel": { "material": "PMMA", "composition": "cast black PMMA rod" },
+    "geometry": {
+      "type": "cylinder",
+      "thickness": { "value": 6.4, "unit": "mm" },
+      "thermal_regime": "thick"
+    },
+    "oxygen": { "value": 18.2, "unit": "%" },
+    "ventilation": {
+      "speed": { "value": 7.55, "unit": "cm/s" },
+      "direction": "opposed"
+    },
+    "phenomena": ["spread"],
+    "provenance": {
+      "reference": "Link et al., Sci. Rep. 8:120 (2018), Supplementary Table S1",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Supplementary Table S1"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 0.0678, "unit": "mm/s" },
+        "quality": "measured",
+        "provenance": {
+          "reference": "Table S1 B16 Vf×10³=6.78 cm/s → 0.0678 mm/s",
+          "doi": "10.1038/s41598-017-18398-4",
+          "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+          "page": "Table S1"
+        }
+      }
+    ],
+    "notes": "Example staging row mirroring curated conversion from Table S1."
+  }
+]
