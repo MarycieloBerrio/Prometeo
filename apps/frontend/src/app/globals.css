@@ -1184,3 +1184,89 @@ code {
   color: var(--muted);
   font-size: 0.75rem;
 }
+
+.fv-gallery .stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.fv-run {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.fv-run-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.fv-run .badge {
+  flex-shrink: 0;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.fv-run .badge.tone-warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+.fv-run .badge.tone-ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+.fv-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+.fv-media {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.fv-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.fv-media figcaption {
+  padding: 0.45rem 0.6rem;
+}
+.fv-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+}
+.fv-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.fv-log {
+  overflow-x: auto;
+}
+.fv-log table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.fv-log th,
+.fv-log td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.fv-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
