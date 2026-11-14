@@ -61,6 +61,10 @@ in `raw/psi/<accession>/`. `curated/document_chunks.json` stays as the offline f
 tests and CI. Experimental-table rows land in `raw_test_records` as text; turning a row into a
 trial is still the reviewed curation described above.
 
+`prometeo derive-bass2-flow` estimates BASS-II flow speeds from the table's "Air display" column
+and NASA's fan calibration, and writes `processed/bass2_flow_speeds.json`. Those values are
+`derived` estimates for the curator to review; they are not curated evidence.
+
 ## Primary sources
 
 - **BASS-II** (MVP): NASA Physical Sciences Informatics (PSI) repository + BASS-II Summary Report (NTRS).

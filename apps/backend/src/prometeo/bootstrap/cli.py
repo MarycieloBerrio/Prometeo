@@ -196,5 +196,83 @@ def search_knowledge_base(
         typer.echo("")
 
 
+@app.command("derive-bass2-flow")
+def derive_bass2_flow(
+    out: Annotated[
+        Path | None,
+        typer.Option(help="Write the worksheet as JSON. Default: data/processed/."),
+    ] = None,
+) -> None:
+    """Estimate BASS-II flow speeds from the PSI-25 table and NASA's fan calibration.
+
+    Produces a worksheet for the curator: every speed is `derived` and needs review before it
+    goes into a curated trial. Free-text readings are listed, not interpreted.
+    """
+    from prometeo.bootstrap.container import derive_bass2_flow_job
+    from prometeo.domain.physics.fan_calibration import FlowDerivationKind
+
+    settings = get_settings()
+    report = derive_bass2_flow_job(settings).execute()
+    target = out or settings.data_dir / "processed" / "bass2_flow_speeds.json"
+    payload = {
+        "status": "DERIVED ESTIMATES FOR HUMAN REVIEW. Not curated evidence.",
+        "source": {
+            "reference": report.citation,
+            "doi": report.doi,
+            "url": report.url,
+            "source_file": report.table_file,
+        },
+        "quality": "derived",
+        "method": report.method,
+        "tests": [
+            {
+                "test": t.test_label,
+                "row": t.row_number,
+                "pi": t.pi,
+                "sample": t.sample,
+                "material": t.material,
+                "flow_restrictors": t.restrictors,
+                "fan_display_raw": t.fan_display,
+                "air_display_raw": t.air_display,
+                "kind": t.derivation.kind.value,
+                "reason": t.derivation.reason,
+                "steps": [
+                    {
+                        "air_display": step.air_display,
+                        "flow_speed": (
+                            {"value": step.speed.value, "unit": step.speed.unit}
+                            if step.speed
+                            else None
+                        ),
+                        "note": step.note,
+                    }
+                    for step in t.derivation.steps
+                ],
+            }
+            for t in report.tests
+        ],
+    }
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    for t in report.tests:
+        if t.derivation.kind is FlowDerivationKind.NOT_DERIVABLE:
+            continue
+        speeds = ", ".join(
+            f"{step.speed.value:g}" if step.speed else "n/a" for step in t.derivation.steps
+        )
+        typer.echo(f"{t.test_label or '?':<6} {t.derivation.kind.value:<8} {speeds} cm/s")
+    typer.echo("")
+    typer.echo(f"{report.citation}")
+    typer.echo(f"Method: {report.method}")
+    typer.echo(
+        f"{len(report.tests)} tests: "
+        f"{report.count(FlowDerivationKind.SINGLE)} single reading, "
+        f"{report.count(FlowDerivationKind.STEPPED)} stepped flow, "
+        f"{report.count(FlowDerivationKind.NOT_DERIVABLE)} not derivable (need review)"
+    )
+    typer.echo(f"Wrote {target}")
+
+
 if __name__ == "__main__":
     app()

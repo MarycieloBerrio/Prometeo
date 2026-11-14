@@ -70,6 +70,21 @@ src/prometeo/
 Dependency direction: `bootstrap → adapters → application → domain`. Enforced by
 import-linter contracts in `pyproject.toml`.
 
+## BASS-II flow speed (curation aid)
+
+The PSI-25 table records the anemometer reading ("Air display"), not the flow speed. NASA's
+calibration file (PSI-25, Reference Data, `Fan calibration data.xlsx`) gives
+`U [cm/s] = 1.0066 x Air display`, implemented in `domain/physics/fan_calibration.py`.
+
+```bash
+uv run prometeo derive-bass2-flow     # writes data/processed/bass2_flow_speeds.json
+```
+
+The output is a worksheet for the curator, not evidence. Every speed is `derived`, is an
+estimate (the display resolves about 1 cm/s) and needs review before it enters a curated trial.
+Readings outside the calibrated range (2 to 59) and free-text cells ("10 blowoff", "0.5 pot")
+are listed and never converted. Speeds published by the investigators take precedence.
+
 ## Configuration
 
 All env vars are prefixed `PROMETEO_` — see the repo-root `.env.example`.
