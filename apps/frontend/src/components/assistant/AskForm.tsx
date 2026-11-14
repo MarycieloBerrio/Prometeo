@@ -20,12 +20,8 @@ const SUGGESTIONS = [
 export function AskForm({ params }: { params: AskParams }) {
   const hasScope = Boolean(params.material || params.geometry || params.flow_direction);
   return (
-    <Form action="/assistant" className="ask card">
-      <div className="ask-heading">
-        <span className="ask-symbol"><Icon name="sigma" size={23} /></span>
-        <div><p className="eyebrow">EVIDENCE-GUIDED RESEARCH CONSOLE</p><h2>Frame a scientific question.</h2><p className="small muted">The engine retrieves trials, validates conditions and reports what the evidence can support.</p></div>
-        <span className="ask-status"><i /> AUDIT PIPELINE</span>
-      </div>
+    <Form action="/assistant" className="ask">
+      <p className="eyebrow">ASK THE EVIDENCE</p>
       <label className="field field-grow ask-input">
         <Icon name="search" size={18} />
         <input

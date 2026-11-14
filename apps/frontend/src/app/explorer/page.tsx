@@ -62,7 +62,7 @@ async function TrialResults({ searchParams }: { searchParams: SearchParams }) {
 
       {trials.length > 0 && (
         <>
-          <div className="index-readout"><span className="eyebrow">INDEX RESPONSE</span><strong>{trials.length.toString().padStart(2, "0")}</strong><span>recorded {trials.length === 1 ? "trial" : "trials"} in this view</span><span className="muted small">Select two records to open the lab</span></div>
+          <div className="index-result-line"><strong>{trials.length} {trials.length === 1 ? "trial" : "trials"}</strong><span>Inspect a record, or select two to compare.</span></div>
           <TrialPicker trials={trials} />
         </>
       )}

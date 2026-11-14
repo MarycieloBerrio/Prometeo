@@ -8,6 +8,7 @@ export function NavLinks({ active }: { active: string | null }) {
     <nav className="nav" aria-label="Modules">
       {MODULES.filter((m) => m.inFlow).map((m) => (
         <NavItem key={m.slug} slug={m.slug} active={active === m.slug}>
+          <span className="nav-step" aria-hidden="true">{m.number}</span>
           <span className="nav-label">{m.label}</span>
         </NavItem>
       ))}

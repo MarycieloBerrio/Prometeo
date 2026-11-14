@@ -21,10 +21,6 @@ type Params = PageProps<"/explorer/[id]">["params"];
 export default function TrialPage({ params }: PageProps<"/explorer/[id]">) {
   return (
     <div className="page">
-      <Link href="/explorer" className="back">
-        <Icon name="search" size={15} />
-        All trials
-      </Link>
       <Suspense fallback={<LoadingState label="Opening the experiment record" />}>
         <TrialSheet params={params} />
       </Suspense>
@@ -46,28 +42,27 @@ async function TrialSheet({ params }: { params: Params }) {
 
   return (
     <>
-      <header className="page-header">
-        <span className="page-icon">
-          <Icon name="flame" size={24} />
-        </span>
-        <div>
-          <p className="mono small muted">{trial.id}</p>
-          <h1>{trial.material}</h1>
-          <div className="row">
-            <Tag>{trial.investigation}</Tag>
-            {trial.sample_id && <span className="muted small">Sample {trial.sample_id}</span>}
-            {trial.phenomena.map((p) => (
-              <span key={p} className="phenomenon">
-                <Icon name={PHENOMENON_ICON[p] ?? "info"} size={13} />
-                {humanize(p)}
-              </span>
-            ))}
-          </div>
+      <header className="trial-sheet-header">
+        <div className="trial-sheet-route">
+          <Link href="/explorer" className="back"><Icon name="arrowLeft" size={15} /> Experiment index</Link>
+          <span>{trial.investigation} / {trial.id}</span>
         </div>
-        <div className="page-actions">
-          <Link href={`/compare?a=${encodeURIComponent(trial.id)}`} className="btn btn-primary">
-            <Icon name="compare" size={16} />
-            Compare with…
+        <div className="trial-sheet-heading">
+          <div>
+            <h1>{trial.material}</h1>
+            <div className="row">
+              <Tag>{trial.investigation}</Tag>
+              {trial.sample_id && <span className="muted small">Sample {trial.sample_id}</span>}
+              {trial.phenomena.map((p) => (
+                <span key={p} className="phenomenon">
+                  <Icon name={PHENOMENON_ICON[p] ?? "info"} size={13} />
+                  {humanize(p)}
+                </span>
+              ))}
+            </div>
+          </div>
+          <Link href={`/compare?a=${encodeURIComponent(trial.id)}`} className="record-next">
+            Compare with another trial <Icon name="arrowRight" size={16} />
           </Link>
         </div>
       </header>
@@ -104,7 +99,7 @@ async function TrialSheet({ params }: { params: Params }) {
       </Section>
 
       {trial.media.length > 0 && (
-        <Section title="Media">
+        <Section title="Media" hint="Source links from this trial">
           <ul className="list">
             {trial.media.map((m) => (
               <li key={m.uri} className="list-row">
@@ -122,6 +117,7 @@ async function TrialSheet({ params }: { params: Params }) {
               </li>
             ))}
           </ul>
+          <Link href="/flamevision" className="record-next">Inspect available FlameVision artifacts <Icon name="arrowRight" size={15} /></Link>
         </Section>
       )}
 

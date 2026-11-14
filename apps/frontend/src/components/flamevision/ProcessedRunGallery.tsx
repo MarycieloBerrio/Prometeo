@@ -94,7 +94,7 @@ export async function ProcessedRunGallery() {
         const base = `/experiments/flamevision/${run.key}`;
         const sample = track?.observations?.slice(0, 5) ?? [];
         return (
-          <article className="card fv-run" key={run.key}>
+          <article className="fv-run" key={run.key}>
             <header className="fv-run-head">
               <div>
                 <strong>{run.trial_key}</strong>
@@ -112,22 +112,16 @@ export async function ProcessedRunGallery() {
                 : " No Prometeo Trial.id is associated — do not map this run onto unrelated BASS-II sample IDs."}
             </p>
 
-            <div className="fv-media-grid">
+            {track && <TrackScrubber observations={track.observations} />}
+            <details className="fv-keyframes">
+              <summary>View source keyframes <Icon name="plus" size={16} /></summary>
               <figure className="fv-media">
                 {/* Static processed artifact from Juanfer's validation pipeline */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`${base}/keyframes.jpg`} alt={`Keyframes for ${run.key}`} />
-                <figcaption className="small muted">Keyframes (luminous edge context)</figcaption>
+                <figcaption className="small muted">Keyframes of the luminous edge. This sequence is not a live overlay.</figcaption>
               </figure>
-              <div className="fv-media-context">
-                <span className="eyebrow">SOURCE CONTEXT</span>
-                <strong>{run.trial_key}</strong>
-                <p className="small muted">The image sequence gives visual context. Inspect the frame log below for recorded time, edge position, and detection status.</p>
-                <span className="mono small">{run.position_unit} / {run.rate_unit}</span>
-              </div>
-            </div>
-
-            {track && <TrackScrubber observations={track.observations} />}
+            </details>
             <details className="fv-exported-curve">
               <summary>View exported static curve</summary>
               <figure className="fv-media">

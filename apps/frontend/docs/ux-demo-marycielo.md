@@ -1,5 +1,7 @@
 # Prometeo: 30-second jury walkthrough
 
+> This file preserves the earlier demo and verification record. The current interface direction and route map are in [redesign-ignition-workbench.md](redesign-ignition-workbench.md); descriptions of the old thermal field, cards and no-signal viewer below are historical.
+
 This is a live walkthrough, not a prerecorded claim. Select only records that the current API actually returns. Use a pair with the same material, geometry, thermal regime, and flow direction when available. Check the Physics Validator verdict before speaking about a difference. Never describe `SYN-*` records as NASA experiments.
 
 | Time | Screen / transition | English narration |

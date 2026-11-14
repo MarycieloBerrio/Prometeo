@@ -5,54 +5,32 @@ import type { Trial } from "@prometeo/contracts";
 
 import { ProcessedRunGallery } from "@/components/flamevision/ProcessedRunGallery";
 import { SourceLine } from "@/components/trials/SourceLine";
-import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
+import { ApiDown } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader, Section } from "@/components/ui/PageHeader";
 import { LoadingState } from "@/components/ui/LoadingState";
-import { Steps, type Step } from "@/components/ui/Steps";
 import { mediaUrl } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
-
-const METHOD: Step[] = [
-  { icon: "video", title: "Source video", note: "trial-linked footage" },
-  { icon: "flame", title: "Track the edge", note: "frame by frame" },
-  { icon: "chart", title: "Position vs time", note: "derived spread rate" },
-  { icon: "check", title: "Validate", note: "against a reference" },
-];
 
 export default function FlameVisionPage() {
   return (
     <div className="page">
       <PageHeader slug="flamevision" />
-      <div className="vision-method"><span className="eyebrow">IMAGE ANALYSIS / VALIDATION PATH</span><Steps steps={METHOD} /></div>
-      <Suspense fallback={<LoadingState label="Checking source-linked media" />}>
-        <TrialMedia />
-      </Suspense>
       <Section
-        title="Processed run gallery"
-        hint="Static artifacts under /experiments/flamevision · luminous edge · px until validated"
+        title="Luminous edge track"
+        hint="Recorded frame positions · pixels · unvalidated"
       >
         <Suspense fallback={<p className="muted">Loading processed runs…</p>}>
           <ProcessedRunGallery />
         </Suspense>
       </Section>
-      <Section title="What the track means">
-        <div className="principles">
-          <div className="principle">
-            <Icon name="flame" size={20} />
-            <div><strong>Luminous leading edge ≠ reaction front</strong><p className="muted small">A visible edge is not the hottest zone or the heat-release region.</p></div>
-          </div>
-          <div className="principle">
-            <Icon name="sigma" size={20} />
-            <div><strong>Derived only with calibration</strong><p className="muted small">A spread rate requires spatial and temporal calibration plus a documented method.</p></div>
-          </div>
-          <div className="principle">
-            <Icon name="alert" size={20} />
-            <div><strong>Validation must be explicit</strong><p className="muted small">A trial video alone does not establish a validated track or measurement.</p></div>
-          </div>
-        </div>
+      <Section title="Trial-linked source video" hint="Only media supplied by trial records">
+        <Suspense fallback={<LoadingState label="Checking source-linked media" />}>
+          <TrialMedia />
+        </Suspense>
       </Section>
+      <div className="vision-next"><span>The track is visual evidence, not a calibrated spread rate.</span><Link href="/assistant">Ask what the evidence supports <Icon name="arrowRight" size={15} /></Link></div>
     </div>
   );
 }
@@ -71,24 +49,8 @@ async function TrialMedia() {
     <>
       {trials.some((trial) => trial.is_synthetic) && <DemoBanner />}
       {videos.length === 0 ? (
-        <div className="vision-workbench">
-          <div className="vision-viewport">
-            <div className="vision-viewport-heading"><span>FLAMEVISION / SOURCE VIEWER</span><span>NO SIGNAL</span></div>
-            <div className="vision-reticle" aria-hidden="true"><Icon name="flame" size={54} /></div>
-            <EmptyState icon="video" title="No verified flame video available yet" action={<Link href="/explorer" className="btn"><Icon name="search" size={16} />Browse experiments</Link>}>
-              No trial currently provides a source-linked video URI. An overlay or validation result is not available from this API.
-            </EmptyState>
-            <div className="vision-viewport-footer"><span>AWAITING TRIAL MEDIA</span><span>NO TRIAL-LINKED TRACK</span></div>
-          </div>
-          <aside className="vision-inspector" aria-label="Vision interpretation status">
-            <p className="eyebrow">INTERPRETATION PANEL</p>
-            <div><span>INPUT</span><strong>No verified video</strong><p>Only media referenced by a trial record can appear here.</p></div>
-            <div><span>FEATURE</span><strong>Luminous leading edge</strong><p>Not the reaction front, temperature maximum or heat-release zone.</p></div>
-            <div><span>VALIDATION</span><strong>Not available</strong><p>No track or published-reference match is supplied by the current API.</p></div>
-          </aside>
-        </div>
+        <p className="vision-availability">No verified trial-linked video is available from the current API. The processed track above is a separate, unvalidated artifact; it is not mapped to an unrelated trial. <Link href="/explorer">Browse trial records <Icon name="arrowRight" size={14} /></Link></p>
       ) : (
-        <Section title="Videos in trial records" hint="Source links supplied by the Evidence Engine">
           <div className="vision-video-list">
             {videos.map(({ trial, media, uri }) => (
               <article className="vision-workbench" key={`${trial.id}-${uri}`}>
@@ -113,12 +75,7 @@ async function TrialMedia() {
               </article>
             ))}
           </div>
-        </Section>
       )}
-      <Callout tone="info" title="No live overlay API in the current contract">
-        The gallery below shows offline processed artifacts (keyframes, curve, track log). Live video
-        overlays are still outside the Evidence Engine HTTP contract.
-      </Callout>
     </>
   );
 }

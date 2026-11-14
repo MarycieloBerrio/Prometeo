@@ -5,7 +5,8 @@ import { useState } from "react";
 
 import type { Trial } from "@prometeo/contracts";
 
-import { TrialCard } from "@/components/trials/TrialCard";
+import { SourceLine } from "@/components/trials/SourceLine";
+import { DataQualityBadge } from "@/components/ui/Badges";
 import { Icon } from "@/components/ui/Icon";
 import { formatQuantity, humanize } from "@/domain/format";
 
@@ -73,8 +74,8 @@ export function TrialPicker({ trials }: { trials: Trial[] }) {
         </section>
 
         <aside className="index-inspector" aria-label="Selected experiment">
-          <div className="index-inspector-head"><span className="eyebrow">ACTIVE RECORD / INSPECTOR</span><span className="mono small">{active.id}</span></div>
-          <TrialCard trial={active} selected action={<Link href={"/explorer/" + encodeURIComponent(active.id)} className="btn btn-small">Open full record <Icon name="arrowRight" size={14} /></Link>} />
+          <div className="index-inspector-head"><span className="eyebrow">RECORD IN FOCUS</span><span className="mono small">{active.id}</span></div>
+          <TrialInspector trial={active} />
         </aside>
       </div>
 
@@ -95,5 +96,39 @@ export function TrialPicker({ trials }: { trials: Trial[] }) {
         )}
       </div>
     </>
+  );
+}
+
+function TrialInspector({ trial }: { trial: Trial }) {
+  const result = trial.results.find((item) => item.name === "flame_spread_rate") ?? trial.results[0];
+  return (
+    <div className="record-inspection">
+      <div className="record-inspection-title">
+        <span className="eyebrow">{trial.investigation} / {humanize(trial.geometry)}</span>
+        <h2>{trial.material}</h2>
+        <p>{trial.sample_id ? `Sample ${trial.sample_id}` : "Sample not recorded"}</p>
+      </div>
+      <dl className="record-inspection-conditions">
+        <div><dt>Oxygen</dt><dd>{formatQuantity(trial.oxygen) ?? "Not recorded"}</dd></div>
+        <div><dt>Ventilation</dt><dd>{formatQuantity(trial.flow_speed) ?? "Not recorded"}</dd></div>
+        <div><dt>Flow direction</dt><dd>{humanize(trial.flow_direction)}</dd></div>
+      </dl>
+      <div className="record-inspection-result">
+        <span className="eyebrow">RECORDED RESULT</span>
+        {result ? (
+          <>
+            <span>{humanize(result.name)}</span>
+            <strong>{formatQuantity(result.value) ?? "Not recorded"}</strong>
+            <DataQualityBadge quality={result.quality} />
+            <SourceLine provenance={result.provenance} />
+          </>
+        ) : <p>No result recorded for this condition point.</p>}
+      </div>
+      {trial.is_synthetic && <DataQualityBadge quality="synthetic" />}
+      <div className="record-inspection-source"><span className="eyebrow">RECORD SOURCE</span><SourceLine provenance={trial.provenance} /></div>
+      <Link href={"/explorer/" + encodeURIComponent(trial.id)} className="record-inspection-link">
+        Open full record <Icon name="arrowRight" size={16} />
+      </Link>
+    </div>
   );
 }
