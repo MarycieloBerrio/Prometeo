@@ -3,26 +3,16 @@ import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { MODULES } from "@/domain/modules";
 
-/** Sidebar links. `active` is the current first path segment, or null when unknown. */
+/** One instrument rail across all routes. */
 export function NavLinks({ active }: { active: string | null }) {
-  const flow = MODULES.filter((m) => m.inFlow);
-  const later = MODULES.filter((m) => !m.inFlow);
   return (
     <nav className="nav" aria-label="Modules">
-      <p className="nav-title">Workflow</p>
-      {flow.map((m) => (
+      {MODULES.map((m) => (
         <NavItem key={m.slug} slug={m.slug} active={active === m.slug}>
           <span className="nav-step">{Number(m.number)}</span>
           <Icon name={m.icon} />
           <span className="nav-label">{m.label}</span>
-        </NavItem>
-      ))}
-      <p className="nav-title">Later</p>
-      {later.map((m) => (
-        <NavItem key={m.slug} slug={m.slug} active={active === m.slug}>
-          <span className="nav-step" />
-          <Icon name={m.icon} />
-          <span className="nav-label">{m.label}</span>
+          {!m.inFlow && <span className="nav-future">LATER</span>}
         </NavItem>
       ))}
     </nav>

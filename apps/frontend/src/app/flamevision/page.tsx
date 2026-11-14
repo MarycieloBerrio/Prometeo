@@ -9,6 +9,7 @@ import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader, Section } from "@/components/ui/PageHeader";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { Steps, type Step } from "@/components/ui/Steps";
 import { mediaUrl } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
@@ -24,8 +25,8 @@ export default function FlameVisionPage() {
   return (
     <div className="page">
       <PageHeader slug="flamevision" />
-      <Steps steps={METHOD} />
-      <Suspense fallback={<p className="muted">Checking trial media…</p>}>
+      <div className="vision-method"><span className="eyebrow">IMAGE ANALYSIS / VALIDATION PATH</span><Steps steps={METHOD} /></div>
+      <Suspense fallback={<LoadingState label="Checking source-linked media" />}>
         <TrialMedia />
       </Suspense>
       <Section
@@ -70,20 +71,45 @@ async function TrialMedia() {
     <>
       {trials.some((trial) => trial.is_synthetic) && <DemoBanner />}
       {videos.length === 0 ? (
-        <EmptyState icon="video" title="No verified video available" action={<Link href="/explorer" className="btn"><Icon name="search" size={16} />Browse trials</Link>}>
-          No trial currently provides a source-linked video URI. An overlay or validation result is not available from this API.
-        </EmptyState>
+        <div className="vision-workbench">
+          <div className="vision-viewport">
+            <div className="vision-viewport-heading"><span>FLAMEVISION / SOURCE VIEWER</span><span>NO SIGNAL</span></div>
+            <div className="vision-reticle" aria-hidden="true"><Icon name="flame" size={54} /></div>
+            <EmptyState icon="video" title="No verified flame video available yet" action={<Link href="/explorer" className="btn"><Icon name="search" size={16} />Browse experiments</Link>}>
+              No trial currently provides a source-linked video URI. An overlay or validation result is not available from this API.
+            </EmptyState>
+            <div className="vision-viewport-footer"><span>AWAITING SOURCE MEDIA</span><span>NO TRACK GENERATED</span></div>
+          </div>
+          <aside className="vision-inspector" aria-label="Vision interpretation status">
+            <p className="eyebrow">INTERPRETATION PANEL</p>
+            <div><span>INPUT</span><strong>No verified video</strong><p>Only media referenced by a trial record can appear here.</p></div>
+            <div><span>FEATURE</span><strong>Luminous leading edge</strong><p>Not the reaction front, temperature maximum or heat-release zone.</p></div>
+            <div><span>VALIDATION</span><strong>Not available</strong><p>No track or published-reference match is supplied by the current API.</p></div>
+          </aside>
+        </div>
       ) : (
         <Section title="Videos in trial records" hint="Source links supplied by the Evidence Engine">
-          <div className="grid">
+          <div className="vision-video-list">
             {videos.map(({ trial, media, uri }) => (
-              <article className="card media-card" key={`${trial.id}-${uri}`}>
-                <strong><Link className="link" href={`/explorer/${encodeURIComponent(trial.id)}`}>{trial.id} · {trial.material}</Link></strong>
-                {trial.is_synthetic && <strong className="small">Synthetic fixture — not NASA footage</strong>}
-                <p className="small muted">Video listed for this trial. Processing and validation are not established by the media record.</p>
-                <a className="btn" href={uri} target="_blank" rel="noreferrer">Open source video <Icon name="external" size={14} /></a>
-                <SourceLine provenance={trial.provenance} />
-                {(media.start_s !== null || media.end_s !== null) && <p className="small muted">Recorded segment: {media.start_s ?? "?"}–{media.end_s ?? "?"} s</p>}
+              <article className="vision-workbench" key={`${trial.id}-${uri}`}>
+                <div className="vision-viewport">
+                  <div className="vision-viewport-heading"><span>FLAMEVISION / {trial.id}</span><span>TRIAL MEDIA</span></div>
+                  {/\.(mp4|webm|ogg)(\?|$)/i.test(uri) ? (
+                    <video controls preload="metadata" src={uri} aria-label={`Source video for trial ${trial.id}`}>
+                      Your browser cannot play this video. <a href={uri}>Open the source file</a>.
+                    </video>
+                  ) : <div className="vision-open"><Icon name="video" size={40} /><p>Video format requires its source viewer.</p><a className="btn" href={uri} target="_blank" rel="noreferrer">Open video <Icon name="external" size={14} /></a></div>}
+                  <div className="vision-viewport-footer"><span>MEDIA FROM TRIAL RECORD</span><span>TRACK NOT VALIDATED</span></div>
+                </div>
+                <aside className="vision-inspector">
+                  <p className="eyebrow">SOURCE & INTERPRETATION</p>
+                  <strong><Link className="link" href={`/explorer/${encodeURIComponent(trial.id)}`}>{trial.id} · {trial.material}</Link></strong>
+                  {trial.is_synthetic && <strong className="small">Synthetic fixture — not NASA footage</strong>}
+                  <p className="small muted">The media record does not establish a processed or validated flame-front track.</p>
+                  <SourceLine provenance={trial.provenance} />
+                  {(media.start_s !== null || media.end_s !== null) && <p className="small muted">Recorded segment: {media.start_s ?? "?"}–{media.end_s ?? "?"} s</p>}
+                  <a className="btn" href={uri} target="_blank" rel="noreferrer">Open source media <Icon name="external" size={14} /></a>
+                </aside>
               </article>
             ))}
           </div>

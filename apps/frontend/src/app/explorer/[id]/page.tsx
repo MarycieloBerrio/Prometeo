@@ -11,6 +11,7 @@ import { ApiDown } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { Icon } from "@/components/ui/Icon";
 import { Section } from "@/components/ui/PageHeader";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { formatQuantity, humanize, mediaUrl, PHENOMENON_ICON } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
 import { ApiError } from "@/infrastructure/http/http-evidence-gateway";
@@ -24,7 +25,7 @@ export default function TrialPage({ params }: PageProps<"/explorer/[id]">) {
         <Icon name="search" size={15} />
         All trials
       </Link>
-      <Suspense fallback={<p className="muted">Loading trial…</p>}>
+      <Suspense fallback={<LoadingState label="Opening the experiment record" />}>
         <TrialSheet params={params} />
       </Suspense>
     </div>

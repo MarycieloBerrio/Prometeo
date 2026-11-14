@@ -33,17 +33,24 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
 
   return (
     <>
-      <Callout tone={verdict.tone} title={verdict.title}>
-        {verdict.note}
-      </Callout>
+      <div className={`verdict-panel verdict-${verdict.tone}`} role="status">
+        <span className="verdict-symbol"><Icon name={verdict.tone === "ok" ? "check" : verdict.tone === "danger" ? "ban" : "alert"} size={30} /></span>
+        <div className="verdict-message"><p className="eyebrow">PHYSICS VALIDATOR / COMPARABILITY</p><h2>{verdict.title}</h2><p>{verdict.note}</p></div>
+        <div className="verdict-meta"><span>{result.issues.length} {result.issues.length === 1 ? "issue" : "issues"}</span><strong>{direct ? "DIRECT" : result.level === "not_comparable" ? "BLOCKED" : "CONDITIONAL"}</strong></div>
+      </div>
+
+      <div className="control-intent">
+        <div><span className="eyebrow">DECLARED AS VARIED</span><strong>{result.varied.length ? result.varied.map(humanize).join(" · ") : "None declared"}</strong></div>
+        <div><span className="eyebrow">CHECKED AS CONTROLLED</span><span>{VARIABLES.filter((variable) => !result.varied.includes(variable.key)).map((variable) => variable.label).join(" · ") || "None"}</span></div>
+      </div>
 
       <Section title="Trial records" hint="Identity and provenance of both experimental setups">
         <div className="grid">
           {[a, b].map((trial, index) => (
-            <article className="card trial-summary" key={trial.id}>
-              <span className="slot-letter">{index === 0 ? "A" : "B"}</span>
-              <strong className="mono">{trial.id}</strong>
-              <span>{trial.investigation} · {trial.material}{trial.composition ? ` (${trial.composition})` : ""}</span>
+            <article className="card trial-summary comparison-record" key={trial.id}>
+              <div className="comparison-record-heading"><span className="slot-letter">{index === 0 ? "A" : "B"}</span><span className="eyebrow">EXPERIMENT RECORD</span><strong className="mono">{trial.id}</strong></div>
+              <h3>{trial.material}</h3>
+              <span className="small muted">{trial.investigation}{trial.composition ? ` · ${trial.composition}` : ""} · {trial.geometry}</span>
               <span className="small muted">Sample {trial.sample_id ?? "not recorded"} · {trial.phenomena.length ? trial.phenomena.map(humanize).join(", ") : "phenomena not recorded"}</span>
               <SourceLine provenance={trial.provenance} />
             </article>
@@ -55,9 +62,10 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
         <Section title="Physics checks" hint="Messages returned by the Evidence Engine">
           <ul className="list">
             {result.issues.map((issue, index) => (
-              <li key={`${issue.variable}-${index}`} className="list-row">
+              <li key={`${issue.variable}-${index}`} className={`issue-row issue-${issue.severity}`}>
+                <span className="issue-severity"><Icon name={issue.severity === "blocking" ? "ban" : issue.severity === "warning" ? "alert" : "info"} size={16} />{issue.severity}</span>
                 <strong>{humanize(issue.variable)}</strong>
-                <span className="small">{issue.severity}: {issue.message}</span>
+                <span className="small">{issue.message}</span>
               </li>
             ))}
           </ul>

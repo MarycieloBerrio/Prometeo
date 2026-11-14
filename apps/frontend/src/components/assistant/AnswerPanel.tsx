@@ -15,8 +15,8 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
   const refused = response.answer === null;
   return (
     <div className="answer">
-      <div className={`answer-main card tone-border-${TIER_TONE[response.tier] ?? "neutral"}`}>
-        <div className="row-between">
+      <div className={`answer-main card tone-border-${TIER_TONE[response.tier] ?? "neutral"}${refused ? " answer-refusal" : ""}`}>
+        <div className="answer-topline"><span className="eyebrow">RESEARCH OUTPUT / EVIDENCE TIER</span>
           <TierBadge tier={response.tier} />
           {response.model && <span className="small muted mono">{response.model}</span>}
         </div>
@@ -29,11 +29,14 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
           </>
         ) : (
           <>
-            <p className="eyebrow">AI explanation · review the evidence below</p>
+            <p className="eyebrow">{response.model ? "AI EXPLANATION" : "EVIDENCE ENGINE EXPLANATION"} / REVIEW THE SOURCES BELOW</p>
             <p className="answer-text">{response.answer}</p>
           </>
         )}
+        <div className="answer-tally"><span>{response.assessments.length} trials assessed</span><span>{response.cited_sources.length} cited sources</span><span>{response.limitations.length} limitations</span></div>
       </div>
+
+      <div className="answer-section-label"><span className="eyebrow">TRACE THE RESPONSE</span><span className="small muted">Open each register to inspect its basis</span></div>
 
       <Group icon="book" title="Cited sources" count={response.cited_sources.length} open>
         <ul className="bullets">
@@ -113,15 +116,14 @@ function Group({
   open?: boolean;
   children: ReactNode;
 }) {
-  if (count === 0) return null;
   return (
-    <details className="group" open={open}>
+    <details className={`group${count === 0 ? " group-empty" : ""}`} open={open && count > 0}>
       <summary>
         <Icon name={icon} size={16} />
         <span>{title}</span>
         <span className="count">{count}</span>
       </summary>
-      <div className="group-body">{children}</div>
+      <div className="group-body">{count > 0 ? children : <p className="small muted">No entries returned in this register.</p>}</div>
     </details>
   );
 }

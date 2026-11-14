@@ -8,6 +8,7 @@ import { TrialPicker } from "@/components/trials/TrialPicker";
 import { ApiDown, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { firstParam } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
 
@@ -18,7 +19,7 @@ export default function ExplorerPage({ searchParams }: PageProps<"/explorer">) {
   return (
     <div className="page">
       <PageHeader slug="explorer" />
-      <Suspense fallback={<p className="muted">Loading trials…</p>}>
+      <Suspense fallback={<LoadingState label="Reading the experiment index" />}>
         <TrialResults searchParams={searchParams} />
       </Suspense>
     </div>
@@ -61,9 +62,7 @@ async function TrialResults({ searchParams }: { searchParams: SearchParams }) {
 
       {trials.length > 0 && (
         <>
-          <p className="muted small">
-            {trials.length} {trials.length === 1 ? "trial" : "trials"} · pick two to compare
-          </p>
+          <div className="index-readout"><span className="eyebrow">INDEX RESPONSE</span><strong>{trials.length.toString().padStart(2, "0")}</strong><span>recorded {trials.length === 1 ? "trial" : "trials"} in this view</span><span className="muted small">Select two records to open the lab</span></div>
           <TrialPicker trials={trials} />
         </>
       )}
