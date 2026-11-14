@@ -95,7 +95,16 @@ def _trial_repository(settings: Settings) -> TrialRepository:
 
 def _explainer(settings: Settings) -> ExplanationGenerator:
     if settings.explainer == "anthropic":
+        import anthropic
+
         from prometeo.adapters.outbound.llm.anthropic_explainer import AnthropicExplainer
 
-        return AnthropicExplainer(settings.anthropic_model, settings.anthropic_effort)
+        # A key from settings (env or .env) is passed explicitly, because pydantic-settings
+        # does not export .env values to os.environ. Without one, the SDK resolves its own
+        # credentials (ANTHROPIC_API_KEY, ANTHROPIC_AUTH_TOKEN or an `ant auth login` profile).
+        key = settings.anthropic_key()
+        client = anthropic.Anthropic(api_key=key) if key else None
+        return AnthropicExplainer(
+            settings.anthropic_model, settings.anthropic_effort, client=client
+        )
     return OfflineExplainer()
