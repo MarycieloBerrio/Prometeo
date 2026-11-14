@@ -1,5 +1,6 @@
 import type { CompareResponse, Trial } from "@prometeo/contracts";
 
+import { SourceLine } from "@/components/trials/SourceLine";
 import { DataQualityBadge } from "@/components/ui/Badges";
 import { Callout } from "@/components/ui/Callout";
 import { Icon, type IconName } from "@/components/ui/Icon";
@@ -15,18 +16,20 @@ const VERDICTS: Record<string, { tone: "ok" | "warn" | "danger"; title: string; 
   partially_comparable: {
     tone: "warn",
     title: "Partially comparable",
-    note: "Read the warnings before using the difference.",
+    note: "Controlled conditions differ or remain uncertain. Read the recorded values separately.",
   },
   not_comparable: {
     tone: "danger",
     title: "Not comparable",
-    note: "A controlled variable differs, so the numbers are withheld.",
+    note: "A controlled condition conflicts. Read the records separately; no comparative delta is displayed.",
   },
 };
 
-export function ComparisonResult({ result }: { result: CompareResponse }) {
+export function ComparisonResult({ result, metric }: { result: CompareResponse; metric: string }) {
   const [a, b] = result.trials;
   const verdict = VERDICTS[result.level] ?? { tone: "warn" as const, title: humanize(result.level), note: "" };
+  const direct = result.level === "directly_comparable" && !result.withheld_reason;
+  const deltas = direct ? result.deltas.filter((delta) => delta.metric === metric) : [];
 
   return (
     <>
@@ -34,22 +37,68 @@ export function ComparisonResult({ result }: { result: CompareResponse }) {
         {verdict.note}
       </Callout>
 
+      <Section title="Trial records" hint="Identity and provenance of both experimental setups">
+        <div className="grid">
+          {[a, b].map((trial, index) => (
+            <article className="card trial-summary" key={trial.id}>
+              <span className="slot-letter">{index === 0 ? "A" : "B"}</span>
+              <strong className="mono">{trial.id}</strong>
+              <span>{trial.investigation} · {trial.material}{trial.composition ? ` (${trial.composition})` : ""}</span>
+              <span className="small muted">Sample {trial.sample_id ?? "not recorded"} · {trial.phenomena.length ? trial.phenomena.map(humanize).join(", ") : "phenomena not recorded"}</span>
+              <SourceLine provenance={trial.provenance} />
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      {result.issues.length > 0 && (
+        <Section title="Physics checks" hint="Messages returned by the Evidence Engine">
+          <ul className="list">
+            {result.issues.map((issue, index) => (
+              <li key={`${issue.variable}-${index}`} className="list-row">
+                <strong>{humanize(issue.variable)}</strong>
+                <span className="small">{issue.severity}: {issue.message}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
       <Section title="Conditions side by side" hint="Verdict per variable comes from the Physics Validator">
         <ConditionDiff a={a} b={b} result={result} />
       </Section>
 
-      <Section title="Measured difference" hint="B − A">
-        {result.withheld_reason ? (
-          <Callout tone="neutral" icon="ban" title="Numbers withheld">
+      <Section title={direct ? "Recorded result and difference" : "Recorded results, separately"} hint={humanize(metric)}>
+        {!direct && result.withheld_reason && (
+          <Callout tone="neutral" icon="ban" title="Delta withheld">
             {result.withheld_reason}
           </Callout>
-        ) : result.deltas.length === 0 ? (
+        )}
+        {!direct ? (
+          <div className="grid">
+            {[a, b].map((trial, index) => {
+              const measurement = trial.results.find((item) => item.name === metric);
+              return (
+                <div key={trial.id} className="card separate-result">
+                  <span className="slot-letter">{index === 0 ? "A" : "B"} · {trial.id}</span>
+                  {measurement ? (
+                    <>
+                      <strong className="big">{formatQuantity(measurement.value)}</strong>
+                      <DataQualityBadge quality={measurement.quality} />
+                      <SourceLine provenance={measurement.provenance} />
+                    </>
+                  ) : <span className="muted">Not recorded</span>}
+                </div>
+              );
+            })}
+          </div>
+        ) : deltas.length === 0 ? (
           <Callout tone="neutral" title="No shared measurement">
             These trials have no recorded result in common. No difference can be shown.
           </Callout>
         ) : (
           <div className="grid">
-            {result.deltas.map((d) => (
+            {deltas.map((d) => (
               <div key={d.metric} className="card delta">
                 <span className="small muted">{humanize(d.metric)}</span>
                 <div className="delta-values">
@@ -69,12 +118,27 @@ export function ComparisonResult({ result }: { result: CompareResponse }) {
                   {d.difference.value > 0 ? "+" : ""}
                   {formatQuantity(d.difference)}
                 </p>
+                <RecordedBars a={d.a.value.value} b={d.b.value.value} unit={d.a.value.unit} sameUnit={d.a.value.unit === d.b.value.unit} />
+                <SourceLine provenance={d.a.provenance} />
+                <SourceLine provenance={d.b.provenance} />
               </div>
             ))}
           </div>
         )}
       </Section>
     </>
+  );
+}
+
+function RecordedBars({ a, b, unit, sameUnit }: { a: number; b: number; unit: string; sameUnit: boolean }) {
+  if (!sameUnit || !Number.isFinite(a) || !Number.isFinite(b) || a < 0 || b < 0) return null;
+  const maximum = Math.max(a, b);
+  return (
+    <figure className="recorded-bars" aria-label={`Recorded values: A ${a} ${unit}; B ${b} ${unit}`}>
+      <div className="bar-row"><span>A</span><i style={{ width: `${maximum ? a / maximum * 100 : 0}%` }} /><span>{a} {unit}</span></div>
+      <div className="bar-row"><span>B</span><i style={{ width: `${maximum ? b / maximum * 100 : 0}%` }} /><span>{b} {unit}</span></div>
+      <figcaption className="small muted">Recorded measurements only. Bars share a scale; no values are interpolated.</figcaption>
+    </figure>
   );
 }
 

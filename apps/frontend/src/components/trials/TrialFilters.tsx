@@ -3,12 +3,13 @@ import Link from "next/link";
 
 import type { TrialQuery } from "@/application/ports/evidence-gateway";
 import { Icon, type IconName } from "@/components/ui/Icon";
-import { FLOW_DIRECTIONS, GEOMETRIES, humanize, PHENOMENA } from "@/domain/format";
+import { FLOW_DIRECTIONS, GEOMETRIES, humanize, INVESTIGATIONS, PHENOMENA } from "@/domain/format";
 
 export function TrialFilters({ query }: { query: TrialQuery }) {
   const hasFilters = Object.values(query).some(Boolean);
   return (
     <Form action="/explorer" className="filters">
+      <Select name="investigation" icon="book" label="Investigation" options={INVESTIGATIONS} value={query.investigation} />
       <label className="field field-grow">
         <Icon name="flame" size={16} />
         <input name="material" placeholder="Fuel, e.g. PMMA" defaultValue={query.material} aria-label="Fuel" />
