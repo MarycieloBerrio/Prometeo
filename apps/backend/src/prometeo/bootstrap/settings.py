@@ -6,6 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
+from pydantic import AliasChoices, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _REPO_ROOT = Path(__file__).resolve().parents[5]
@@ -36,12 +37,25 @@ class Settings(BaseSettings):
     explainer: Literal["offline", "anthropic"] = "offline"
     anthropic_model: str = "claude-opus-5-5"
     anthropic_effort: Literal["low", "medium", "high", "xhigh", "max"] = "high"
+    # Read from the environment or from either .env file, under its standard SDK name. A real
+    # environment variable wins over .env. Empty means "not set": the SDK then falls back to
+    # its own resolution (ANTHROPIC_API_KEY in the process env, or an `ant auth login` profile).
+    anthropic_api_key: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("ANTHROPIC_API_KEY", "PROMETEO_ANTHROPIC_API_KEY"),
+    )
 
     cors_origins: str = "http://localhost:3000"
 
     @property
     def raw_dir(self) -> Path:
         return self.data_dir / "raw"
+
+    def anthropic_key(self) -> str | None:
+        """The configured key, or None when unset or blank (never logged or echoed)."""
+        if self.anthropic_api_key is None:
+            return None
+        return self.anthropic_api_key.get_secret_value().strip() or None
 
     def trial_paths(self) -> list[Path]:
         return [self.data_dir / p.strip() for p in self.trial_files.split(",") if p.strip()]
