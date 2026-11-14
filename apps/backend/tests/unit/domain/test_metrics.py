@@ -28,6 +28,15 @@ def test_spread_velocity_rejects_negative() -> None:
         flame_spread_velocity(Q(10, "mm"), Q(0, "s"), Q(0, "mm"), Q(10, "s"))
 
 
+def test_spread_velocity_caller_must_orient_decreasing_lab_axis() -> None:
+    """Front advancing in -x lab frame: flip axis before calling; do not abs() silently."""
+    with pytest.raises(InvalidMeasurementError, match="negative"):
+        flame_spread_velocity(Q(20, "mm"), Q(0, "s"), Q(10, "mm"), Q(5, "s"))
+    # Oriented axis x' = x0 - x recovers the physical advance rate.
+    v = flame_spread_velocity(Q(0, "mm"), Q(0, "s"), Q(10, "mm"), Q(5, "s"))
+    assert v.value == pytest.approx(2.0)
+
+
 def test_spread_velocity_rejects_non_finite() -> None:
     with pytest.raises(InvalidMeasurementError, match="finite"):
         flame_spread_velocity(Q(math.nan, "mm"), Q(0, "s"), Q(1, "mm"), Q(1, "s"))

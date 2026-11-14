@@ -25,9 +25,10 @@ NOT_COMPARABLE_WITHHELD_REASON = (
     "Trials differ in controlled variables; deltas withheld."
 )
 
-MIXED_QUALITY_SKIP_REASON = (
-    "Metric skipped: cannot subtract SYNTHETIC and MEASURED (or other mixed-quality) "
-    "results as if they were one evidence class."
+QUALITY_SKIP_REASON = (
+    "Metric skipped: evidence deltas require measured or derived (with method) "
+    "traceable results; extracted/unavailable/synthetic-vs-real pairs are not subtracted "
+    "as scientific effects. Both-SYNTHETIC remains allowed only for development fixtures."
 )
 
 
@@ -72,7 +73,7 @@ class CompareTrials:
             ma, mb = a.measurement(name), b.measurement(name)
             if ma is None or mb is None:
                 continue
-            if not _qualities_commensurable(ma.quality, mb.quality):
+            if not _evidence_delta_allowed(ma, mb):
                 skipped_quality = True
                 continue
             try:
@@ -86,7 +87,7 @@ class CompareTrials:
         if not deltas and (skipped_quality or skipped_units):
             parts: list[str] = []
             if skipped_quality:
-                parts.append(MIXED_QUALITY_SKIP_REASON)
+                parts.append(QUALITY_SKIP_REASON)
             if skipped_units:
                 parts.append(
                     "Metric skipped: incompatible units between trial results; "
@@ -102,16 +103,31 @@ class CompareTrials:
         return t
 
 
-def _qualities_commensurable(qa: DataQuality, qb: DataQuality) -> bool:
-    """Allow same-class pairs; reject synthetic↔measured (and similar) as evidence deltas.
+def _evidence_delta_allowed(ma: Measurement, mb: Measurement) -> bool:
+    """Admit only scientifically usable evidence pairs (or both-SYNTHETIC for fixtures).
 
-    Both-SYNTHETIC is allowed so the development fixture path keeps exercising the engine.
+    Rejected for causal/evidence deltas: EXTRACTED, UNAVAILABLE, mixed SYNTHETIC↔other,
+    DERIVED without a recorded method, or untraceable provenance.
     """
-    if qa is qb:
-        return True
-    synthetic = DataQuality.SYNTHETIC
-    if synthetic in (qa, qb) and qa is not qb:
+    qa, qb = ma.quality, mb.quality
+
+    if qa is DataQuality.SYNTHETIC and qb is DataQuality.SYNTHETIC:
+        return True  # development fixtures only — never NASA evidence
+
+    if DataQuality.SYNTHETIC in (qa, qb):
         return False
-    # measured↔derived is still a unit conversion of recorded numbers; mark as ok here.
-    # EvidenceRank / UI must still show each quality badge.
-    return {qa, qb} <= {DataQuality.MEASURED, DataQuality.DERIVED}
+    if qa in (DataQuality.EXTRACTED, DataQuality.UNAVAILABLE):
+        return False
+    if qb in (DataQuality.EXTRACTED, DataQuality.UNAVAILABLE):
+        return False
+
+    allowed = {DataQuality.MEASURED, DataQuality.DERIVED}
+    if qa not in allowed or qb not in allowed:
+        return False
+
+    if qa is DataQuality.DERIVED and not (ma.method and ma.method.strip()):
+        return False
+    if qb is DataQuality.DERIVED and not (mb.method and mb.method.strip()):
+        return False
+
+    return ma.provenance.is_traceable and mb.provenance.is_traceable

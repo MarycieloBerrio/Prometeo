@@ -173,3 +173,62 @@ def test_simultaneous_oxygen_and_flow_drift_is_partial() -> None:
     report = assess_compatibility(a, b, VARY_FLOW)
     assert report.level is Comparability.PARTIAL
     assert any(i.variable is Variable.OXYGEN for i in report.issues)
+
+
+def test_oxygen_18p2_vs_17p5_not_matched_by_relative_five_percent() -> None:
+    """B16/B19 O2 gap is ~3.85% relative but 0.7 pp absolute — not a controlled match."""
+    a = make_trial("A", oxygen=Quantity(18.2, "%"))
+    b = make_trial("B", oxygen=Quantity(17.5, "%"), ventilation=FAST)
+    report = assess_compatibility(a, b, VARY_FLOW)
+    assert report.level is Comparability.PARTIAL
+    assert any(
+        i.variable is Variable.OXYGEN
+        and "percentage points" in i.message
+        and i.severity is Severity.WARNING
+        for i in report.issues
+    )
+
+
+def test_oxygen_within_published_band_counts_as_controlled_match() -> None:
+    a = make_trial("A", oxygen=Quantity(18.2, "%"))
+    b = make_trial("B", oxygen=Quantity(18.4, "%"), ventilation=FAST)
+    report = assess_compatibility(a, b, VARY_FLOW)
+    ox_warn = [
+        i for i in report.issues
+        if i.variable is Variable.OXYGEN and i.severity is Severity.WARNING
+    ]
+    assert not ox_warn
+    assert report.level is Comparability.DIRECT
+
+
+def test_flow_direction_mismatch_not_waived_by_varied() -> None:
+    a = make_trial("A", ventilation=Ventilation(Quantity(5, "cm/s"), FlowDirection.OPPOSED))
+    b = make_trial("B", ventilation=Ventilation(Quantity(5, "cm/s"), FlowDirection.CONCURRENT))
+    report = assess_compatibility(a, b, frozenset({Variable.FLOW_DIRECTION}))
+    assert report.level is Comparability.NOT_COMPARABLE
+    assert any("cannot be waived" in i.message for i in report.issues)
+
+
+def test_fuel_mismatch_not_waived_by_varied() -> None:
+    from prometeo.domain.experiments.model import Fuel
+
+    a = make_trial("A")
+    b = make_trial("B", fuel=Fuel("other-material"), ventilation=FAST)
+    report = assess_compatibility(a, b, frozenset({Variable.FUEL, Variable.FLOW_SPEED}))
+    assert report.level is Comparability.NOT_COMPARABLE
+
+
+def test_varied_flow_speed_without_real_change_is_partial() -> None:
+    a = make_trial("A")
+    b = make_trial("B")  # same 5 cm/s
+    report = assess_compatibility(a, b, VARY_FLOW)
+    assert report.level is Comparability.PARTIAL
+    assert any("no experimental change established" in i.message for i in report.issues)
+
+
+def test_multi_factor_oxygen_and_flow_both_varied_is_partial() -> None:
+    a = make_trial("A")
+    b = make_trial("B", oxygen=Quantity(30, "%"), ventilation=FAST)
+    report = assess_compatibility(a, b, frozenset({Variable.OXYGEN, Variable.FLOW_SPEED}))
+    assert report.level is Comparability.PARTIAL
+    assert any("Multiple experimental factors" in i.message for i in report.issues)

@@ -32,8 +32,16 @@ def flame_spread_velocity(
 ) -> Quantity:
     """v_f = (x_f(t2) - x_f(t1)) / (t2 - t1), returned in mm/s.
 
-    Caller is responsible for ensuring both positions track the SAME physical front.
-    Negative results are rejected: a signed retreat is not reported as spread rate here.
+    Coordinate convention (caller responsibility):
+      Positions must be expressed in an *oriented* flame-spread axis where +x points
+      in the intended direction of front advance. If the camera/lab frame has the front
+      advancing toward decreasing pixel/mm coordinates, the caller must flip the axis
+      (e.g. x' = -x or x' = x_ref - x) *before* calling this function.
+
+    Negative slope is rejected (not absolute-valued): a negative result usually means
+    wrong front identity, reversed axis, or extinction retreat — not a silent |v|.
+    FlameVision / Juanfer must orient samples before the fit; do not change this API
+    to abs() without a coordinated calibration contract.
     """
     p1 = _require(x1, Dimension.LENGTH, "x1")
     p2 = _require(x2, Dimension.LENGTH, "x2")
@@ -52,7 +60,12 @@ def flame_spread_velocity(
 def flame_spread_velocity_fit(
     positions: Sequence[Quantity], times: Sequence[Quantity]
 ) -> Quantity:
-    """Least-squares slope of front position vs time (more robust than two points), in mm/s."""
+    """Least-squares slope of front position vs time, in mm/s.
+
+    Same oriented-axis convention as `flame_spread_velocity`: +x = intended spread
+    direction. Samples may be unordered in time (they are sorted here) but must not
+    contain duplicates. Negative fitted slopes are rejected without taking abs().
+    """
     if len(positions) != len(times) or len(positions) < 2:
         raise InvalidMeasurementError("Need at least two (position, time) pairs of equal length")
     xs = [_require(p, Dimension.LENGTH, "position") for p in positions]
