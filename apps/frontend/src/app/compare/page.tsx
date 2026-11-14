@@ -6,16 +6,14 @@ import type { CompareRequest, CompareResponse, CoverageResponse, Trial } from "@
 import { CompareForm } from "@/components/compare/CompareForm";
 import { ComparisonResult } from "@/components/compare/ComparisonResult";
 import { CoverageMap } from "@/components/compare/CoverageMap";
-import {
-  ObservationalSpreadChart,
-  observationalSpreadPoints,
-} from "@/components/compare/ObservationalSpreadChart";
+import { ObservationalSpreadChart } from "@/components/compare/ObservationalSpreadChart";
 import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader, Section } from "@/components/ui/PageHeader";
 import { LoadingState } from "@/components/ui/LoadingState";
 import { allParams, firstParam, VARIABLES } from "@/domain/format";
+import { observationalSpreadPoints } from "@/domain/observational-spread";
 import { gateway } from "@/infrastructure/gateway";
 
 type SearchParams = PageProps<"/compare">["searchParams"];

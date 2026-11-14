@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import type { ReactNode } from "react";
 
+import { TrackScrubber, type TrackObservation } from "@/components/flamevision/TrackScrubber";
 import { Callout } from "@/components/ui/Callout";
 import { Icon } from "@/components/ui/Icon";
 
@@ -42,7 +43,7 @@ type TrackSummary = {
   };
   verdict: string;
   validation: { status: string; reason: string; reference: null | string };
-  observations: Array<{ frame: number; time_s: number; status: string; edge_px: number }>;
+  observations: TrackObservation[];
 };
 
 const PUBLIC_ROOT = path.join(process.cwd(), "public", "experiments", "flamevision");
@@ -118,12 +119,23 @@ export async function ProcessedRunGallery() {
                 <img src={`${base}/keyframes.jpg`} alt={`Keyframes for ${run.key}`} />
                 <figcaption className="small muted">Keyframes (luminous edge context)</figcaption>
               </figure>
+              <div className="fv-media-context">
+                <span className="eyebrow">SOURCE CONTEXT</span>
+                <strong>{run.trial_key}</strong>
+                <p className="small muted">The image sequence gives visual context. Inspect the frame log below for recorded time, edge position, and detection status.</p>
+                <span className="mono small">{run.position_unit} / {run.rate_unit}</span>
+              </div>
+            </div>
+
+            {track && <TrackScrubber observations={track.observations} />}
+            <details className="fv-exported-curve">
+              <summary>View exported static curve</summary>
               <figure className="fv-media">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={`${base}/curve.png`} alt={`Position vs time curve for ${run.key}`} />
-                <figcaption className="small muted">Edge position vs time (px)</figcaption>
+                <figcaption className="small muted">Exported edge position vs time (px)</figcaption>
               </figure>
-            </div>
+            </details>
 
             {track && (
               <div className="fv-stats">
@@ -159,8 +171,8 @@ export async function ProcessedRunGallery() {
             {track?.feature_note && <p className="muted small">{track.feature_note}</p>}
 
             {sample.length > 0 && (
-              <div className="fv-log">
-                <p className="small muted">Tracking log sample (first rows of track.json)</p>
+              <details className="fv-log">
+                <summary>Inspect first five raw log rows</summary>
                 <table>
                   <thead>
                     <tr>
@@ -181,7 +193,7 @@ export async function ProcessedRunGallery() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </details>
             )}
 
             <div className="fv-actions">

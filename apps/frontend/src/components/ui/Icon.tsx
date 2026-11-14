@@ -44,6 +44,7 @@ const PATHS = {
     </>
   ),
   arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
+  arrowLeft: <path d="M19 12H5m6-6-6 6 6 6" />,
   check: (
     <>
       <circle cx="12" cy="12" r="9" />
