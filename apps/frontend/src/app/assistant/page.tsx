@@ -7,6 +7,7 @@ import { AskForm, type AskParams } from "@/components/assistant/AskForm";
 import { ApiDown } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { Steps, type Step } from "@/components/ui/Steps";
 import { firstParam } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
@@ -26,8 +27,8 @@ export default function AssistantPage({ searchParams }: PageProps<"/assistant">)
   return (
     <div className="page">
       <PageHeader slug="assistant" />
-      <Steps steps={PIPELINE} />
-      <Suspense fallback={<p className="muted">Checking the evidence…</p>}>
+      <div className="assistant-pipeline"><span className="eyebrow">AUDIT TRAIL / FIVE STAGES</span><Steps steps={PIPELINE} /></div>
+      <Suspense fallback={<LoadingState label="Auditing the evidence packet" />}>
         <Assistant searchParams={searchParams} />
       </Suspense>
     </div>

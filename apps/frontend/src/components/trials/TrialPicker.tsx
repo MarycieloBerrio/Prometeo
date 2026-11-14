@@ -50,11 +50,12 @@ export function TrialPicker({ trials }: { trials: Trial[] }) {
       </div>
 
       <div className="tray" role="status">
+        <div className="tray-intro"><span className="eyebrow">COMPARISON QUEUE</span><strong>{picked.length} / 2 selected</strong></div>
         <div className="tray-slots">
           {[0, 1].map((i) => (
             <span key={i} className={`slot${picked[i] ? " slot-filled" : ""}`}>
               <span className="slot-letter">{i === 0 ? "A" : "B"}</span>
-              <span className="mono small">{picked[i] ?? "pick a trial"}</span>
+              <span className="mono small">{picked[i] ?? "Awaiting record"}</span>
             </span>
           ))}
         </div>

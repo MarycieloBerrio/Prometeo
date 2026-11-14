@@ -21,24 +21,29 @@ export function AskForm({ params }: { params: AskParams }) {
   const hasScope = Boolean(params.material || params.geometry || params.flow_direction);
   return (
     <Form action="/assistant" className="ask card">
+      <div className="ask-heading">
+        <span className="ask-symbol"><Icon name="sigma" size={23} /></span>
+        <div><p className="eyebrow">EVIDENCE-GUIDED RESEARCH CONSOLE</p><h2>Frame a scientific question.</h2><p className="small muted">The engine retrieves trials, validates conditions and reports what the evidence can support.</p></div>
+        <span className="ask-status"><i /> AUDIT PIPELINE</span>
+      </div>
       <label className="field field-grow ask-input">
-        <Icon name="chat" size={18} />
+        <Icon name="search" size={18} />
         <input
           name="q"
-          placeholder="Ask about fuels, oxygen, airflow, flame spread…"
+          placeholder="e.g. How does ventilation affect flame spread in microgravity?"
           defaultValue={params.q}
           aria-label="Question"
           required
         />
         <button type="submit" className="btn btn-primary">
-          Ask
+          Examine evidence
           <Icon name="arrowRight" size={16} />
         </button>
       </label>
 
       <details className="ask-scope" open={hasScope}>
         <summary className="small">
-          <Icon name="search" size={14} /> Narrow to specific conditions
+          <Icon name="layers" size={14} /> Constrain the evidence search
         </summary>
         <div className="filters">
           <label className="field">
@@ -72,7 +77,7 @@ export function AskForm({ params }: { params: AskParams }) {
 
       {!params.q && (
         <div className="suggestions">
-          <span className="small muted">Try</span>
+          <span className="eyebrow">START WITH A QUESTION</span>
           {SUGGESTIONS.map((s) => (
             <Link key={s} href={{ pathname: "/assistant", query: { q: s } }} className="suggestion">
               {s}

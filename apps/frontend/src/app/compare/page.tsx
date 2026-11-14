@@ -10,6 +10,7 @@ import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { Icon } from "@/components/ui/Icon";
 import { PageHeader, Section } from "@/components/ui/PageHeader";
+import { LoadingState } from "@/components/ui/LoadingState";
 import { allParams, firstParam, VARIABLES } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
 
@@ -20,7 +21,7 @@ export default function ComparePage({ searchParams }: PageProps<"/compare">) {
   return (
     <div className="page">
       <PageHeader slug="compare" />
-      <Suspense fallback={<p className="muted">Loading…</p>}>
+      <Suspense fallback={<LoadingState label="Aligning experiment conditions" />}>
         <CompareLab searchParams={searchParams} />
       </Suspense>
     </div>
@@ -86,7 +87,7 @@ async function CompareLab({ searchParams }: { searchParams: SearchParams }) {
           No trials are loaded. An empty dataset does not indicate that a material is safe.
         </EmptyState>
       )}
-      {!trialsError && trials.length > 0 && <CompareForm trials={trials} a={a} b={b} varied={varied} metric={metric} />}
+      {!trialsError && trials.length > 0 && <CompareForm key={[a, b, metric, ...varied].join("|")} trials={trials} a={a} b={b} varied={varied} metric={metric} />}
       {trials.length === 1 && (
         <Callout tone="neutral" title="Comparison unavailable">
           At least two distinct trials are needed. You can still inspect this trial and the evidence coverage.
