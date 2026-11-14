@@ -67,10 +67,10 @@
   },
   {
     "id": "bass2-evidence-absence-not-safety",
-    "text": "CURATION RULE for assistant consumers: Empty coverage cells and omitted fields mean no curated evidence was verified for that condition, not that combustion cannot occur and not that a material is safe for spacecraft use. Prometeo refuses extrapolation beyond comparable measured trials. Synthetic fixture ids (SYN-*) are development only and are not NASA evidence.",
+    "text": "CURATION RULE (not an experimental NASA result): Empty coverage cells and omitted fields mean no curated evidence was verified for that condition, not that combustion cannot occur and not that a material is safe for spacecraft use. Prometeo refuses extrapolation beyond comparable measured trials. Synthetic fixture ids (SYN-*) are development only and are not NASA evidence. Numeric rod FSR values in this corpus come from Link et al. Sci. Rep. Table S1 (peer-reviewed supplement), not from a direct PSI-25 raw-file transcription.",
     "provenance": {
-      "reference": "Prometeo scientific integrity rules (AGENTS.md / data/README.md) applied to BASS-II curation",
-      "url": "https://github.com/MarycieloBerrio/Prometeo",
+      "reference": "Prometeo scientific integrity rules (AGENTS.md / data/README.md) applied to BASS-II curation — internal policy text",
+      "url": "https://github.com/MarycieloBerrio/Prometeo/blob/main/data/README.md",
       "page": "data/README.md curation rules"
     }
   }

@@ -2,8 +2,9 @@
   "manifest_version": 1,
   "curator": "Yulian (data pipeline)",
   "reviewed_at": "2026-11-14",
+  "re_audited_at": "2026-11-14T19:30:00Z",
   "investigation": "BASS-II",
-  "notes": "Only values checked against primary tables/text are curated. Large binaries stay in data/raw/ (gitignored).",
+  "notes": "Only values checked against primary tables/text are curated. Large binaries stay in data/raw/ (gitignored). B16/B19 trial ids are condition points on two physical samples, not independent replicates. Rod geometry.thickness stores diameter under frozen schema.",
   "sources": [
     {
       "id": "psi-25",
