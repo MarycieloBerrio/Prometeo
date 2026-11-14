@@ -1,0 +1,16 @@
+{
+  "schema": "prometeo.flamevision.index/v1",
+  "note": "Derived FlameVision artifacts. The tracked feature is the luminous leading edge, not the reaction front. See docs/flamevision-validation-juanfer.md.",
+  "runs": [
+    {
+      "key": "psi25-test-b9",
+      "manifest": "psi25-test-b9/manifest.json",
+      "trial_key": "NASA PSI-25 (BASS-II) test B9, sample 154m",
+      "prometeo_trial_id": null,
+      "validation_status": "UNVALIDATED",
+      "position_unit": "px",
+      "rate_unit": "px/s",
+      "credit": "NASA PSI, PSI-25 (BASS-II), DOI 10.60555/4qc4-de67, CC0-1.0"
+    }
+  ]
+}
