@@ -137,6 +137,41 @@ def build_knowledge_base(
         raise typer.Exit(code=1)
 
 
+@app.command("diagnose-db")
+def diagnose_db() -> None:
+    """Read-only check of Postgres schema vs migrations 0001+0002 (never mutates the DB)."""
+    from prometeo.adapters.outbound.persistence.schema_diagnostics import (
+        SchemaState,
+        diagnose,
+    )
+
+    settings = get_settings()
+    report = diagnose(settings.database_url)
+    color = {
+        SchemaState.FRESH: "green",
+        SchemaState.LEGACY_PRE_KB: "yellow",
+        SchemaState.EMPTY: "yellow",
+        SchemaState.PARTIAL: "red",
+        SchemaState.UNREACHABLE: "yellow",
+    }[report.state]
+
+    typer.secho(f"state: {report.state.value}", fg=color, bold=True)
+    if report.snapshot.error:
+        typer.echo(f"error: {report.snapshot.error}")
+    if report.missing_tables:
+        typer.echo(f"missing tables: {', '.join(report.missing_tables)}")
+    if report.missing_columns:
+        cols = ", ".join(f"{t}.{c}" for t, c in report.missing_columns)
+        typer.echo(f"missing columns: {cols}")
+    if report.missing_indexes:
+        typer.echo(f"missing indexes: {', '.join(report.missing_indexes)}")
+    if report.legacy_psi_resource_unique_present:
+        typer.echo("legacy constraint still present: assets_psi_resource_id_key")
+    typer.echo(report.guidance)
+    if report.state in {SchemaState.PARTIAL}:
+        raise typer.Exit(code=1)
+
+
 @app.command("search-knowledge-base")
 def search_knowledge_base(
     query: Annotated[str, typer.Argument(help="Question or keywords.")],

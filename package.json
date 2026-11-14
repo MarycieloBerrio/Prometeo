@@ -17,6 +17,7 @@
     "check:api": "cd apps/backend && uv run ruff check . && uv run mypy && uv run lint-imports && uv run pytest",
     "contracts": "cd apps/backend && uv run prometeo export-openapi && cd ../.. && pnpm --filter @prometeo/contracts generate",
     "db:up": "docker compose up -d db",
+    "db:diagnose": "cd apps/backend && uv run prometeo diagnose-db",
     "kb:build": "cd apps/backend && uv run --extra knowledge prometeo build-knowledge-base",
     "kb:search": "cd apps/backend && uv run --extra knowledge prometeo search-knowledge-base",
     "check": "pnpm check:api && pnpm lint:web && pnpm typecheck:web"
