@@ -68,3 +68,13 @@ FLEX and SAFFIRE tables were not inspected (the PSI API timed out); assume diffe
   thickness, convert fan setting to cm/s). The schema records the method; it does not do it.
 - Vector search with a small English model is weaker on formulas and tables. Tables from reports
   should become `measurements` with provenance, not chunks.
+
+## Findings while loading the real catalog (2026-11-14)
+
+- PSI's `resource_id` is shared by all files of one PSI resource (BASS-II: 694 files, 7 ids), so
+  it cannot be a unique file id. Files are keyed by `remote_path`
+  (`infra/db/migrations/0002_knowledge_base.sql`).
+- The BASS-II experimental table has 129 data rows.
+- The PSI API returns an empty file list for FLEX, FLEX-2, SAFFIRE-II and ACME E-FIELD. Their
+  metadata, publications and tables are loaded; their files are not catalogued.
+- A search for "combustion" returns 26 investigations; 24 are in Combustion Science.
