@@ -1,1 +1,307 @@
-[]
+[
+  {
+    "id": "BASS-II-B16-Vg755",
+    "investigation": "BASS-II",
+    "sample_id": "B16",
+    "fuel": {
+      "material": "PMMA",
+      "composition": "cast black PMMA rod"
+    },
+    "geometry": {
+      "type": "cylinder",
+      "thickness": { "value": 6.4, "unit": "mm" },
+      "thermal_regime": "thick"
+    },
+    "oxygen": { "value": 18.2, "unit": "%" },
+    "ventilation": {
+      "speed": { "value": 7.55, "unit": "cm/s" },
+      "direction": "opposed"
+    },
+    "phenomena": ["spread"],
+    "provenance": {
+      "reference": "Link et al., Sci. Rep. 8:120 (2018), Supplementary Table S1 (BASS-II ISS opposed-flow PMMA rods)",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Supplementary Table S1"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 0.0678, "unit": "mm/s" },
+        "quality": "measured",
+        "method": null,
+        "uncertainty": null,
+        "provenance": {
+          "reference": "Link et al. Sci. Rep. 8:120 (2018) Table S1 sample B16; Vf reported as Vf×10³ = 6.78 cm/s",
+          "doi": "10.1038/s41598-017-18398-4",
+          "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+          "page": "Table S1; Δt = 72 s"
+        }
+      }
+    ],
+    "media": [],
+    "notes": "Condition point from stepped opposed-flow burn on sample B16 (0.64 cm diameter). thickness field stores rod diameter. Vf converted from Table S1 column Vf×10³ (cm/s): 6.78e-3 cm/s = 0.0678 mm/s. Right-column header in the PDF incorrectly says mm/s; magnitudes match the cm/s scale used on the left and in Table S2. Same physical sample as other B16-* records; not an independent ignition. Pressure omitted (not tabulated for this row). No public direct video URI verified for this sample id.",
+    "tags": ["bass-ii", "pmma-rod", "opposed", "link-2018", "compare-candidate"]
+  },
+  {
+    "id": "BASS-II-B16-Vg167",
+    "investigation": "BASS-II",
+    "sample_id": "B16",
+    "fuel": {
+      "material": "PMMA",
+      "composition": "cast black PMMA rod"
+    },
+    "geometry": {
+      "type": "cylinder",
+      "thickness": { "value": 6.4, "unit": "mm" },
+      "thermal_regime": "thick"
+    },
+    "oxygen": { "value": 18.2, "unit": "%" },
+    "ventilation": {
+      "speed": { "value": 1.67, "unit": "cm/s" },
+      "direction": "opposed"
+    },
+    "phenomena": ["spread"],
+    "provenance": {
+      "reference": "Link et al., Sci. Rep. 8:120 (2018), Supplementary Table S1 (BASS-II ISS opposed-flow PMMA rods)",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Supplementary Table S1"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 0.0762, "unit": "mm/s" },
+        "quality": "measured",
+        "method": null,
+        "uncertainty": null,
+        "provenance": {
+          "reference": "Link et al. Sci. Rep. 8:120 (2018) Table S1 sample B16; Vf×10³ = 7.62 cm/s",
+          "doi": "10.1038/s41598-017-18398-4",
+          "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+          "page": "Table S1; Δt = 139 s"
+        }
+      }
+    ],
+    "media": [],
+    "notes": "Same B16 burn sequence as BASS-II-B16-Vg755. Peak FSR among curated B16 points — supports the non-monotonic opposed-flow response described in the paper (Fig. 6a). thickness = rod diameter.",
+    "tags": ["bass-ii", "pmma-rod", "opposed", "link-2018", "compare-candidate"]
+  },
+  {
+    "id": "BASS-II-B16-Vg083",
+    "investigation": "BASS-II",
+    "sample_id": "B16",
+    "fuel": {
+      "material": "PMMA",
+      "composition": "cast black PMMA rod"
+    },
+    "geometry": {
+      "type": "cylinder",
+      "thickness": { "value": 6.4, "unit": "mm" },
+      "thermal_regime": "thick"
+    },
+    "oxygen": { "value": 18.2, "unit": "%" },
+    "ventilation": {
+      "speed": { "value": 0.83, "unit": "cm/s" },
+      "direction": "opposed"
+    },
+    "phenomena": ["spread"],
+    "provenance": {
+      "reference": "Link et al., Sci. Rep. 8:120 (2018), Supplementary Table S1 (BASS-II ISS opposed-flow PMMA rods)",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Supplementary Table S1"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 0.0699, "unit": "mm/s" },
+        "quality": "measured",
+        "method": null,
+        "uncertainty": null,
+        "provenance": {
+          "reference": "Link et al. Sci. Rep. 8:120 (2018) Table S1 sample B16; Vf×10³ = 6.99 cm/s",
+          "doi": "10.1038/s41598-017-18398-4",
+          "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+          "page": "Table S1; Δt = 198 s"
+        }
+      }
+    ],
+    "media": [],
+    "notes": "Same B16 burn sequence. Intermediate low-flow point between Vg=1.67 and Vg=0.72 cm/s.",
+    "tags": ["bass-ii", "pmma-rod", "opposed", "link-2018", "compare-candidate"]
+  },
+  {
+    "id": "BASS-II-B16-Vg072",
+    "investigation": "BASS-II",
+    "sample_id": "B16",
+    "fuel": {
+      "material": "PMMA",
+      "composition": "cast black PMMA rod"
+    },
+    "geometry": {
+      "type": "cylinder",
+      "thickness": { "value": 6.4, "unit": "mm" },
+      "thermal_regime": "thick"
+    },
+    "oxygen": { "value": 18.2, "unit": "%" },
+    "ventilation": {
+      "speed": { "value": 0.72, "unit": "cm/s" },
+      "direction": "opposed"
+    },
+    "phenomena": ["spread"],
+    "provenance": {
+      "reference": "Link et al., Sci. Rep. 8:120 (2018), Supplementary Table S1 (BASS-II ISS opposed-flow PMMA rods)",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Supplementary Table S1"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 0.0568, "unit": "mm/s" },
+        "quality": "measured",
+        "method": null,
+        "uncertainty": null,
+        "provenance": {
+          "reference": "Link et al. Sci. Rep. 8:120 (2018) Table S1 sample B16; Vf×10³ = 5.68 cm/s",
+          "doi": "10.1038/s41598-017-18398-4",
+          "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+          "page": "Table S1; Δt = 170 s"
+        }
+      }
+    ],
+    "media": [],
+    "notes": "Same B16 burn sequence. Lowest curated flow for B16 still above the ~0.6 cm/s quenching threshold reported in the paper text.",
+    "tags": ["bass-ii", "pmma-rod", "opposed", "link-2018", "compare-candidate"]
+  },
+  {
+    "id": "BASS-II-B19-Vg755",
+    "investigation": "BASS-II",
+    "sample_id": "B19",
+    "fuel": {
+      "material": "PMMA",
+      "composition": "cast black PMMA rod"
+    },
+    "geometry": {
+      "type": "cylinder",
+      "thickness": { "value": 6.4, "unit": "mm" },
+      "thermal_regime": "thick"
+    },
+    "oxygen": { "value": 17.5, "unit": "%" },
+    "ventilation": {
+      "speed": { "value": 7.55, "unit": "cm/s" },
+      "direction": "opposed"
+    },
+    "phenomena": ["spread"],
+    "provenance": {
+      "reference": "Link et al., Sci. Rep. 8:120 (2018), Supplementary Table S1 (BASS-II ISS opposed-flow PMMA rods)",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Supplementary Table S1"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 0.0469, "unit": "mm/s" },
+        "quality": "measured",
+        "method": null,
+        "uncertainty": null,
+        "provenance": {
+          "reference": "Link et al. Sci. Rep. 8:120 (2018) Table S1 sample B19; Vf×10³ = 4.69 cm/s",
+          "doi": "10.1038/s41598-017-18398-4",
+          "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+          "page": "Table S1; Δt = 67 s"
+        }
+      }
+    ],
+    "media": [],
+    "notes": "Sample B19 at 17.5% O2 (paper Fig. 4b / Fig. 6a companion). thickness = rod diameter. Paired with B16 at matched Vg for oxygen-variation comparisons (Daniel to confirm).",
+    "tags": ["bass-ii", "pmma-rod", "opposed", "link-2018", "compare-candidate"]
+  },
+  {
+    "id": "BASS-II-B19-Vg167",
+    "investigation": "BASS-II",
+    "sample_id": "B19",
+    "fuel": {
+      "material": "PMMA",
+      "composition": "cast black PMMA rod"
+    },
+    "geometry": {
+      "type": "cylinder",
+      "thickness": { "value": 6.4, "unit": "mm" },
+      "thermal_regime": "thick"
+    },
+    "oxygen": { "value": 17.5, "unit": "%" },
+    "ventilation": {
+      "speed": { "value": 1.67, "unit": "cm/s" },
+      "direction": "opposed"
+    },
+    "phenomena": ["spread"],
+    "provenance": {
+      "reference": "Link et al., Sci. Rep. 8:120 (2018), Supplementary Table S1 (BASS-II ISS opposed-flow PMMA rods)",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Supplementary Table S1"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 0.0652, "unit": "mm/s" },
+        "quality": "measured",
+        "method": null,
+        "uncertainty": null,
+        "provenance": {
+          "reference": "Link et al. Sci. Rep. 8:120 (2018) Table S1 sample B19; Vf×10³ = 6.52 cm/s",
+          "doi": "10.1038/s41598-017-18398-4",
+          "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+          "page": "Table S1; Δt = 128 s"
+        }
+      }
+    ],
+    "media": [],
+    "notes": "Same B19 burn sequence. Matched Vg=1.67 cm/s with BASS-II-B16-Vg167 for oxygen comparison at fixed flow.",
+    "tags": ["bass-ii", "pmma-rod", "opposed", "link-2018", "compare-candidate"]
+  },
+  {
+    "id": "BASS-II-FILM-100um-SR-extinction-context",
+    "investigation": "BASS-II",
+    "sample_id": "PMMA-film-100um",
+    "fuel": {
+      "material": "PMMA",
+      "composition": "PMMA film ~100 µm thick (Bhattacharjee thin-fuel series in BASS-II Summary Report)"
+    },
+    "geometry": {
+      "type": "sheet",
+      "thickness": { "value": 0.1, "unit": "mm" },
+      "thermal_regime": "thin"
+    },
+    "ventilation": {
+      "direction": "opposed"
+    },
+    "phenomena": ["spread", "extinction"],
+    "provenance": {
+      "reference": "Olson, S. L., Burning and Suppression of Solids–II (BASS-II) Summary Report, NASA/TM-20210011385 (2021)",
+      "url": "https://ntrs.nasa.gov/citations/20210011385",
+      "doi": null,
+      "page": "pp. 22–24, §2.2.5 Extinction Velocity"
+    },
+    "results": [
+      {
+        "name": "flame_spread_rate",
+        "value": { "value": 2.2, "unit": "mm/s" },
+        "quality": "measured",
+        "method": null,
+        "uncertainty": null,
+        "provenance": {
+          "reference": "NASA/TM-20210011385 §2.2.5: steady opposed spread of 2.2 mm/s over a 100-µm sample before forced flow was cut off",
+          "url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf",
+          "page": "23"
+        }
+      }
+    ],
+    "media": [],
+    "notes": "ONLY the 2.2 mm/s steady spread value and thin-sheet geometry are recorded here. Oxygen mole fraction and the exact opposed-flow speed during that 2.2 mm/s segment are NOT stated in the same paragraph (a companion test used 3 cm/s then ramped down to ~1.1 cm/s extinction). Oxygen and ventilation.speed are therefore omitted — unknown, not defaulted. NOT comparable to B16/B19 rods (thin sheet vs thick cylinder). Included to document a verified thin-fuel BASS-II observation and extinction context.",
+    "tags": ["bass-ii", "pmma-film", "opposed", "nasa-tm-20210011385", "incomplete-conditions"]
+  }
+]

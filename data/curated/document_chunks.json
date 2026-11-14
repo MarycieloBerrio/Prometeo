@@ -1,1 +1,77 @@
-[]
+[
+  {
+    "id": "bass2-tm-overview-limitations",
+    "text": "SUMMARY (not a verbatim quote) of NASA/TM-20210011385: BASS-II burned small solid samples inside a flow duct in the ISS Microgravity Science Glovebox. Primary controlled variables were ambient O2 (via N2 vitiation of the MSG working volume), forced ventilation speed/direction, and fuel geometry/thickness. Heat-release estimates from O2 consumption used Huggett’s 13.1 kJ per gram O2 and were typically well below 100 W for these small flames. LIMITATION: small-sample MSG fires are not full-scale spacecraft fires; absence of a recorded burn does not mean a material is safe.",
+    "provenance": {
+      "reference": "Olson, S. L., BASS-II Summary Report, NASA/TM-20210011385 (Oct 2021) — paraphrased overview",
+      "url": "https://ntrs.nasa.gov/citations/20210011385",
+      "page": "abstract / §1 introductory summary"
+    }
+  },
+  {
+    "id": "bass2-tm-thin-film-extinction",
+    "text": "SUMMARY (paraphrase) of NASA/TM-20210011385 §2.2.5: For opposed flow over a 100-µm PMMA film, a steady flame-spread rate of 2.2 mm/s was established before the forced flow was cut; the flame extinguished within about 2 s. In a companion ramp-down test started at 3 cm/s opposed flow, extinction occurred near ~1.1 cm/s fan-indicated velocity. Across 100–300 µm films extinction was near ~1 cm/s, and near ~1.5 cm/s for 400 µm, with large low-speed calibration uncertainty. LIMITATION: extinction velocity here is an apparatus-indicated fan/airspeed value, not a certification limit.",
+    "provenance": {
+      "reference": "NASA/TM-20210011385 §2.2.5 Extinction Velocity — paraphrased",
+      "url": "https://ntrs.nasa.gov/citations/20210011385",
+      "page": "23-24"
+    }
+  },
+  {
+    "id": "bass2-tm-rod-loc-micro-vs-1g",
+    "text": "SUMMARY (paraphrase) of NASA/TM-20210011385 Ch. 4 (opposed PMMA rods): Black cast PMMA rods of 6.35, 9.525 and 12.7 mm diameter were burned in opposed forced flow aboard ISS. Sustained spread was not observed below roughly 4 mm/s opposed flow for the two smaller diameters under the reported matrices. Microgravity tests observed spread at O2 as low as about 17.5% under the low-flow conditions studied, while companion normal-gravity comparisons in the same chapter did not sustain spread below about 19% O2. LIMITATION: flow regimes are not interchangeable with buoyant 1g flows; microgravity ≠ lunar/Martian gravity.",
+    "provenance": {
+      "reference": "NASA/TM-20210011385 Chapter 4 opposed-flow PMMA rods — paraphrased",
+      "url": "https://ntrs.nasa.gov/citations/20210011385",
+      "page": "47-51"
+    }
+  },
+  {
+    "id": "bass2-link2018-nonmonotonic-opposed",
+    "text": "SUMMARY (paraphrase) of Link et al., Sci. Rep. 8:120 (2018): BASS-II opposed-flow tests on black cast PMMA cylinders (diameters 6.4, 9.5, 12.7 mm) at O2 roughly 16–21% and opposed flows roughly 0.4–8 cm/s. For samples B16 (18.2% O2) and B19 (17.5% O2), flame-spread rate first increased then decreased as opposed flow increased — a non-monotonic trend previously predicted but not experimentally shown for thick fuels at these low flows. No spread was observed below about 0.6 cm/s in the reported sequences. LIMITATION: values are luminous leading-edge tracking from still imagery; sample count and astronaut time constrained the matrix.",
+    "provenance": {
+      "reference": "Link et al., The Effect of Gravity on Flame Spread over PMMA Cylinders, Sci. Rep. 8:120 (2018) — paraphrased; CC BY 4.0",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "page": "Results / Fig. 6 discussion"
+    }
+  },
+  {
+    "id": "bass2-link2018-table-s1-method",
+    "text": "SUMMARY (paraphrase) of Link et al. supplementary methods: Microgravity flame-spread rates were obtained by tracking the flame leading edge on high-resolution stills (~1 s cadence) and taking the slope of position versus time over intervals listed as Δt in Table S1. Table S1 lists diameter, O2, sample id (B/C), opposed flow Vg, Δt, and Vf×10³. Prometeo curated records convert Vf×10³ (cm/s) to mm/s as Vf_mm_s = (Vf×10³) × 0.01. LIMITATION: oxygen and flow meters have operational uncertainty; the paper notes conditions were hard to keep perfectly constant.",
+    "provenance": {
+      "reference": "Link et al. Sci. Rep. 8:120 (2018) Supplementary Table S1 — paraphrased method note",
+      "doi": "10.1038/s41598-017-18398-4",
+      "url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+      "page": "Table S1"
+    }
+  },
+  {
+    "id": "bass2-psi25-access-and-scope",
+    "text": "SUMMARY of NASA PSI investigation PSI-25 (BASS-II) public metadata (consulted 2026-11-14): Investigation DOI 10.60555/4qc4-de67, license CC0-1.0, ~255.77 GB package, Version 4, flight platform ISS. Objectives include ignition, growth, spread and extinction of solid fuels under low-velocity forced flow with O2 vitiation. Public HTML lists example tests (e.g. Bhattacharjee B1 sample 147, 100 µm PMMA film) and example raw video filenames, but bulk file API endpoints returned 404 without an authenticated PSI session in this curation pass. LIMITATION: Prometeo does not treat PSI file names as downloadable media URIs until a reproducible public or licensed URL is verified.",
+    "provenance": {
+      "reference": "NASA Physical Sciences Informatics PSI-25 BASS-II investigation landing page — paraphrased access note",
+      "doi": "10.60555/4qc4-de67",
+      "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25",
+      "page": "investigation metadata"
+    }
+  },
+  {
+    "id": "bass2-olson2015-concurrent-limits-not-fsr",
+    "text": "SUMMARY (paraphrase) of Olson & Ferkul, NTRS 20150008961: Twenty-four BASS concurrent-flow PMMA rod tests mapped flammability limits (blowoff and quenching) versus oxygen and flow, including O2 down toward ~14%. The paper focuses on extinction boundaries and Damköhler-number interpretation, not a tabulated flame-spread-rate matrix for concurrent spread. LIMITATION: do not invent concurrent FSR values from this abstract; concurrent quantitative spread rates remain an evidence gap in the curated MVP set.",
+    "provenance": {
+      "reference": "Olson & Ferkul, Microgravity Flammability of PMMA Rods in Concurrent Flow, NTRS 20150008961 (2015) — paraphrased",
+      "url": "https://ntrs.nasa.gov/citations/20150008961",
+      "page": "abstract / conclusions"
+    }
+  },
+  {
+    "id": "bass2-evidence-absence-not-safety",
+    "text": "CURATION RULE for assistant consumers: Empty coverage cells and omitted fields mean no curated evidence was verified for that condition, not that combustion cannot occur and not that a material is safe for spacecraft use. Prometeo refuses extrapolation beyond comparable measured trials. Synthetic fixture ids (SYN-*) are development only and are not NASA evidence.",
+    "provenance": {
+      "reference": "Prometeo scientific integrity rules (AGENTS.md / data/README.md) applied to BASS-II curation",
+      "url": "https://github.com/MarycieloBerrio/Prometeo",
+      "page": "data/README.md curation rules"
+    }
+  }
+]
