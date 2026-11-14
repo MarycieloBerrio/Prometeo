@@ -78,7 +78,7 @@ async function TrialMedia() {
             <EmptyState icon="video" title="No verified flame video available yet" action={<Link href="/explorer" className="btn"><Icon name="search" size={16} />Browse experiments</Link>}>
               No trial currently provides a source-linked video URI. An overlay or validation result is not available from this API.
             </EmptyState>
-            <div className="vision-viewport-footer"><span>AWAITING SOURCE MEDIA</span><span>NO TRACK GENERATED</span></div>
+            <div className="vision-viewport-footer"><span>AWAITING TRIAL MEDIA</span><span>NO TRIAL-LINKED TRACK</span></div>
           </div>
           <aside className="vision-inspector" aria-label="Vision interpretation status">
             <p className="eyebrow">INTERPRETATION PANEL</p>
