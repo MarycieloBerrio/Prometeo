@@ -1,0 +1,39 @@
+# Local stack: Postgres + pgvector, Evidence Engine API.
+# Frontend runs on the host with `pnpm dev:web` for fast refresh.
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-prometeo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prometeo}
+      POSTGRES_DB: ${POSTGRES_DB:-prometeo}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./infra/db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-prometeo}"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PROMETEO_DATA_DIR: /app/data
+      PROMETEO_DATABASE_URL: postgresql://${POSTGRES_USER:-prometeo}:${POSTGRES_PASSWORD:-prometeo}@db:5432/${POSTGRES_DB:-prometeo}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

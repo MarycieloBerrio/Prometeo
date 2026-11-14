@@ -1,0 +1,1317 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Prometeo Evidence Engine API",
+    "description": "Evidence-grounded scientific intelligence for microgravity combustion.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "meta"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trials": {
+      "get": {
+        "tags": [
+          "experiments"
+        ],
+        "summary": "List Trials",
+        "operationId": "list_trials_api_v1_trials_get",
+        "parameters": [
+          {
+            "name": "investigation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Investigation"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Investigation"
+            }
+          },
+          {
+            "name": "material",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Material"
+            }
+          },
+          {
+            "name": "geometry",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/GeometryType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Geometry"
+            }
+          },
+          {
+            "name": "phenomenon",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Phenomenon"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Phenomenon"
+            }
+          },
+          {
+            "name": "flow_direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/FlowDirection"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Direction"
+            }
+          },
+          {
+            "name": "oxygen_min",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "O2 volume fraction 0..1",
+              "title": "Oxygen Min"
+            },
+            "description": "O2 volume fraction 0..1"
+          },
+          {
+            "name": "oxygen_max",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "O2 volume fraction 0..1",
+              "title": "Oxygen Max"
+            },
+            "description": "O2 volume fraction 0..1"
+          },
+          {
+            "name": "flow_min_cm_s",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Min Cm S"
+            }
+          },
+          {
+            "name": "flow_max_cm_s",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Max Cm S"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TrialOut"
+                  },
+                  "title": "Response List Trials Api V1 Trials Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trials/{trial_id}": {
+      "get": {
+        "tags": [
+          "experiments"
+        ],
+        "summary": "Get Trial",
+        "operationId": "get_trial_api_v1_trials__trial_id__get",
+        "parameters": [
+          {
+            "name": "trial_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Trial Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrialOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/comparisons": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Compare Trials",
+        "operationId": "compare_trials_api_v1_comparisons_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompareRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/coverage": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Coverage Map",
+        "operationId": "coverage_map_api_v1_coverage_get",
+        "parameters": [
+          {
+            "name": "material",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Material"
+            }
+          },
+          {
+            "name": "geometry",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/GeometryType"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Geometry"
+            }
+          },
+          {
+            "name": "flow_direction",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/FlowDirection"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Flow Direction"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoverageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assistant/ask": {
+      "post": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Ask",
+        "operationId": "ask_api_v1_assistant_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AskRequest": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 3,
+            "title": "Question"
+          },
+          "material": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Material"
+          },
+          "geometry": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Geometry"
+          },
+          "flow_direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flow Direction"
+          },
+          "metric": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric",
+            "default": "flame_spread_rate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "AskRequest"
+      },
+      "AskResponse": {
+        "properties": {
+          "tier": {
+            "type": "string",
+            "title": "Tier"
+          },
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "refusal_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refusal Reason"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "cited_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cited Sources"
+          },
+          "computed_facts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Computed Facts"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "assessments": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentOut"
+            },
+            "type": "array",
+            "title": "Assessments"
+          },
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentOut"
+            },
+            "type": "array",
+            "title": "Documents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tier",
+          "answer",
+          "refusal_reason",
+          "model",
+          "cited_sources",
+          "computed_facts",
+          "limitations",
+          "assessments",
+          "documents"
+        ],
+        "title": "AskResponse"
+      },
+      "AssessmentOut": {
+        "properties": {
+          "trial_id": {
+            "type": "string",
+            "title": "Trial Id"
+          },
+          "relevance": {
+            "type": "string",
+            "title": "Relevance"
+          },
+          "quality": {
+            "type": "string",
+            "title": "Quality"
+          },
+          "tier": {
+            "type": "string",
+            "title": "Tier"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trial_id",
+          "relevance",
+          "quality",
+          "tier",
+          "reasons"
+        ],
+        "title": "AssessmentOut"
+      },
+      "CompareRequest": {
+        "properties": {
+          "trial_a": {
+            "type": "string",
+            "title": "Trial A"
+          },
+          "trial_b": {
+            "type": "string",
+            "title": "Trial B"
+          },
+          "varied": {
+            "items": {
+              "$ref": "#/components/schemas/Variable"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Varied"
+          },
+          "metrics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Metrics",
+            "default": [
+              "flame_spread_rate"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "trial_a",
+          "trial_b",
+          "varied"
+        ],
+        "title": "CompareRequest"
+      },
+      "CompareResponse": {
+        "properties": {
+          "trials": {
+            "items": {
+              "$ref": "#/components/schemas/TrialOut"
+            },
+            "type": "array",
+            "title": "Trials"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level"
+          },
+          "varied": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Varied"
+          },
+          "issues": {
+            "items": {
+              "$ref": "#/components/schemas/IssueOut"
+            },
+            "type": "array",
+            "title": "Issues"
+          },
+          "deltas": {
+            "items": {
+              "$ref": "#/components/schemas/DeltaOut"
+            },
+            "type": "array",
+            "title": "Deltas"
+          },
+          "withheld_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withheld Reason"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trials",
+          "level",
+          "varied",
+          "issues",
+          "deltas",
+          "withheld_reason"
+        ],
+        "title": "CompareResponse"
+      },
+      "CoverageCellOut": {
+        "properties": {
+          "oxygen_range": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Oxygen Range"
+          },
+          "flow_range_cm_s": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 2,
+            "title": "Flow Range Cm S"
+          },
+          "trial_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Trial Ids"
+          },
+          "observed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Observed"
+          },
+          "has_evidence": {
+            "type": "boolean",
+            "title": "Has Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "oxygen_range",
+          "flow_range_cm_s",
+          "trial_ids",
+          "observed",
+          "has_evidence"
+        ],
+        "title": "CoverageCellOut"
+      },
+      "CoverageResponse": {
+        "properties": {
+          "oxygen_edges": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Oxygen Edges"
+          },
+          "flow_edges_cm_s": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Flow Edges Cm S"
+          },
+          "cells": {
+            "items": {
+              "$ref": "#/components/schemas/CoverageCellOut"
+            },
+            "type": "array",
+            "title": "Cells"
+          },
+          "unplaced_trial_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unplaced Trial Ids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "oxygen_edges",
+          "flow_edges_cm_s",
+          "cells",
+          "unplaced_trial_ids"
+        ],
+        "title": "CoverageResponse"
+      },
+      "DeltaOut": {
+        "properties": {
+          "metric": {
+            "type": "string",
+            "title": "Metric"
+          },
+          "a": {
+            "$ref": "#/components/schemas/MeasurementOut"
+          },
+          "b": {
+            "$ref": "#/components/schemas/MeasurementOut"
+          },
+          "difference": {
+            "$ref": "#/components/schemas/QuantityOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "metric",
+          "a",
+          "b",
+          "difference"
+        ],
+        "title": "DeltaOut"
+      },
+      "DocumentOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "excerpt": {
+            "type": "string",
+            "title": "Excerpt"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ProvenanceOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "excerpt",
+          "score",
+          "provenance"
+        ],
+        "title": "DocumentOut"
+      },
+      "FlowDirection": {
+        "type": "string",
+        "enum": [
+          "concurrent",
+          "opposed",
+          "quiescent",
+          "unknown"
+        ],
+        "title": "FlowDirection"
+      },
+      "GeometryType": {
+        "type": "string",
+        "enum": [
+          "sheet",
+          "cylinder",
+          "sphere",
+          "droplet",
+          "other"
+        ],
+        "title": "GeometryType"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Investigation": {
+        "type": "string",
+        "enum": [
+          "BASS-II",
+          "FLEX",
+          "SAFFIRE-I",
+          "FLAME-SPREAD-MODELING",
+          "SYNTHETIC"
+        ],
+        "title": "Investigation"
+      },
+      "IssueOut": {
+        "properties": {
+          "variable": {
+            "type": "string",
+            "title": "Variable"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "variable",
+          "severity",
+          "message"
+        ],
+        "title": "IssueOut"
+      },
+      "MeasurementOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "value": {
+            "$ref": "#/components/schemas/QuantityOut"
+          },
+          "quality": {
+            "type": "string",
+            "title": "Quality"
+          },
+          "uncertainty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuantityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ProvenanceOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "value",
+          "quality",
+          "uncertainty",
+          "method",
+          "provenance"
+        ],
+        "title": "MeasurementOut"
+      },
+      "MediaOut": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "uri": {
+            "type": "string",
+            "title": "Uri"
+          },
+          "start_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start S"
+          },
+          "end_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End S"
+          }
+        },
+        "type": "object",
+        "required": [
+          "kind",
+          "uri",
+          "start_s",
+          "end_s"
+        ],
+        "title": "MediaOut"
+      },
+      "Phenomenon": {
+        "type": "string",
+        "enum": [
+          "ignition",
+          "spread",
+          "extinction"
+        ],
+        "title": "Phenomenon"
+      },
+      "ProvenanceOut": {
+        "properties": {
+          "reference": {
+            "type": "string",
+            "title": "Reference"
+          },
+          "source_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source File"
+          },
+          "doi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doi"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reference"
+        ],
+        "title": "ProvenanceOut"
+      },
+      "QuantityOut": {
+        "properties": {
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "unit": {
+            "type": "string",
+            "title": "Unit"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "unit"
+        ],
+        "title": "QuantityOut"
+      },
+      "TrialOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "investigation": {
+            "type": "string",
+            "title": "Investigation"
+          },
+          "sample_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sample Id"
+          },
+          "material": {
+            "type": "string",
+            "title": "Material"
+          },
+          "composition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Composition"
+          },
+          "geometry": {
+            "type": "string",
+            "title": "Geometry"
+          },
+          "thickness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuantityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thermal_regime": {
+            "type": "string",
+            "title": "Thermal Regime"
+          },
+          "oxygen": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuantityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "flow_speed": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuantityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "flow_direction": {
+            "type": "string",
+            "title": "Flow Direction"
+          },
+          "pressure": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuantityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "phenomena": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Phenomena"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/MeasurementOut"
+            },
+            "type": "array",
+            "title": "Results"
+          },
+          "media": {
+            "items": {
+              "$ref": "#/components/schemas/MediaOut"
+            },
+            "type": "array",
+            "title": "Media"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/ProvenanceOut"
+          },
+          "is_synthetic": {
+            "type": "boolean",
+            "title": "Is Synthetic"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "investigation",
+          "sample_id",
+          "material",
+          "composition",
+          "geometry",
+          "thickness",
+          "thermal_regime",
+          "oxygen",
+          "flow_speed",
+          "flow_direction",
+          "pressure",
+          "phenomena",
+          "results",
+          "media",
+          "provenance",
+          "is_synthetic",
+          "notes"
+        ],
+        "title": "TrialOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "Variable": {
+        "type": "string",
+        "enum": [
+          "fuel",
+          "geometry",
+          "thickness",
+          "thermal_regime",
+          "oxygen",
+          "flow_speed",
+          "flow_direction",
+          "pressure"
+        ],
+        "title": "Variable"
+      }
+    }
+  }
+}

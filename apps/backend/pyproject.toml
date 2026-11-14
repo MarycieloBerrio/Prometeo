@@ -1,0 +1,100 @@
+[project]
+name = "prometeo-backend"
+version = "0.1.0"
+description = "Prometeo Evidence Engine — evidence-grounded scientific intelligence for microgravity combustion data."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "pydantic>=2.8",
+  "pydantic-settings>=2.4",
+  "httpx>=0.27",
+  "typer>=0.12",
+  "numpy>=2.0",
+  "anthropic>=0.70",
+  "psycopg[binary]>=3.2",
+]
+
+[project.optional-dependencies]
+# Offline data-preparation pipelines (document extraction, dataframes, signal processing).
+science = ["pandas>=2.2", "scipy>=1.14"]
+# FlameVision video processing.
+vision = ["opencv-python-headless>=4.10"]
+
+[project.scripts]
+prometeo = "prometeo.bootstrap.cli:app"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "ruff>=0.6",
+  "mypy>=1.11",
+  "import-linter>=2.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/prometeo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+mypy_path = "src"
+packages = ["prometeo"]
+
+[[tool.mypy.overrides]]
+module = ["cv2", "cv2.*"]
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------------------
+# Hexagonal architecture rules — enforced in CI with `uv run lint-imports`.
+# ---------------------------------------------------------------------------
+[tool.importlinter]
+root_package = "prometeo"
+include_external_packages = true
+
+[[tool.importlinter.contracts]]
+name = "Hexagonal layers: adapters -> application -> domain"
+type = "layers"
+layers = [
+  "prometeo.bootstrap",
+  "prometeo.adapters",
+  "prometeo.application",
+  "prometeo.domain",
+]
+
+[[tool.importlinter.contracts]]
+name = "Domain is pure (no frameworks, no I/O libraries)"
+type = "forbidden"
+source_modules = ["prometeo.domain"]
+forbidden_modules = [
+  "fastapi", "pydantic", "pydantic_settings", "httpx", "anthropic",
+  "psycopg", "cv2", "pandas", "typer", "uvicorn",
+]
+
+[[tool.importlinter.contracts]]
+name = "Application layer does not depend on frameworks or vendors"
+type = "forbidden"
+source_modules = ["prometeo.application"]
+forbidden_modules = [
+  "fastapi", "httpx", "anthropic", "psycopg", "cv2", "typer", "uvicorn",
+]

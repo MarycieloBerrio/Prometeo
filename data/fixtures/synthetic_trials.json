@@ -1,0 +1,61 @@
+[
+  {
+    "id": "SYN-001",
+    "investigation": "SYNTHETIC",
+    "sample_id": "fixture-A-1",
+    "fuel": { "material": "Fixture material A" },
+    "geometry": { "type": "sheet", "thickness": { "value": 0.25, "unit": "mm" }, "thermal_regime": "thin" },
+    "oxygen": { "value": 21, "unit": "%" },
+    "ventilation": { "speed": { "value": 5, "unit": "cm/s" }, "direction": "concurrent" },
+    "pressure": { "value": 101.3, "unit": "kPa" },
+    "phenomena": ["ignition", "spread"],
+    "provenance": { "reference": "SYNTHETIC FIXTURE - not NASA data" },
+    "results": [
+      { "name": "flame_spread_rate", "value": { "value": 1.0, "unit": "mm/s" }, "quality": "synthetic" }
+    ],
+    "notes": "Development fixture for UI and API wiring. Values are invented."
+  },
+  {
+    "id": "SYN-002",
+    "investigation": "SYNTHETIC",
+    "sample_id": "fixture-A-2",
+    "fuel": { "material": "Fixture material A" },
+    "geometry": { "type": "sheet", "thickness": { "value": 0.25, "unit": "mm" }, "thermal_regime": "thin" },
+    "oxygen": { "value": 21, "unit": "%" },
+    "ventilation": { "speed": { "value": 10, "unit": "cm/s" }, "direction": "concurrent" },
+    "pressure": { "value": 101.3, "unit": "kPa" },
+    "phenomena": ["ignition", "spread"],
+    "provenance": { "reference": "SYNTHETIC FIXTURE - not NASA data" },
+    "results": [
+      { "name": "flame_spread_rate", "value": { "value": 1.5, "unit": "mm/s" }, "quality": "synthetic" }
+    ],
+    "notes": "Development fixture for UI and API wiring. Values are invented."
+  },
+  {
+    "id": "SYN-003",
+    "investigation": "SYNTHETIC",
+    "sample_id": "fixture-A-3",
+    "fuel": { "material": "Fixture material A" },
+    "geometry": { "type": "cylinder", "thickness": { "value": 10, "unit": "mm" }, "thermal_regime": "thick" },
+    "oxygen": { "value": 21, "unit": "%" },
+    "ventilation": { "speed": { "value": 5, "unit": "cm/s" }, "direction": "opposed" },
+    "pressure": { "value": 101.3, "unit": "kPa" },
+    "phenomena": ["ignition", "spread"],
+    "provenance": { "reference": "SYNTHETIC FIXTURE - not NASA data" },
+    "results": [],
+    "notes": "Different geometry/flow direction: must be flagged NOT comparable with SYN-001."
+  },
+  {
+    "id": "SYN-004",
+    "investigation": "SYNTHETIC",
+    "sample_id": "fixture-B-1",
+    "fuel": { "material": "Fixture material B" },
+    "geometry": { "type": "sheet", "thermal_regime": "thin" },
+    "oxygen": { "value": 17, "unit": "%" },
+    "ventilation": { "speed": { "value": 2, "unit": "cm/s" }, "direction": "concurrent" },
+    "pressure": { "value": 101.3, "unit": "kPa" },
+    "phenomena": ["extinction"],
+    "provenance": { "reference": "SYNTHETIC FIXTURE - not NASA data" },
+    "results": []
+  }
+]

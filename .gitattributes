@@ -1,0 +1,5 @@
+# Normalize line endings (team works across Windows/macOS/Linux).
+* text=auto eol=lf
+*.{png,jpg,jpeg,gif,ico,mp4,mov,pdf} binary
+packages/contracts/src/generated.ts linguist-generated=true
+packages/contracts/openapi.json linguist-generated=true

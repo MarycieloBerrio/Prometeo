@@ -1,0 +1,17 @@
+{
+  "name": "@prometeo/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript types generated from the backend OpenAPI schema. Never edit generated files by hand.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "openapi-typescript ./openapi.json -o ./src/generated.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.4.0",
+    "typescript": "^5"
+  }
+}
