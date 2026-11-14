@@ -99,48 +99,6 @@
 .ignition-footer a { display: inline-flex; align-items: center; gap: .5rem; color: #ecc19b; }
 .ignition-footer a:hover { color: #fff; }
 
-/* The remaining research tools use the same restrained charcoal and ember palette. */
-.app-shell:not(:has(.ignition-home)) { background: #050505; }
-.app-shell:not(:has(.ignition-home))::before,
-.app-shell:not(:has(.ignition-home)) > .thermal-field { display: none; }
-.topbar { min-height: 68px; background: #080808; border-bottom-color: #302b26; backdrop-filter: none; }
-.brand-mark { width: 31px; height: 31px; border: 0; border-radius: 0; background: none; box-shadow: none; }
-.brand-name small { display: none; }
-.nav-item { padding: .5rem .7rem; border-radius: 0; color: #aca49e; }
-.nav-item-active { color: #f6c598; background: none; }
-.nav-item-active::after { bottom: -16px; box-shadow: none; }
-.topbar-status { color: #aa9b8f; }
-.app-footer { border-top-color: #302b26; color: #8e8177; }
-.card { background: #11100f; border-color: #37302b; box-shadow: none; }
-.page-header { border-bottom-color: #3c332d; }
-.page-header::after { box-shadow: none; }
-.page-header .page-icon,
-.page-header .eyebrow { display: none; }
-.page-header h1 { font-weight: 570; }
-.page-header-index { display: none; }
-.btn { border-radius: 3px; }
-.btn-primary { background: #e9aa75; box-shadow: none; }
-.btn-primary:hover { background: #f7c79d; }
-.field { background: #0b0a09; border-color: #4e4138; }
-.section-head { border-bottom-color: #38302a; }
-.index-ledger, .index-inspector, .obs-chart, .obs-plot, .coverage, .track-scrubber { background: #100e0d; }
-.obs-inspector, .coverage-inspector, .track-reading { background: #17120f; }
-.trial-card { border-color: #40342c; border-radius: 3px; background: #15110f; box-shadow: none; }
-.trial-card::before { display: none; }
-.trial-card:hover { transform: none; box-shadow: none; }
-.trial-sigil { border: 0; background: none; box-shadow: none; }
-.compare-form { padding: 0; border: 0; background: none; }
-.compare-select { border-color: #4e4037; border-radius: 3px; background: #15110f; }
-.compare-select select { border-color: #59493e; border-radius: 2px; background: #0b0a09; }
-.ask { padding: 0; border: 0; background: none; }
-.ask-heading { border-bottom: 0; padding-bottom: .2rem; }
-.ask-symbol, .ask-status { display: none; }
-.ask-input { background: #0b0a09; border-color: #665041; }
-.ask-input .icon { color: #e7ad7a; }
-.ask-scope { border-color: #46382f; border-radius: 2px; background: #13100e; }
-.suggestion { border-color: #4a3930; border-radius: 2px; background: #15110f; color: #e0b58d; }
-.suggestion:hover { border-color: #b28565; background: #211710; color: #fff1de; }
-
 @media (max-width: 900px) {
   .ignition-video, .ignition-poster { width: 82vw; opacity: .7; }
   .ignition-scene::after { background: linear-gradient(90deg, #000 0%, rgb(0 0 0 / .94) 20%, rgb(0 0 0 / .5) 75%), linear-gradient(180deg, rgb(0 0 0 / .4), transparent 40%, #000); }
