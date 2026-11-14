@@ -327,6 +327,10 @@ code {
   opacity: 0.45;
   cursor: default;
 }
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
 /* Tones: set once, used by callouts, pills and status cells. */
 .tone-ok {
@@ -472,6 +476,7 @@ code {
   display: flex;
   align-items: baseline;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .steps {
@@ -610,12 +615,11 @@ code {
   color: var(--muted);
 }
 .flow {
-  display: flex;
-  align-items: stretch;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
 }
 .flow-card {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -659,7 +663,7 @@ code {
 }
 @media (max-width: 820px) {
   .flow {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
   .flow-arrow {
     justify-content: center;
@@ -904,6 +908,49 @@ code {
   font-weight: 700;
   color: var(--accent);
 }
+.trial-summary,
+.separate-result,
+.media-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.trial-summary .source,
+.separate-result .source,
+.delta .source {
+  overflow-wrap: anywhere;
+}
+.compare-metric {
+  align-self: flex-start;
+  min-width: 220px;
+}
+.recorded-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: 1.2rem minmax(50px, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.75rem;
+}
+.bar-row i {
+  display: block;
+  min-height: 0.9rem;
+  background: var(--accent);
+  border-radius: 3px;
+}
+.bar-row + .bar-row i {
+  background: var(--info);
+}
 
 .coverage {
   display: flex;
@@ -919,6 +966,35 @@ code {
   align-items: center;
   gap: 0.5rem;
   overflow-x: auto;
+}
+@media (max-width: 460px) {
+  .page-header {
+    flex-wrap: wrap;
+  }
+  .page-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+  .ask-input {
+    flex-wrap: wrap;
+    padding: 0.45rem;
+  }
+  .ask-input input {
+    flex-basis: calc(100% - 2rem);
+  }
+  .ask-input .btn {
+    width: 100%;
+  }
+  .compare-pick .field {
+    flex-basis: 100%;
+  }
+  .compare-vs {
+    margin: 0 auto;
+  }
+  .tray .btn,
+  .tray .btn-disabled {
+    width: 100%;
+  }
 }
 .coverage-ylabel,
 .coverage-xlabel {
@@ -939,6 +1015,7 @@ code {
   flex: 1;
   display: grid;
   gap: 4px;
+  min-width: 440px;
 }
 .coverage-axis {
   font-family: var(--font-geist-mono), monospace;
@@ -960,6 +1037,7 @@ code {
   /* Hatched = no recorded evidence. Deliberately not green or "safe"-looking. */
   background: repeating-linear-gradient(45deg, var(--surface-2) 0 6px, transparent 6px 12px);
   border: 1px solid var(--border);
+  color: var(--muted);
 }
 .cell-on {
   background: var(--accent-soft);

@@ -7,10 +7,11 @@ import type { Trial } from "@prometeo/contracts";
 import { ConditionTiles } from "@/components/trials/Conditions";
 import { SourceLine } from "@/components/trials/SourceLine";
 import { DataQualityBadge, Tag } from "@/components/ui/Badges";
-import { ApiDown, Callout } from "@/components/ui/Callout";
+import { ApiDown } from "@/components/ui/Callout";
+import { DemoBanner } from "@/components/ui/DemoBanner";
 import { Icon } from "@/components/ui/Icon";
 import { Section } from "@/components/ui/PageHeader";
-import { formatQuantity, humanize, PHENOMENON_ICON } from "@/domain/format";
+import { formatQuantity, humanize, mediaUrl, PHENOMENON_ICON } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
 import { ApiError } from "@/infrastructure/http/http-evidence-gateway";
 
@@ -71,9 +72,7 @@ async function TrialSheet({ params }: { params: Params }) {
       </header>
 
       {trial.is_synthetic && (
-        <Callout tone="warn" title="Synthetic fixture">
-          Invented values for development. Not NASA data.
-        </Callout>
+        <DemoBanner />
       )}
 
       <Section title="Conditions">
@@ -110,7 +109,13 @@ async function TrialSheet({ params }: { params: Params }) {
               <li key={m.uri} className="list-row">
                 <span className="row">
                   <Icon name="video" size={16} />
-                  <span className="mono small">{m.uri}</span>
+                  {mediaUrl(m.uri) ? (
+                    <a className="link mono small" href={mediaUrl(m.uri) ?? undefined} target="_blank" rel="noreferrer">
+                      Open {m.kind} source
+                    </a>
+                  ) : (
+                    <span className="mono small">URI unavailable or unverified</span>
+                  )}
                 </span>
                 <Tag>{m.kind}</Tag>
               </li>

@@ -3,7 +3,7 @@ import Form from "next/form";
 import type { Trial } from "@prometeo/contracts";
 
 import { Icon } from "@/components/ui/Icon";
-import { VARIABLES } from "@/domain/format";
+import { humanize, VARIABLES } from "@/domain/format";
 
 /** The variables a user most often changes on purpose between two trials. */
 const VARIED_CHOICES = ["flow_speed", "oxygen", "thickness", "pressure"];
@@ -13,14 +13,19 @@ export function CompareForm({
   a,
   b,
   varied,
+  metric,
 }: {
   trials: Trial[];
   a?: string;
   b?: string;
   varied: string[];
+  metric: string;
 }) {
+  const metrics = [...new Set(trials.flatMap((trial) => trial.results.map((result) => result.name)))];
+  if (!metrics.includes("flame_spread_rate")) metrics.unshift("flame_spread_rate");
   return (
     <Form action="/compare" className="compare-form card">
+      <input type="hidden" name="submitted" value="1" />
       <div className="compare-pick">
         <TrialSelect name="a" letter="A" trials={trials} value={a} />
         <span className="compare-vs" aria-hidden>
@@ -42,7 +47,15 @@ export function CompareForm({
         ))}
       </fieldset>
 
-      <button type="submit" className="btn btn-primary">
+      <label className="field compare-metric">
+        <Icon name="chart" size={16} />
+        <span className="small">Result</span>
+        <select name="metric" defaultValue={metric} aria-label="Result metric">
+          {metrics.map((name) => <option key={name} value={name}>{humanize(name)}</option>)}
+        </select>
+      </label>
+
+      <button type="submit" className="btn btn-primary" disabled={trials.length < 2}>
         Compare
         <Icon name="arrowRight" size={16} />
       </button>

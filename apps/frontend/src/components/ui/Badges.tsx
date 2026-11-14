@@ -5,7 +5,7 @@ const QUALITY_LABELS: Record<string, string> = {
   derived: "Derived",
   extracted: "Unreviewed",
   unavailable: "Unavailable",
-  synthetic: "Synthetic",
+  synthetic: "DEMO · SYNTHETIC, NOT NASA",
 };
 
 const QUALITY_HINTS: Record<string, string> = {

@@ -6,6 +6,7 @@ import type { AskResponse } from "@prometeo/contracts";
 import { SourceLine } from "@/components/trials/SourceLine";
 import { TierBadge } from "@/components/ui/Badges";
 import { Icon, type IconName } from "@/components/ui/Icon";
+import { externalUrl } from "@/domain/format";
 
 const TIER_TONE: Record<string, string> = { direct: "ok", partial: "warn", insufficient: "danger" };
 
@@ -22,14 +23,29 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
         {refused ? (
           <>
             <h2>
-              <Icon name="ban" size={20} /> Prometeo will not answer this
+              <Icon name="ban" size={20} /> The available evidence cannot answer this
             </h2>
-            <p>{response.refusal_reason}</p>
+            <p>{response.refusal_reason ?? "No supported conclusion is available for this question."}</p>
           </>
         ) : (
-          <p className="answer-text">{response.answer}</p>
+          <>
+            <p className="eyebrow">AI explanation · review the evidence below</p>
+            <p className="answer-text">{response.answer}</p>
+          </>
         )}
       </div>
+
+      <Group icon="book" title="Cited sources" count={response.cited_sources.length} open>
+        <ul className="bullets">
+          {response.cited_sources.map((source, index) => (
+            <li key={`${source}-${index}`}>
+              {externalUrl(source) ? (
+                <a className="link" href={externalUrl(source) ?? undefined} target="_blank" rel="noreferrer">{source}</a>
+              ) : source}
+            </li>
+          ))}
+        </ul>
+      </Group>
 
       <Group icon="alert" title="Limits of this answer" count={response.limitations.length} open>
         <ul className="bullets">
@@ -39,7 +55,7 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
         </ul>
       </Group>
 
-      <Group icon="search" title="Trials assessed" count={response.assessments.length}>
+      <Group icon="search" title="Experimental evidence · trials assessed" count={response.assessments.length}>
         <ul className="list">
           {response.assessments.map((a) => (
             <li key={a.trial_id} className="list-row">
@@ -62,7 +78,7 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
         </ul>
       </Group>
 
-      <Group icon="sigma" title="Computed facts" count={response.computed_facts.length}>
+      <Group icon="sigma" title="Computed facts · Evidence Engine" count={response.computed_facts.length}>
         <ul className="bullets mono small">
           {response.computed_facts.map((f) => (
             <li key={f}>{f}</li>
