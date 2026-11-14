@@ -1,0 +1,118 @@
+{
+  "manifest_version": 1,
+  "curator": "Yulian (data pipeline)",
+  "reviewed_at": "2026-11-14",
+  "re_audited_at": "2026-11-14T19:30:00Z",
+  "investigation": "BASS-II",
+  "notes": "Only values checked against primary tables/text are curated. Large binaries stay in data/raw/ (gitignored). B16/B19 trial ids are condition points on two physical samples, not independent replicates. Rod geometry.thickness stores diameter under frozen schema.",
+  "sources": [
+    {
+      "id": "psi-25",
+      "title": "NASA PSI-25 Burning and Suppression of Solids - II (BASS-II)",
+      "url": "https://psi.nasa.gov/physci/repo/data/investigations/PSI-25",
+      "doi": "10.60555/4qc4-de67",
+      "license": "CC0-1.0",
+      "published": "2022-12-31",
+      "consulted_at": "2026-11-14",
+      "access": {
+        "public_metadata_html": true,
+        "bulk_download_without_session": false,
+        "approx_package_size_gb": 255.77,
+        "api_files_probe": "GET https://psi.nasa.gov/geode-py/ws/investigations/PSI-25/files returned 404 without auth (2026-11-14)"
+      },
+      "local_files": [],
+      "sha256": null,
+      "reviewer": "Yulian",
+      "used_for_curated_numbers": false,
+      "limitation": "Metadata and example filenames visible; quantitative FSR tables for curated rods taken from peer-reviewed supplement instead of PSI raw packages."
+    },
+    {
+      "id": "ntrs-tm-20210011385",
+      "title": "Burning and Suppression of Solids–II (BASS-II) Summary Report",
+      "url": "https://ntrs.nasa.gov/citations/20210011385",
+      "download_url": "https://ntrs.nasa.gov/api/citations/20210011385/downloads/TM-20210011385.pdf",
+      "document_id": "20210011385",
+      "published": "2021-10-01",
+      "consulted_at": "2026-11-14",
+      "local_files": [
+        {
+          "path": "data/raw/ntrs/TM-20210011385.pdf",
+          "bytes": 48972416,
+          "in_git": false
+        }
+      ],
+      "sha256": null,
+      "reviewer": "Yulian",
+      "tables_or_pages_used": ["§2.2.5 pp.23-24 (2.2 mm/s thin-film context)", "Ch.4 opposed rods qualitative LOC"],
+      "used_for_curated_numbers": true
+    },
+    {
+      "id": "nature-link-2018",
+      "title": "The Effect of Gravity on Flame Spread over PMMA Cylinders",
+      "url": "https://www.nature.com/articles/s41598-017-18398-4",
+      "doi": "10.1038/s41598-017-18398-4",
+      "pmc": "PMC5760683",
+      "license": "CC BY 4.0",
+      "published": "2018-01-09",
+      "consulted_at": "2026-11-14",
+      "supplement_url": "https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-017-18398-4/MediaObjects/41598_2017_18398_MOESM1_ESM.pdf",
+      "local_files": [
+        {
+          "path": "data/raw/nature/41598_2017_18398_MOESM1_ESM.pdf",
+          "bytes": 645055,
+          "in_git": false
+        }
+      ],
+      "sha256": null,
+      "reviewer": "Yulian",
+      "tables_or_pages_used": ["Supplementary Table S1 samples B16 and B19"],
+      "used_for_curated_numbers": true,
+      "unit_note": "Table S1 left header Vf×10³ (cm/s); right header erroneously prints (mm/s) but values share the cm/s×10³ magnitude. Conversion used: mm/s = (Vf×10³) * 0.01."
+    },
+    {
+      "id": "ntrs-20150008961",
+      "title": "Microgravity Flammability of PMMA Rods in Concurrent Flow",
+      "url": "https://ntrs.nasa.gov/citations/20150008961",
+      "download_url": "https://ntrs.nasa.gov/api/citations/20150008961/downloads/20150008961.pdf",
+      "document_id": "20150008961",
+      "published": "2015-05-17",
+      "consulted_at": "2026-11-14",
+      "local_files": [
+        {
+          "path": "data/raw/ntrs/20150008961.pdf",
+          "bytes": 449964,
+          "in_git": false
+        }
+      ],
+      "used_for_curated_numbers": false,
+      "limitation": "Flammability-boundary paper; no concurrent FSR table curated into trials.json."
+    },
+    {
+      "id": "space-apps-2026-flame-in-freefall",
+      "title": "NASA Space Apps Challenge 2026 — Flame in Freefall resources",
+      "url": "https://www.spaceappschallenge.org/2026/challenges/flame-in-freefall/?tab=resources",
+      "consulted_at": "2026-11-14",
+      "access": {
+        "resources_tab_fetch": "HTML fetch returned incomplete/challenging content (500 on challenge root at one probe); PSI-25 is the designated primary repository in project AGENTS.md and is publicly reachable."
+      },
+      "used_for_curated_numbers": false,
+      "reviewer": "Yulian"
+    }
+  ],
+  "curated_trial_ids": [
+    "BASS-II-B16-Vg755",
+    "BASS-II-B16-Vg167",
+    "BASS-II-B16-Vg083",
+    "BASS-II-B16-Vg072",
+    "BASS-II-B19-Vg755",
+    "BASS-II-B19-Vg167",
+    "BASS-II-FILM-100um-SR-extinction-context"
+  ],
+  "evidence_gaps": [
+    "No concurrent-flow flame_spread_rate rows curated (Olson 2015 is limits-focused).",
+    "No verified public video URIs attached to media[] (PSI raw MP4s require package access).",
+    "Pressure omitted on rod rows (not tabulated per Table S1 row).",
+    "Thin-film row omits O2 and Vg because TM text does not bind 2.2 mm/s to one fully specified condition vector.",
+    "PSI bulk CSV/telemetry not ingested this pass."
+  ]
+}
