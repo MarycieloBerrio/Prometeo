@@ -20,6 +20,7 @@ from prometeo.application.use_cases.ask_research_assistant import AskResearchAss
 from prometeo.application.use_cases.build_knowledge_base import BuildKnowledgeBase
 from prometeo.application.use_cases.compare_trials import CompareTrials
 from prometeo.application.use_cases.coverage_map import BuildCoverageMap
+from prometeo.application.use_cases.derive_bass2_flow import DeriveBass2FlowSpeeds
 from prometeo.application.use_cases.explore_experiments import ExploreExperiments
 from prometeo.bootstrap.settings import Settings
 
@@ -78,6 +79,19 @@ def build_knowledge_base_job(settings: Settings) -> BuildKnowledgeBase:
         store=PostgresKnowledgeStore(settings.database_url),
         embedder=_embedder(settings),
         extractor=DocumentTextExtractor(),
+    )
+
+
+def derive_bass2_flow_job(settings: Settings) -> DeriveBass2FlowSpeeds:
+    """Offline curation aid (CLI only): reads the PSI-25 table, needs no database."""
+    from prometeo.adapters.outbound.nasa.psi_client import PsiClient
+
+    return DeriveBass2FlowSpeeds(
+        PsiClient(
+            settings.psi_base_url,
+            cache_dir=settings.raw_dir / "psi",
+            cache_root=settings.raw_dir,
+        )
     )
 
 

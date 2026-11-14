@@ -102,6 +102,7 @@ pnpm contracts                                 # regenerate API types after chan
 pnpm kb:build                                  # all PSI "combustion" hits in Combustion Science
 pnpm kb:build --only PSI-25                    # one investigation (BASS-II)
 pnpm kb:search "flame spread vs flow speed"    # hybrid full-text + vector search
+(cd apps/backend && uv run prometeo derive-bass2-flow)  # BASS-II flow speeds (derived, for review)
 ```
 
 The Research Assistant reads the knowledge base when `PROMETEO_DOCUMENT_STORE=postgres`
