@@ -161,6 +161,62 @@ def test_incompatible_metric_units_skip_without_inventing_number() -> None:
     assert "units" in result.withheld_reason.lower()
 
 
+def test_extracted_pair_does_not_produce_evidence_delta() -> None:
+    a = make_trial(
+        "A",
+        results=(
+            Measurement(
+                "flame_spread_rate",
+                Quantity(1.0, "mm/s"),
+                DataQuality.EXTRACTED,
+                TEST_PROV,
+            ),
+        ),
+    )
+    b = make_trial(
+        "B",
+        ventilation=Ventilation(Quantity(10, "cm/s"), FlowDirection.CONCURRENT),
+        results=(
+            Measurement(
+                "flame_spread_rate",
+                Quantity(1.5, "mm/s"),
+                DataQuality.EXTRACTED,
+                TEST_PROV,
+            ),
+        ),
+    )
+    result = CompareTrials(_Repo([a, b])).execute(
+        "A", "B", frozenset({Variable.FLOW_SPEED}), ["flame_spread_rate"]
+    )
+    assert result.compatibility.level is Comparability.DIRECT
+    assert result.deltas == ()
+    assert result.withheld_reason
+    assert "extracted" in result.withheld_reason.lower()
+
+
+def test_derived_without_method_does_not_produce_evidence_delta() -> None:
+    a = make_trial("A")
+    b = make_trial(
+        "B",
+        ventilation=Ventilation(Quantity(10, "cm/s"), FlowDirection.CONCURRENT),
+        results=(
+            Measurement(
+                "flame_spread_rate",
+                Quantity(1.5, "mm/s"),
+                DataQuality.DERIVED,
+                TEST_PROV,
+                method=None,
+            ),
+        ),
+    )
+    result = CompareTrials(_Repo([a, b])).execute(
+        "A", "B", frozenset({Variable.FLOW_SPEED}), ["flame_spread_rate"]
+    )
+    assert result.compatibility.level is Comparability.DIRECT
+    assert result.deltas == ()
+    assert result.withheld_reason
+
+
 def test_synthetic_vs_measured_quality_not_subtracted() -> None:
     a = make_trial("A")
     b = make_trial(
