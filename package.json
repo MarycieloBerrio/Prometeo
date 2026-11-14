@@ -9,6 +9,7 @@
   "scripts": {
     "dev:web": "pnpm --filter @prometeo/frontend dev",
     "dev:api": "cd apps/backend && uv run prometeo serve",
+    "dev:api:synthetic": "cd apps/backend && uv run prometeo serve --synthetic",
     "build:web": "pnpm --filter @prometeo/frontend build",
     "lint:web": "pnpm --filter @prometeo/frontend lint",
     "typecheck:web": "pnpm --filter @prometeo/frontend typecheck",

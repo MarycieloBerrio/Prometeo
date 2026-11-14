@@ -96,8 +96,9 @@ pnpm contracts                                 # regenerate API types after chan
 (cd apps/backend && uv run prometeo validate-data)   # parse curated data through the domain
 ```
 
-UI work without curated data: set `PROMETEO_TRIAL_FILES=fixtures/synthetic_trials.json` and
-`PROMETEO_INCLUDE_SYNTHETIC=true` (see `.env.example`).
+UI work without curated data: `pnpm dev:api:synthetic` (= `uv run prometeo serve --synthetic`).
+The team develops on Windows/PowerShell, so don't document bash-only `VAR=value cmd` syntax.
+Use CLI flags, `.env` files or package scripts instead.
 
 **Definition of done for any change:** `pnpm check` passes, and `pnpm build:web` passes if you
 touched the frontend. Add or update tests for domain and application changes.

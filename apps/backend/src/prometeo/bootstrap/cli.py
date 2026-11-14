@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Annotated
 
@@ -14,9 +15,23 @@ app = typer.Typer(help="Prometeo Evidence Engine", no_args_is_help=True)
 
 
 @app.command()
-def serve(host: str = "127.0.0.1", port: int = 8000, reload: bool = True) -> None:
+def serve(
+    host: str = "127.0.0.1",
+    port: int = 8000,
+    reload: bool = True,
+    synthetic: Annotated[
+        bool,
+        typer.Option(help="Serve the invented fixture in data/fixtures (UI development only)."),
+    ] = False,
+) -> None:
     """Run the HTTP API."""
     import uvicorn
+
+    if synthetic:
+        # Set via os.environ so the uvicorn reload subprocess inherits it (works on any shell).
+        os.environ["PROMETEO_TRIAL_FILES"] = "fixtures/synthetic_trials.json"
+        os.environ["PROMETEO_INCLUDE_SYNTHETIC"] = "true"
+        typer.secho("Serving SYNTHETIC fixture data — not NASA evidence.", fg="yellow")
 
     uvicorn.run("prometeo.bootstrap.api:app", host=host, port=port, reload=reload)
 

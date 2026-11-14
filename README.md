@@ -18,16 +18,15 @@ cp .env.example .env
 pnpm install
 (cd apps/backend && uv sync)
 
-# Terminal 1 — API (use the synthetic fixture until curated BASS-II data lands)
-cd apps/backend
-PROMETEO_TRIAL_FILES=fixtures/synthetic_trials.json PROMETEO_INCLUDE_SYNTHETIC=true uv run prometeo serve
+# Terminal 1 — API on the synthetic fixture (until curated BASS-II data lands)
+pnpm dev:api:synthetic   # = cd apps/backend && uv run prometeo serve --synthetic
 
 # Terminal 2 — web
-pnpm dev:web          # http://localhost:3000
+pnpm dev:web             # http://localhost:3000
 ```
 
-On PowerShell, set the env vars with `$env:PROMETEO_TRIAL_FILES="fixtures/synthetic_trials.json"`
-(and the same for `PROMETEO_INCLUDE_SYNTHETIC`), or put them in `apps/backend/.env`.
+Works the same in PowerShell, bash and zsh. Other settings go in `apps/backend/.env`
+(see `.env.example`).
 
 Run all checks with `pnpm check`.
 
