@@ -1,10 +1,11 @@
 import type { Provenance } from "@prometeo/contracts";
 
 import { Icon } from "@/components/ui/Icon";
+import { externalUrl } from "@/domain/format";
 
 /** Where a value comes from. Shown wherever a value or excerpt is shown. */
 export function SourceLine({ provenance }: { provenance: Provenance }) {
-  const href = provenance.doi ? `https://doi.org/${provenance.doi}` : provenance.url;
+  const href = externalUrl(provenance.doi ? `https://doi.org/${provenance.doi}` : provenance.url);
   return (
     <span className="source small">
       <Icon name="book" size={14} label="Source" />

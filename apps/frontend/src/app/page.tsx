@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Fragment } from "react";
 
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { MODULES } from "@/domain/modules";
@@ -11,15 +10,16 @@ const PRINCIPLES: { icon: IconName; title: string; note: string }[] = [
 ];
 
 export default function Home() {
-  const flow = MODULES.filter((m) => m.inFlow);
+  const flow = MODULES.filter((m) => ["explorer", "compare", "assistant"].includes(m.slug));
   return (
     <div className="page">
       <section className="hero">
         <p className="eyebrow">NASA Space Apps 2026 · Flame in Freefall</p>
         <h1>What do we really know about fire in space?</h1>
         <p className="lead">
-          Prometeo turns NASA microgravity combustion experiments into evidence you can check.
+          Prometeo helps you find documented microgravity combustion trials, check physical comparability, and trace a supported explanation to its sources.
         </p>
+        <p className="small muted">Research support, not safety certification. Empty evidence is never a safety finding.</p>
         <div className="row">
           <Link href="/explorer" className="btn btn-primary btn-large">
             Start exploring
@@ -35,17 +35,11 @@ export default function Home() {
       <section className="section">
         <div className="section-head">
           <h2>How it works</h2>
-          <span className="muted small">Four steps, in order</span>
+          <span className="muted small">Three core modules · one traceable conclusion</span>
         </div>
         <div className="flow">
-          {flow.map((m, i) => (
-            <Fragment key={m.slug}>
-              {i > 0 && (
-                <span className="flow-arrow" aria-hidden>
-                  <Icon name="arrowRight" size={20} />
-                </span>
-              )}
-              <Link href={`/${m.slug}`} className="card flow-card">
+          {flow.map((m) => (
+              <Link key={m.slug} href={`/${m.slug}`} className="card flow-card">
                 <span className="flow-top">
                   <span className="page-icon">
                     <Icon name={m.icon} size={22} />
@@ -55,9 +49,9 @@ export default function Home() {
                 <h3>{m.label}</h3>
                 <p className="muted small">{m.purpose}</p>
               </Link>
-            </Fragment>
           ))}
         </div>
+        <p className="small muted">Optional: <Link href="/flamevision" className="link">FlameVision</Link> displays a source-linked video only when a trial record provides one.</p>
       </section>
 
       <section className="principles">

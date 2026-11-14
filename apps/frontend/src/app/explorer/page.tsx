@@ -5,7 +5,8 @@ import type { Trial } from "@prometeo/contracts";
 import type { TrialQuery } from "@/application/ports/evidence-gateway";
 import { TrialFilters } from "@/components/trials/TrialFilters";
 import { TrialPicker } from "@/components/trials/TrialPicker";
-import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
+import { ApiDown, EmptyState } from "@/components/ui/Callout";
+import { DemoBanner } from "@/components/ui/DemoBanner";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { firstParam } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
@@ -27,6 +28,7 @@ export default function ExplorerPage({ searchParams }: PageProps<"/explorer">) {
 async function TrialResults({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const query: TrialQuery = {
+    investigation: firstParam(params.investigation),
     material: firstParam(params.material),
     geometry: firstParam(params.geometry),
     flow_direction: firstParam(params.flow_direction),
@@ -48,9 +50,7 @@ async function TrialResults({ searchParams }: { searchParams: SearchParams }) {
       {error && <ApiDown message={error} />}
 
       {!error && trials.some((t) => t.is_synthetic) && (
-        <Callout tone="warn" title="Synthetic fixtures">
-          These values are invented for development. They are not NASA data.
-        </Callout>
+        <DemoBanner />
       )}
 
       {!error && trials.length === 0 && (

@@ -34,5 +34,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint:web
+      # Next.js 16 route/layout globals (PageProps, LayoutProps) are emitted by
+      # `next typegen`; bare `tsc --noEmit` fails without them on a clean runner.
+      # Official order: next typegen && tsc --noEmit
+      # https://nextjs.org/docs/app/api-reference/cli/next#next-typegen-options
+      - run: pnpm --filter @prometeo/frontend exec next typegen
       - run: pnpm typecheck:web
       - run: pnpm build:web
