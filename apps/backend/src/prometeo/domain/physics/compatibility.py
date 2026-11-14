@@ -16,7 +16,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from prometeo.domain.experiments.model import FlowDirection, ThermalRegime, Trial
+from prometeo.domain.experiments.model import (
+    FlowDirection,
+    GeometryType,
+    ThermalRegime,
+    Trial,
+)
 from prometeo.domain.shared.quantity import Quantity
 
 # Heuristic for controlled numeric "same condition" checks. Not a physical law.
@@ -91,21 +96,43 @@ def assess_compatibility(
             )
         )
 
-    if controlled(Variable.FUEL):
-        if not a.fuel.material.strip() or not b.fuel.material.strip():
-            issues.append(_warn(Variable.FUEL, "Fuel material unknown for a trial"))
-        elif a.fuel.material.lower() != b.fuel.material.lower():
-            issues.append(_blocking(Variable.FUEL, f"{a.fuel.material} vs {b.fuel.material}"))
+    # Essential physical incompatibilities stay blocking even if listed in `varied`.
+    # Marking geometry/fuel/regime as varied must not launder cylinder↔sheet or thin↔thick.
+    if not a.fuel.material.strip() or not b.fuel.material.strip():
+        issues.append(_warn(Variable.FUEL, "Fuel material unknown for a trial"))
+    elif a.fuel.material.lower() != b.fuel.material.lower():
+        issues.append(
+            CompatibilityIssue(
+                Variable.FUEL,
+                Severity.BLOCKING,
+                f"Essential fuel mismatch: {a.fuel.material} vs {b.fuel.material} "
+                "(cannot be waived by listing fuel in varied)",
+            )
+        )
 
-    if controlled(Variable.GEOMETRY) and a.geometry.type is not b.geometry.type:
-        issues.append(_blocking(Variable.GEOMETRY, f"{a.geometry.type} vs {b.geometry.type}"))
+    if a.geometry.type is not b.geometry.type:
+        issues.append(
+            CompatibilityIssue(
+                Variable.GEOMETRY,
+                Severity.BLOCKING,
+                f"Essential geometry mismatch: {a.geometry.type} vs {b.geometry.type} "
+                "(cannot be waived by listing geometry in varied)",
+            )
+        )
 
-    if controlled(Variable.THERMAL_REGIME):
-        ra, rb = a.geometry.thermal_regime, b.geometry.thermal_regime
-        if ThermalRegime.UNKNOWN in (ra, rb):
+    ra, rb = a.geometry.thermal_regime, b.geometry.thermal_regime
+    if ThermalRegime.UNKNOWN in (ra, rb):
+        if controlled(Variable.THERMAL_REGIME):
             issues.append(_warn(Variable.THERMAL_REGIME, "Thermal regime unknown for a trial"))
-        elif ra is not rb:
-            issues.append(_blocking(Variable.THERMAL_REGIME, f"{ra} vs {rb}"))
+    elif ra is not rb:
+        issues.append(
+            CompatibilityIssue(
+                Variable.THERMAL_REGIME,
+                Severity.BLOCKING,
+                f"Essential thermal-regime mismatch: {ra} vs {rb} "
+                "(cannot be waived by listing thermal_regime in varied)",
+            )
+        )
 
     if controlled(Variable.FLOW_DIRECTION):
         da, db = a.ventilation.direction, b.ventilation.direction
@@ -131,6 +158,34 @@ def assess_compatibility(
             issue = _numeric_issue(var, qa, qb, rel_tol)
             if issue:
                 issues.append(issue)
+
+    # Same physical sample / stepped condition points are not independent replicates.
+    if (
+        a.sample_id
+        and b.sample_id
+        and a.sample_id == b.sample_id
+        and a.id != b.id
+    ):
+        issues.append(
+            CompatibilityIssue(
+                Variable.FLOW_SPEED,
+                Severity.WARNING,
+                f"Same physical sample_id '{a.sample_id}': condition points from one "
+                "experimental sequence, not independent replicates — descriptive series "
+                "only; do not treat as statistical replication or invent uncertainty",
+            )
+        )
+
+    # Cylinder rows currently store diameter in geometry.thickness (schema limitation).
+    if a.geometry.type is GeometryType.CYLINDER and b.geometry.type is GeometryType.CYLINDER:
+        issues.append(
+            CompatibilityIssue(
+                Variable.THICKNESS,
+                Severity.INFO,
+                "For cylinders, geometry.thickness currently stores rod diameter "
+                "(not sheet thickness); do not interpret as film thickness",
+            )
+        )
 
     # Varied isolation: the claimed varied set must actually differ, and other essentials
     # must not also drift without being listed in `varied`.

@@ -146,3 +146,30 @@ def test_rel_tol_is_heuristic_near_zero_documented_via_close_match() -> None:
     a = make_trial("A", ventilation=zero)
     b = make_trial("B", oxygen=Quantity(25, "%"), ventilation=zero)
     assert assess_compatibility(a, b, VARY_OXYGEN).level is Comparability.DIRECT
+
+
+def test_geometry_mismatch_not_waived_by_listing_geometry_in_varied() -> None:
+    a = make_trial("A")
+    b = make_trial("B", geometry=replace(a.geometry, type=GeometryType.CYLINDER))
+    report = assess_compatibility(
+        a, b, frozenset({Variable.FLOW_SPEED, Variable.GEOMETRY})
+    )
+    assert report.level is Comparability.NOT_COMPARABLE
+    assert any("cannot be waived" in i.message for i in report.issues)
+
+
+def test_same_sample_condition_points_are_partial_not_replicates() -> None:
+    a = make_trial("A", sample_id="B16")
+    b = make_trial("B", sample_id="B16", ventilation=FAST)
+    report = assess_compatibility(a, b, VARY_FLOW)
+    assert report.level is Comparability.PARTIAL
+    assert any("not independent replicates" in i.message for i in report.issues)
+
+
+def test_simultaneous_oxygen_and_flow_drift_is_partial() -> None:
+    a = make_trial("A")
+    b = make_trial("B", oxygen=Quantity(30, "%"), ventilation=FAST)
+    # Only flow marked varied — oxygen also changed → isolation invalid / PARTIAL
+    report = assess_compatibility(a, b, VARY_FLOW)
+    assert report.level is Comparability.PARTIAL
+    assert any(i.variable is Variable.OXYGEN for i in report.issues)
