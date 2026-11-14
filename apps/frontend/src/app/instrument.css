@@ -21,7 +21,7 @@
   --radius: 16px;
   --radius-sm: 10px;
 }
-html { color-scheme: dark; scroll-behavior: smooth; }
+html { color-scheme: dark; }
 body {
   background: #070b10;
   color: var(--foreground);
