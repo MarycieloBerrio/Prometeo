@@ -11,23 +11,35 @@ combustion research, experimental data and video (BASS-II, FLEX, SAFFIRE) so eng
 search, compare and interpret combustion trials. Every conclusion stays traceable to the
 experiments behind it, and the platform refuses to extrapolate when the evidence isn't there.
 
-## Quick start
+## Quick start (curated MVP)
 
-```bash
-cp .env.example .env
+Default API serves **curated BASS-II JSON** (7 trials, 0 synthetic). No Postgres and no
+Anthropic key required.
+
+```powershell
+Copy-Item .env.example .env   # optional; defaults already point at curated JSON
 pnpm install
-(cd apps/backend && uv sync)
+cd apps/backend; uv sync; cd ../..
 
-# Terminal 1 — API on the synthetic fixture (until curated BASS-II data lands)
-pnpm dev:api:synthetic   # = cd apps/backend && uv run prometeo serve --synthetic
+# Terminal 1 — Evidence Engine (curated)
+pnpm dev:api              # http://127.0.0.1:8000  (or: uv run prometeo serve --no-reload)
 
 # Terminal 2 — web
-pnpm dev:web             # http://localhost:3000
+pnpm dev:web              # http://localhost:3000
 ```
 
-Works the same in PowerShell, bash and zsh. Other settings go in `apps/backend/.env`
-(see `.env.example`).
+Sanity check before demos:
 
+```powershell
+cd apps/backend
+uv run prometeo validate-data   # expect: OK: 7 trials (0 synthetic)
+```
+
+UI-only work without curated semantics: `pnpm dev:api:synthetic` (labels data as
+`SYNTHETIC` — never mix into jury claims). Verified smoke notes:
+[`docs/integration/mvp-quickstart-smoke-yulian.md`](docs/integration/mvp-quickstart-smoke-yulian.md).
+
+Other settings go in `apps/backend/.env` or the repo-root `.env` (see `.env.example`).
 Run all checks with `pnpm check`.
 
 ## Repository
