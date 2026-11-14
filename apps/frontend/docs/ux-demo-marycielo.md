@@ -46,7 +46,20 @@ The app was exercised locally with the existing API and the four `SYN-*` develop
 | `/api/v1/coverage` | 51 of 54 cells have no recorded evidence with the current fixtures. |
 | `/assistant` with material `unobtanium` | HTTP 200; `insufficient` refusal and limitations render. |
 | `/flamevision` | HTTP 200; synthetic notice and “No verified video available” render. |
-| Curated API mode | Zero trial records; Explorer and Comparison show “No recorded evidence”, Comparison still shows the coverage map, and FlameVision shows no-video state. |
+| Curated API mode (before the data integration) | Zero trial records; Explorer and Comparison show “No recorded evidence”, Comparison still shows the coverage map, and FlameVision shows no-video state. |
 | API stopped | Explorer returns HTTP 200 with an explicit “Evidence Engine not reachable” error state. |
 
 No browser screenshot was captured: the computer-use helper stopped when it could not determine the browser URL confidently. Therefore a visual 390 px check remains unverified. CSS includes single-column home cards, wrapping form controls and actions, and horizontally scrollable comparison and coverage tables for narrow widths.
+
+## Scientific instrument redesign
+
+The frontend now uses a dark observatory palette, warm thermal accents, fine measurement grids, and a restrained animated thermal field. The field is explicitly marked as abstract illustration, not experiment imagery or data. A horizontal instrument rail connects Explorer, Comparison Lab, Research Assistant, and FlameVision. The home page leads into a three-step research path instead of presenting the modules as equivalent dashboard cards.
+
+- **Explorer:** records expose material, oxygen, airflow, geometry, phenomena, measurement quality, and provenance. Filters and a comparison queue keep the research task visible.
+- **Comparison Lab:** A/B selectors preview selected conditions immediately. Users declare intentional variation; the verdict distinguishes it from checked controlled conditions and lists each issue. A duplicate selection is blocked before submission. Recorded values and coverage remain visible with their existing evidence limits.
+- **Research Assistant:** the question console and response register expose evidence tier, citations, computed facts, assessments, limitations, and refusal state. An AI explanation is labelled as such only when a model response exists.
+- **FlameVision:** a technical viewer plays a linked media file only when the trial contains a playable video URI. Otherwise it shows an explicit no-signal state. The existing static processed-run gallery remains available and keeps its validation status, source, and pixel units visible. No live overlay API is claimed.
+
+The layout has tablet and narrow-screen rules, keyboard focus styling, a skip link, and reduced-motion handling. CSS-only animation adds no dependency. The redesign was checked with `pnpm lint:web`, `pnpm typecheck:web`, `pnpm build:web`, and `git diff --check` on 14 November 2026. Browser visual inspection of localhost was denied by the Browser Use origin-permission gate, so no screenshot or measured viewport result is claimed for this revision.
+
+The redesign branch is based on the later `main`, which already includes curated BASS-II records, the observed-spread chart, and the static FlameVision processed-run gallery. The earlier empty-curated-data check above describes an earlier repository state; it is retained as an empty-state verification record, not a claim about the current dataset.

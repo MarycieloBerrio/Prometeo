@@ -12,10 +12,11 @@ export function PageHeader({ slug, children }: { slug: string; children?: ReactN
         <Icon name={mod.icon} size={24} />
       </span>
       <div>
-        <p className="eyebrow">Step {mod.number}</p>
+        <p className="eyebrow">INSTRUMENT {mod.number} / PROMETEO LAB</p>
         <h1>{mod.name}</h1>
         <p className="muted">{mod.purpose}</p>
       </div>
+      <span className="page-header-index" aria-hidden="true">{mod.number}</span>
       {children && <div className="page-actions">{children}</div>}
     </header>
   );
@@ -33,6 +34,7 @@ export function Section({
   return (
     <section className="section">
       <div className="section-head">
+        <span className="section-marker" aria-hidden="true" />
         <h2>{title}</h2>
         {hint && <span className="muted small">{hint}</span>}
       </div>

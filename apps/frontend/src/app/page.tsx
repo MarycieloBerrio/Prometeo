@@ -1,69 +1,82 @@
 import Link from "next/link";
 
 import { Icon, type IconName } from "@/components/ui/Icon";
-import { MODULES } from "@/domain/modules";
+import { ThermalField } from "@/components/ui/ThermalField";
 
-const PRINCIPLES: { icon: IconName; title: string; note: string }[] = [
-  { icon: "book", title: "Every value has a source", note: "Unit, provenance and data quality." },
-  { icon: "ban", title: "No extrapolation", note: "No data means no answer." },
-  { icon: "alert", title: "Limits are visible", note: "Uncertainty is part of the result." },
+const PATH: { number: string; icon: IconName; title: string; description: string; href: string }[] = [
+  {
+    number: "01",
+    icon: "search",
+    title: "Find an experiment",
+    description: "Browse material, oxygen, airflow and source together.",
+    href: "/explorer",
+  },
+  {
+    number: "02",
+    icon: "compare",
+    title: "Test the comparison",
+    description: "Isolate what changed. Let the Physics Validator check the rest.",
+    href: "/compare",
+  },
+  {
+    number: "03",
+    icon: "chat",
+    title: "Trace the conclusion",
+    description: "Read an answer, a cited limitation, or an honest refusal.",
+    href: "/assistant",
+  },
 ];
 
 export default function Home() {
-  const flow = MODULES.filter((m) => ["explorer", "compare", "assistant"].includes(m.slug));
   return (
-    <div className="page">
-      <section className="hero">
-        <p className="eyebrow">NASA Space Apps 2026 · Flame in Freefall</p>
-        <h1>What do we really know about fire in space?</h1>
-        <p className="lead">
-          Prometeo helps you find documented microgravity combustion trials, check physical comparability, and trace a supported explanation to its sources.
-        </p>
-        <p className="small muted">Research support, not safety certification. Empty evidence is never a safety finding.</p>
-        <div className="row">
-          <Link href="/explorer" className="btn btn-primary btn-large">
-            Start exploring
-            <Icon name="arrowRight" size={18} />
-          </Link>
-          <Link href="/assistant" className="btn btn-large">
-            <Icon name="chat" size={18} />
-            Ask a question
-          </Link>
+    <div className="page home-page">
+      <section className="home-hero">
+        <div className="hero-content">
+          <p className="eyebrow hero-eyebrow"><span className="eyebrow-line" /> THE SCIENCE OF FIRE IN FREEFALL</p>
+          <h1>Follow the <em>evidence</em> through the flame.</h1>
+          <p className="lead">
+            Microgravity changes how fire grows. Prometeo turns scattered combustion trials into an explorable
+            record of conditions, physical comparisons and traceable conclusions.
+          </p>
+          <div className="hero-actions">
+            <Link href="/explorer" className="btn btn-primary btn-large">Enter the Explorer <Icon name="arrowRight" size={18} /></Link>
+            <Link href="/compare" className="btn btn-large">Open Comparison Lab <Icon name="compare" size={17} /></Link>
+          </div>
+          <div className="hero-quicklinks" aria-label="Other instruments">
+            <Link href="/assistant"><Icon name="chat" size={15} /> Ask the evidence</Link>
+            <Link href="/flamevision"><Icon name="video" size={15} /> Inspect FlameVision</Link>
+          </div>
+          <p className="hero-disclaimer"><Icon name="shield" size={15} /> Research support. No safety certification or prediction beyond recorded evidence.</p>
+        </div>
+        <div className="hero-visual">
+          <ThermalField hero />
+          <span className="hero-visual-note">ABSTRACT THERMAL FIELD · NOT EXPERIMENTAL DATA</span>
         </div>
       </section>
 
-      <section className="section">
-        <div className="section-head">
-          <h2>How it works</h2>
-          <span className="muted small">Three core modules · one traceable conclusion</span>
+      <section className="home-path" aria-labelledby="path-title">
+        <div className="home-path-heading">
+          <p className="eyebrow">A TRACEABLE RESEARCH PATH</p>
+          <h2 id="path-title">From question to qualified finding.</h2>
+          <p>Three connected instruments keep the source and the limits in view.</p>
         </div>
-        <div className="flow">
-          {flow.map((m) => (
-              <Link key={m.slug} href={`/${m.slug}`} className="card flow-card">
-                <span className="flow-top">
-                  <span className="page-icon">
-                    <Icon name={m.icon} size={22} />
-                  </span>
-                  <span className="flow-number">{Number(m.number)}</span>
-                </span>
-                <h3>{m.label}</h3>
-                <p className="muted small">{m.purpose}</p>
-              </Link>
+        <div className="path-rail">
+          {PATH.map((item) => (
+            <Link href={item.href} className="path-stop" key={item.number}>
+              <span className="path-number">{item.number}<span className="path-dot" /></span>
+              <span className="path-symbol"><Icon name={item.icon} size={22} /></span>
+              <strong>{item.title}</strong>
+              <span className="muted small">{item.description}</span>
+              <span className="path-action">OPEN INSTRUMENT <Icon name="arrowRight" size={14} /></span>
+            </Link>
           ))}
         </div>
-        <p className="small muted">Optional: <Link href="/flamevision" className="link">FlameVision</Link> displays a source-linked video only when a trial record provides one.</p>
       </section>
 
-      <section className="principles">
-        {PRINCIPLES.map((p) => (
-          <div key={p.title} className="principle">
-            <Icon name={p.icon} size={20} />
-            <div>
-              <strong>{p.title}</strong>
-              <p className="muted small">{p.note}</p>
-            </div>
-          </div>
-        ))}
+      <section className="evidence-manifesto" aria-label="Scientific guardrails">
+        <div><span>01 / PROVENANCE</span><strong>Every value has a trail.</strong><p>Source, unit and quality travel with the measurement.</p></div>
+        <div><span>02 / PHYSICS</span><strong>Compatibility comes first.</strong><p>A difference appears only when the conditions support it.</p></div>
+        <div><span>03 / UNCERTAINTY</span><strong>A gap is still a finding.</strong><p>No recorded evidence is never presented as safety.</p></div>
       </section>
     </div>
   );
