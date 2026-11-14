@@ -68,7 +68,15 @@ def assess_trial(trial: Trial, query: TrialFilter, metric: str | None) -> Eviden
 
 
 def overall_tier(assessments: list[EvidenceAssessment]) -> EvidenceTier:
-    """Coverage rule: a conclusion needs at least N usable trials."""
+    """Coverage rule for *comparative* conclusions: need ≥ `MIN_TRIALS_FOR_COMPARISON`.
+
+    Semantics (unchanged signature for the assistant):
+    - `direct` / `partial` / `insufficient` are interpretable tiers — never a confidence %.
+    - Requiring two usable trials is appropriate when answering how a response changes
+      across conditions. It is **not** a claim that a single well-documented trial is
+      scientifically worthless; single-trial descriptive questions need a separate
+      interface (see docs/science-validation-daniel.md — handoff to Evidence Assistant).
+    """
     usable = [a for a in assessments if a.tier is not EvidenceTier.INSUFFICIENT]
     if len(usable) < MIN_TRIALS_FOR_COMPARISON:
         return EvidenceTier.INSUFFICIENT
