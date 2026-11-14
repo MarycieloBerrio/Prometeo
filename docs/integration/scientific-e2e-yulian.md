@@ -45,7 +45,7 @@ The suite builds `TestClient` with explicit settings (no ambient `.env`):
 2. **Condition points ≠ replicates.** Multiple `BASS-II-B16-*` ids are one physical sample under stepped flow.
 3. **`geometry.thickness` on cylinders** currently stores **rod diameter** (schema limitation). Do not call it film thickness.
 4. **FlameVision** tracks the luminous leading edge in pixels until calibrated and linked to a curated trial id. Page may still say “no verified video” while static artifacts live under `apps/frontend/public/experiments/flamevision/`.
-5. **PR #6 (Postgres KB)** remains unmerged: Escenario C (old-schema upgrade) FAIL. Defaults stay JSON.
+5. **PR #6 (Postgres KB)** is merged; Escenario C (old-schema upgrade) still has no in-place auto-migrator. Use `prometeo diagnose-db` (read-only) and apply `0002` by hand or recreate the volume with human approval. Defaults stay JSON.
 
 ## Out of scope (do not “fix” by invading teammates)
 
