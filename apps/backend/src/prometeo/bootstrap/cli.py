@@ -168,7 +168,10 @@ def diagnose_db() -> None:
     if report.legacy_psi_resource_unique_present:
         typer.echo("legacy constraint still present: assets_psi_resource_id_key")
     typer.echo(report.guidance)
-    if report.state in {SchemaState.PARTIAL}:
+    # Only a fully matched 0001+0002 schema is automation-safe. Every other state
+    # (including unreachable / empty / Escenario C) must fail the process so CI
+    # and scripts never treat an incompatible DB as validated.
+    if report.state is not SchemaState.FRESH:
         raise typer.Exit(code=1)
 
 

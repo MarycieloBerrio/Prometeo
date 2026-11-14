@@ -85,3 +85,35 @@ def test_partial_missing_vector() -> None:
     )
     assert diagnosis.state is SchemaState.PARTIAL
     assert "vector" in diagnosis.guidance.lower()
+
+
+def test_partial_when_subset_of_catalog_tables_present() -> None:
+    """Six-table catalogs must not classify as fresh (Ciclo 9 harden)."""
+    subset = frozenset(
+        {
+            "investigations",
+            "sources",
+            "assets",
+            "trials",
+            "measurements",
+            "document_chunks",
+        }
+    )
+    diagnosis = classify(
+        _snap(
+            tables=subset,
+            columns=frozenset(REQUIRED_COLUMNS),
+            indexes=frozenset(REQUIRED_INDEXES),
+        )
+    )
+    assert diagnosis.state is SchemaState.PARTIAL
+    assert "media" in diagnosis.missing_tables
+    assert "flame_tracks" in diagnosis.missing_tables
+    assert len(REQUIRED_TABLES) == 11
+
+
+def test_required_tables_match_0001_init_count() -> None:
+    assert len(REQUIRED_TABLES) == 11
+    assert "investigation_relations" in REQUIRED_TABLES
+    assert "raw_test_records" in REQUIRED_TABLES
+    assert "flame_track_samples" in REQUIRED_TABLES
