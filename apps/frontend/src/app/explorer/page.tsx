@@ -2,7 +2,12 @@ import { Suspense } from "react";
 
 import type { Trial } from "@prometeo/contracts";
 
-import { DataQualityBadge } from "@/components/DataQualityBadge";
+import type { TrialQuery } from "@/application/ports/evidence-gateway";
+import { TrialFilters } from "@/components/trials/TrialFilters";
+import { TrialPicker } from "@/components/trials/TrialPicker";
+import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { firstParam } from "@/domain/format";
 import { gateway } from "@/infrastructure/gateway";
 
 type SearchParams = PageProps<"/explorer">["searchParams"];
@@ -10,89 +15,58 @@ type SearchParams = PageProps<"/explorer">["searchParams"];
 export default function ExplorerPage({ searchParams }: PageProps<"/explorer">) {
   // Static shell renders immediately; request-time data streams in under <Suspense>.
   return (
-    <section className="stack">
-      <p className="eyebrow">Module 01</p>
-      <h1>Experiment Explorer</h1>
+    <div className="page">
+      <PageHeader slug="explorer" />
       <Suspense fallback={<p className="muted">Loading trials…</p>}>
         <TrialResults searchParams={searchParams} />
       </Suspense>
-    </section>
+    </div>
   );
 }
 
 async function TrialResults({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
-  const material = typeof params.material === "string" ? params.material : undefined;
+  const query: TrialQuery = {
+    material: firstParam(params.material),
+    geometry: firstParam(params.geometry),
+    flow_direction: firstParam(params.flow_direction),
+    phenomenon: firstParam(params.phenomenon),
+  };
 
   let trials: Trial[] = [];
   let error: string | null = null;
   try {
-    trials = await gateway.listTrials({ material });
+    trials = await gateway.listTrials(query);
   } catch (e) {
     error = e instanceof Error ? e.message : "Unknown error";
   }
 
   return (
     <>
-      <form className="filters">
-        <input name="material" placeholder="Material (e.g. PMMA)" defaultValue={material} />
-        <button type="submit">Filter</button>
-      </form>
+      <TrialFilters query={query} />
 
-      {error && <p className="notice">Could not reach the Evidence Engine API: {error}</p>}
-      {!error && trials.length === 0 && (
-        <p className="notice">
-          No trials match. An empty result means no recorded evidence, not that a material is safe.
-        </p>
+      {error && <ApiDown message={error} />}
+
+      {!error && trials.some((t) => t.is_synthetic) && (
+        <Callout tone="warn" title="Synthetic fixtures">
+          These values are invented for development. They are not NASA data.
+        </Callout>
       )}
-      {trials.length > 0 && <TrialTable trials={trials} />}
+
+      {!error && trials.length === 0 && (
+        <EmptyState icon="search" title="No recorded evidence">
+          No trial matches these filters. That is a gap in the data, not a sign that a material is safe.
+        </EmptyState>
+      )}
+
+      {trials.length > 0 && (
+        <>
+          <p className="muted small">
+            {trials.length} {trials.length === 1 ? "trial" : "trials"} · pick two to compare
+          </p>
+          <TrialPicker trials={trials} />
+        </>
+      )}
     </>
-  );
-}
-
-function fmt(q: Trial["oxygen"]): string {
-  return q ? `${q.value} ${q.unit}` : "—";
-}
-
-function TrialTable({ trials }: { trials: Trial[] }) {
-  return (
-    <table>
-      <thead>
-        <tr>
-          <th>Trial</th>
-          <th>Investigation</th>
-          <th>Material</th>
-          <th>Geometry</th>
-          <th>O₂</th>
-          <th>Flow</th>
-          <th>Phenomena</th>
-          <th>Results</th>
-        </tr>
-      </thead>
-      <tbody>
-        {trials.map((t) => (
-          <tr key={t.id}>
-            <td className="mono">{t.id}</td>
-            <td>{t.investigation}</td>
-            <td>{t.material}</td>
-            <td>
-              {t.geometry} · {t.thermal_regime}
-            </td>
-            <td>{fmt(t.oxygen)}</td>
-            <td>
-              {fmt(t.flow_speed)} · {t.flow_direction}
-            </td>
-            <td>{t.phenomena.join(", ")}</td>
-            <td>
-              {t.results.map((r) => (
-                <div key={r.name}>
-                  {r.name}: {r.value.value} {r.value.unit} <DataQualityBadge quality={r.quality} />
-                </div>
-              ))}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
   );
 }
