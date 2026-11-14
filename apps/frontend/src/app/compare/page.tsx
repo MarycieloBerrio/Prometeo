@@ -6,6 +6,10 @@ import type { CompareRequest, CompareResponse, CoverageResponse, Trial } from "@
 import { CompareForm } from "@/components/compare/CompareForm";
 import { ComparisonResult } from "@/components/compare/ComparisonResult";
 import { CoverageMap } from "@/components/compare/CoverageMap";
+import {
+  ObservationalSpreadChart,
+  observationalSpreadPoints,
+} from "@/components/compare/ObservationalSpreadChart";
 import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { Icon } from "@/components/ui/Icon";
@@ -118,6 +122,18 @@ async function CompareLab({ searchParams }: { searchParams: SearchParams }) {
             Prometeo first checks that the two trials can be compared. Only then it shows a difference.
           </EmptyState>
         )
+      )}
+
+      {observationalSpreadPoints(trials).length >= 2 && (
+        <Section
+          title="Observed flame spread vs ventilation"
+          hint="BASS-II B16 / B19 condition points · measured values only"
+        >
+          <ObservationalSpreadChart
+            trials={trials}
+            highlight={result ? result.trials.map((t) => t.id) : [a, b].filter((id): id is string => Boolean(id))}
+          />
+        </Section>
       )}
 
       {coverageError && <Callout tone="warn" title="Coverage unavailable">{coverageError}</Callout>}
