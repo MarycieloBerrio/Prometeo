@@ -236,7 +236,12 @@ def test_validate_staging_cli_passes_curated() -> None:
 
 
 def test_compare_behavior_observed_for_handoff_to_daniel() -> None:
-    """Document observed Compare/Physics Validator behaviour without changing Daniel's code."""
+    """Dataset semantics under Daniel's hardened Physics Validator (PR #7).
+
+    Curated BASS-II condition points omit pressure. Unknown controlled variables
+    are not matches, so these pairs stay PARTIAL and causal deltas stay withheld
+    until pressure (and other controls) are curated. Does not edit Daniel's code.
+    """
     repo = JsonTrialRepository([CURATED_TRIALS])
     compare = CompareTrials(repo)
 
@@ -246,13 +251,13 @@ def test_compare_behavior_observed_for_handoff_to_daniel() -> None:
         frozenset({Variable.FLOW_SPEED}),
         ["flame_spread_rate"],
     )
-    # Observed: pressure None/None does not warn; deltas returned (Daniel to decide if OK
-    # for stepped-flow condition points on the same physical sample).
-    assert flow.compatibility.level.value in {
-        "directly_comparable",
-        "partially_comparable",
-    }
-    assert flow.deltas  # current behaviour exposes numeric delta
+    assert flow.compatibility.level.value == "partially_comparable"
+    assert flow.deltas == ()
+    assert flow.withheld_reason
+    assert any(
+        i.variable is Variable.PRESSURE and i.severity.value == "warning"
+        for i in flow.compatibility.issues
+    )
 
     ox = compare.execute(
         "BASS-II-B16-Vg167",
@@ -260,7 +265,10 @@ def test_compare_behavior_observed_for_handoff_to_daniel() -> None:
         frozenset({Variable.OXYGEN}),
         ["flame_spread_rate"],
     )
-    assert ox.deltas
+    assert ox.compatibility.level.value == "partially_comparable"
+    assert ox.deltas == ()
+    assert ox.withheld_reason
+    assert any(i.variable is Variable.PRESSURE for i in ox.compatibility.issues)
 
     film = compare.execute(
         "BASS-II-B16-Vg167",
@@ -272,12 +280,15 @@ def test_compare_behavior_observed_for_handoff_to_daniel() -> None:
     assert film.deltas == ()
     assert film.withheld_reason
 
-    # Explicit observation: both pressures None → no pressure issue today.
+    # Dual-null pressure is a WARNING, not a silent match.
     a = repo.get("BASS-II-B16-Vg755")
     b = repo.get("BASS-II-B16-Vg167")
     assert a is not None and b is not None
     report = assess_compatibility(a, b, frozenset({Variable.FLOW_SPEED}))
-    assert not any(i.variable is Variable.PRESSURE for i in report.issues)
+    assert any(
+        i.variable is Variable.PRESSURE and i.severity.value == "warning"
+        for i in report.issues
+    )
 
 
 def test_api_lists_empty_media_not_fake_player() -> None:
