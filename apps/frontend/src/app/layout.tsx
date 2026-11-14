@@ -6,9 +6,9 @@ import { Suspense } from "react";
 import { ActiveNav } from "@/components/layout/ActiveNav";
 import { NavLinks } from "@/components/layout/NavLinks";
 import { Icon } from "@/components/ui/Icon";
-import { ThermalField } from "@/components/ui/ThermalField";
 import "./globals.css";
 import "./instrument.css";
+import "./ignition.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +31,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body>
         <div className="app-shell">
-          <ThermalField />
           <a className="skip-link" href="#main-content">Skip to content</a>
           <header className="topbar">
             <Link href="/" className="brand" aria-label="Prometeo home">
