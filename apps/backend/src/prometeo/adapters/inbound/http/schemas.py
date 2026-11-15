@@ -3,9 +3,18 @@ consumed by the frontend through `packages/contracts` (generated from OpenAPI)."
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
-from prometeo.application.use_cases.ask_research_assistant import AssistantAnswer
+from prometeo.application.ports.outbound import DocumentChunk, ExplainerModel
+from prometeo.application.use_cases.ask_research_assistant import (
+    RELATED_INVESTIGATION,
+    SAME_INVESTIGATION,
+    AssistantAnswer,
+    document_relation,
+)
 from prometeo.application.use_cases.compare_trials import ComparisonResult
 from prometeo.domain.evidence.coverage import CoverageMap
 from prometeo.domain.experiments.model import Measurement, Provenance, Trial
@@ -114,6 +123,28 @@ class AskRequest(BaseModel):
     geometry: str | None = None
     flow_direction: str | None = None
     metric: str | None = "flame_spread_rate"
+    model: str | None = Field(
+        default=None,
+        description=(
+            "Explanation model for this question, one of GET /assistant/models. Omit for the "
+            "default. Ignored when no language model is configured."
+        ),
+    )
+
+
+class AssistantModelOut(BaseModel):
+    id: str
+    label: str
+    description: str
+
+
+class AssistantModelsResponse(BaseModel):
+    default: str | None = Field(
+        description="Model used when a question names none; null when no model is configured."
+    )
+    models: list[AssistantModelOut] = Field(
+        description="Models a question may pick. Empty with the deterministic explainer."
+    )
 
 
 class AssessmentOut(BaseModel):
@@ -122,13 +153,40 @@ class AssessmentOut(BaseModel):
     quality: str
     tier: str
     reasons: list[str]
+    in_interpretation: bool = Field(
+        description=(
+            "True when this trial's facts were given to the interpretation (it belongs to a "
+            "comparable set). False on a refusal, and for a usable trial that had no "
+            "comparable counterpart: `tier` rates the trial alone, not its use in the answer."
+        )
+    )
 
 
 class DocumentOut(BaseModel):
     id: str
-    excerpt: str
+    excerpt: str = Field(
+        description=(
+            "Full text of the retrieved chunk, exactly as given to the explanation model, so "
+            "every statement attributed to a document can be checked against it."
+        )
+    )
     score: float
     provenance: ProvenanceOut
+    investigation: str | None = Field(
+        default=None, description="Investigation the document belongs to, when recorded."
+    )
+    relation: Literal["same", "related", "other"] = Field(
+        description=(
+            "How that investigation relates to the usable trials: the same one, one the "
+            "catalog lists as related, or another (general background)."
+        )
+    )
+    cited_passages: list[str] = Field(
+        description=(
+            "Passages of this excerpt quoted by the interpretation, verbatim (whitespace "
+            "collapsed). Empty when the interpretation does not quote it."
+        )
+    )
 
 
 class AskResponse(BaseModel):
@@ -231,6 +289,24 @@ def coverage_out(c: CoverageMap) -> CoverageResponse:
     )
 
 
+def _relation(
+    doc: DocumentChunk, investigations: frozenset[str]
+) -> Literal["same", "related", "other"]:
+    relation = document_relation(doc, investigations)
+    if relation == SAME_INVESTIGATION:
+        return "same"
+    return "related" if relation == RELATED_INVESTIGATION else "other"
+
+
+def models_out(models: Sequence[ExplainerModel]) -> AssistantModelsResponse:
+    return AssistantModelsResponse(
+        default=models[0].id if models else None,
+        models=[
+            AssistantModelOut(id=m.id, label=m.label, description=m.description) for m in models
+        ],
+    )
+
+
 def ask_out(a: AssistantAnswer) -> AskResponse:
     return AskResponse(
         tier=a.tier.value,
@@ -244,12 +320,19 @@ def ask_out(a: AssistantAnswer) -> AskResponse:
             AssessmentOut(
                 trial_id=x.trial_id, relevance=x.relevance.value, quality=x.quality.value,
                 tier=x.tier.value, reasons=list(x.reasons),
+                in_interpretation=x.trial_id in a.interpreted_trial_ids,
             )
             for x in a.assessments
         ],
         documents=[
             DocumentOut(
-                id=d.id, excerpt=d.text[:500], score=d.score, provenance=prov_out(d.provenance)
+                id=d.id,
+                excerpt=d.text,
+                score=d.score,
+                provenance=prov_out(d.provenance),
+                investigation=d.investigation,
+                relation=_relation(d, a.evidence_investigations),
+                cited_passages=[c.cited_text for c in a.citations if c.chunk_id == d.id],
             )
             for d in a.documents
         ],

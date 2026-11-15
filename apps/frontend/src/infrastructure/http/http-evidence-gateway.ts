@@ -2,13 +2,18 @@
 import type {
   AskRequest,
   AskResponse,
+  AssistantModelsResponse,
   CompareRequest,
   CompareResponse,
   CoverageResponse,
   Trial,
 } from "@prometeo/contracts";
 
-import type { EvidenceGateway, TrialQuery } from "@/application/ports/evidence-gateway";
+import type {
+  EvidenceGateway,
+  SourceDocumentFile,
+  TrialQuery,
+} from "@/application/ports/evidence-gateway";
 
 export class ApiError extends Error {
   constructor(
@@ -40,6 +45,27 @@ export class HttpEvidenceGateway implements EvidenceGateway {
 
   ask(request: AskRequest): Promise<AskResponse> {
     return this.post("/api/v1/assistant/ask", request);
+  }
+
+  assistantModels(): Promise<AssistantModelsResponse> {
+    return this.get("/api/v1/assistant/models");
+  }
+
+  async sourceDocument(chunkId: string, range?: string | null): Promise<SourceDocumentFile | null> {
+    // Reports run to tens of megabytes; a viewer that asks for a byte range gets only that.
+    const res = await fetch(`${this.baseUrl}/api/v1/documents/${encodeURIComponent(chunkId)}/file`, {
+      headers: range ? { Range: range } : undefined,
+    });
+    if (res.status === 404) return null;
+    if (!res.ok || !res.body) throw new ApiError(res.status, res.statusText);
+    return {
+      body: res.body,
+      status: res.status,
+      contentType: res.headers.get("content-type") ?? "application/octet-stream",
+      contentLength: res.headers.get("content-length"),
+      contentRange: res.headers.get("content-range"),
+      acceptRanges: res.headers.get("accept-ranges"),
+    };
   }
 
   private async get<T>(path: string): Promise<T> {

@@ -380,6 +380,67 @@
         }
       }
     },
+    "/api/v1/assistant/models": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Assistant Models",
+        "description": "Models a question may pick to write its interpretation (empty: none configured).",
+        "operationId": "assistant_models_api_v1_assistant_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantModelsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{chunk_id}/file": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Source Document File",
+        "description": "The original document a retrieved excerpt was extracted from, to show it in place.",
+        "operationId": "source_document_file_api_v1_documents__chunk_id__file_get",
+        "parameters": [
+          {
+            "name": "chunk_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Chunk Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "No local copy of the source file"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/assistant/ask": {
       "post": {
         "tags": [
@@ -475,6 +536,18 @@
             ],
             "title": "Metric",
             "default": "flame_spread_rate"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model",
+            "description": "Explanation model for this question, one of GET /assistant/models. Omit for the default. Ignored when no language model is configured."
           }
         },
         "type": "object",
@@ -596,6 +669,11 @@
             },
             "type": "array",
             "title": "Reasons"
+          },
+          "in_interpretation": {
+            "type": "boolean",
+            "title": "In Interpretation",
+            "description": "True when this trial's facts were given to the interpretation (it belongs to a comparable set). False on a refusal, and for a usable trial that had no comparable counterpart: `tier` rates the trial alone, not its use in the answer."
           }
         },
         "type": "object",
@@ -604,9 +682,63 @@
           "relevance",
           "quality",
           "tier",
-          "reasons"
+          "reasons",
+          "in_interpretation"
         ],
         "title": "AssessmentOut"
+      },
+      "AssistantModelOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "description"
+        ],
+        "title": "AssistantModelOut"
+      },
+      "AssistantModelsResponse": {
+        "properties": {
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default",
+            "description": "Model used when a question names none; null when no model is configured."
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantModelOut"
+            },
+            "type": "array",
+            "title": "Models",
+            "description": "Models a question may pick. Empty with the deterministic explainer."
+          }
+        },
+        "type": "object",
+        "required": [
+          "default",
+          "models"
+        ],
+        "title": "AssistantModelsResponse"
       },
       "CompareRequest": {
         "properties": {
@@ -834,7 +966,8 @@
           },
           "excerpt": {
             "type": "string",
-            "title": "Excerpt"
+            "title": "Excerpt",
+            "description": "Full text of the retrieved chunk, exactly as given to the explanation model, so every statement attributed to a document can be checked against it."
           },
           "score": {
             "type": "number",
@@ -842,6 +975,36 @@
           },
           "provenance": {
             "$ref": "#/components/schemas/ProvenanceOut"
+          },
+          "investigation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investigation",
+            "description": "Investigation the document belongs to, when recorded."
+          },
+          "relation": {
+            "type": "string",
+            "enum": [
+              "same",
+              "related",
+              "other"
+            ],
+            "title": "Relation",
+            "description": "How that investigation relates to the usable trials: the same one, one the catalog lists as related, or another (general background)."
+          },
+          "cited_passages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cited Passages",
+            "description": "Passages of this excerpt quoted by the interpretation, verbatim (whitespace collapsed). Empty when the interpretation does not quote it."
           }
         },
         "type": "object",
@@ -849,7 +1012,9 @@
           "id",
           "excerpt",
           "score",
-          "provenance"
+          "provenance",
+          "relation",
+          "cited_passages"
         ],
         "title": "DocumentOut"
       },

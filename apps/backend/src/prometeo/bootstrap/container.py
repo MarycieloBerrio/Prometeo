@@ -9,10 +9,13 @@ from prometeo.adapters.outbound.persistence.json_trial_repository import JsonTri
 from prometeo.adapters.outbound.persistence.postgres_trial_repository import (
     PostgresTrialRepository,
 )
+from prometeo.adapters.outbound.persistence.source_file_store import NoSourceFiles
 from prometeo.adapters.outbound.retrieval.keyword_retriever import KeywordRetriever
 from prometeo.application.ports.outbound import (
     DocumentRetriever,
+    ExplainerModel,
     ExplanationGenerator,
+    SourceFileStore,
     TextEmbedder,
     TrialRepository,
 )
@@ -22,6 +25,7 @@ from prometeo.application.use_cases.compare_trials import CompareTrials
 from prometeo.application.use_cases.coverage_map import BuildCoverageMap
 from prometeo.application.use_cases.derive_bass2_flow import DeriveBass2FlowSpeeds
 from prometeo.application.use_cases.explore_experiments import ExploreExperiments
+from prometeo.application.use_cases.locate_source_document import LocateSourceDocument
 from prometeo.bootstrap.settings import Settings
 
 
@@ -32,6 +36,9 @@ class Container:
     compare: CompareTrials
     coverage: BuildCoverageMap
     assistant: AskResearchAssistant
+    source_document: LocateSourceDocument
+    # Models a question may ask for, default first. Empty when no language model is wired in.
+    explainer_models: tuple[ExplainerModel, ...] = ()
 
 
 def build_container(
@@ -40,10 +47,13 @@ def build_container(
     trials: TrialRepository | None = None,
     documents: DocumentRetriever | None = None,
     explainer: ExplanationGenerator | None = None,
+    source_files: SourceFileStore | None = None,
 ) -> Container:
     """Build the object graph. Keyword overrides exist for tests."""
     trials = trials or _trial_repository(settings)
     documents = documents or document_retriever(settings)
+    # An injected explainer is a test double: it offers no model choice.
+    models = _explainer_models(settings) if explainer is None else ()
     explainer = explainer or _explainer(settings)
     return Container(
         settings=settings,
@@ -51,6 +61,8 @@ def build_container(
         compare=CompareTrials(trials),
         coverage=BuildCoverageMap(trials),
         assistant=AskResearchAssistant(trials, documents, explainer),
+        source_document=LocateSourceDocument(source_files or _source_files(settings)),
+        explainer_models=models,
     )
 
 
@@ -105,6 +117,24 @@ def _trial_repository(settings: Settings) -> TrialRepository:
     if settings.trial_store == "postgres":
         return PostgresTrialRepository(settings.database_url)
     return JsonTrialRepository(settings.trial_paths())
+
+
+def _source_files(settings: Settings) -> SourceFileStore:
+    if settings.document_store == "postgres":
+        from prometeo.adapters.outbound.persistence.source_file_store import (
+            PostgresSourceFileStore,
+        )
+
+        return PostgresSourceFileStore(settings.database_url, settings.raw_dir)
+    return NoSourceFiles()
+
+
+def _explainer_models(settings: Settings) -> tuple[ExplainerModel, ...]:
+    if settings.explainer != "anthropic":
+        return ()
+    from prometeo.adapters.outbound.llm.anthropic_explainer import explainer_models
+
+    return explainer_models(settings.anthropic_model_choices())
 
 
 def _explainer(settings: Settings) -> ExplanationGenerator:

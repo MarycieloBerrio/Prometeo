@@ -174,9 +174,12 @@ is an **offline preparation job**, never done per request.
 ## 8. AI / LLM integration
 
 - Port: `ExplanationGenerator` in `application/ports/outbound.py`.
-- Adapters: `adapters/outbound/llm/anthropic_explainer.py` (Claude, `claude-opus-5-5`, document
-  blocks with citations enabled, server-side refusal fallback) and `offline_explainer.py`
-  (deterministic, the default).
+- Adapters: `adapters/outbound/llm/anthropic_explainer.py` (Claude, document blocks with
+  citations enabled, server-side refusal fallback where the model has one) and
+  `offline_explainer.py` (deterministic, the default).
+- Model: `claude-sonnet-5-5` by default (`PROMETEO_ANTHROPIC_MODEL`). A question may pick another
+  from `PROMETEO_ANTHROPIC_MODELS` in the Research Assistant; `GET /api/v1/assistant/models` lists
+  them. Whatever the model, its output passes the same audit.
 - Select with `PROMETEO_EXPLAINER=anthropic|offline`. Credentials come from `ANTHROPIC_API_KEY`
   or an `ant auth login` profile. Never hardcode keys or commit `.env`.
 - Semantic Retrieval is built: `PgVectorRetriever` (hybrid full-text + pgvector) over the knowledge

@@ -1,10 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
-import { Suspense } from "react";
 
-import { ActiveNav } from "@/components/layout/ActiveNav";
-import { NavLinks } from "@/components/layout/NavLinks";
 import "./globals.css";
 import "./instrument.css";
 import "./ignition.css";
@@ -26,25 +22,16 @@ export const metadata: Metadata = {
     "Evidence-grounded exploration of NASA microgravity combustion experiments (BASS-II, FLEX, SAFFIRE).",
 };
 
+/**
+ * Document shell only. The landing page and the working pages each render their own
+ * `.app-shell`: Next keeps the previous route in the DOM (hidden) after a client navigation,
+ * so one shared shell styled by "which page is inside" would keep the landing page's rules
+ * (no top bar, no padding) on every page reached from it.
+ */
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body>
-        <div className="app-shell">
-          <a className="skip-link" href="#main-content">Skip to content</a>
-          <header className="topbar">
-            <Link href="/" className="brand" aria-label="Prometeo home">PROMETEO<span className="brand-dot">.</span></Link>
-            <Suspense fallback={<NavLinks active={null} />}>
-              <ActiveNav />
-            </Suspense>
-          </header>
-          <main className="main" id="main-content">{children}</main>
-          <footer className="app-footer">
-            <span>PROMETEO / MICROGRAVITY COMBUSTION</span>
-            <span>Research support · not safety certification</span>
-          </footer>
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

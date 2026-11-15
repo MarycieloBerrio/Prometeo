@@ -5,16 +5,20 @@ Receives already-built use cases; it never constructs outbound adapters itself.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from prometeo import __version__
 from prometeo.adapters.inbound.http.routers import analysis, experiments
+from prometeo.application.ports.outbound import ExplainerModel
 from prometeo.application.use_cases.ask_research_assistant import AskResearchAssistant
 from prometeo.application.use_cases.compare_trials import CompareTrials
 from prometeo.application.use_cases.coverage_map import BuildCoverageMap
 from prometeo.application.use_cases.explore_experiments import ExploreExperiments
+from prometeo.application.use_cases.locate_source_document import LocateSourceDocument
 from prometeo.domain.shared.errors import DomainError, NotFoundError
 
 
@@ -24,6 +28,8 @@ def create_http_app(
     compare: CompareTrials,
     coverage: BuildCoverageMap,
     assistant: AskResearchAssistant,
+    source_document: LocateSourceDocument,
+    assistant_models: Sequence[ExplainerModel],
     cors_origins: list[str],
     include_synthetic: bool,
 ) -> FastAPI:
@@ -36,6 +42,8 @@ def create_http_app(
     app.state.compare = compare
     app.state.coverage = coverage
     app.state.assistant = assistant
+    app.state.source_document = source_document
+    app.state.assistant_models = tuple(assistant_models)
     app.state.include_synthetic = include_synthetic
 
     app.add_middleware(

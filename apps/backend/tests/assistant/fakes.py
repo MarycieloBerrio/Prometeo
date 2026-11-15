@@ -10,7 +10,12 @@ from __future__ import annotations
 import re
 from collections.abc import Sequence
 
-from prometeo.application.ports.outbound import DocumentChunk, EvidencePacket, Explanation
+from prometeo.application.ports.outbound import (
+    Citation,
+    DocumentChunk,
+    EvidencePacket,
+    Explanation,
+)
 from prometeo.application.use_cases.ask_research_assistant import (
     AskResearchAssistant,
     AssistantAnswer,
@@ -57,10 +62,13 @@ class ScriptedExplainer:
     ) -> None:
         self.text, self.sources, self.model = text, tuple(sources), model
         self.calls: list[EvidencePacket] = []
+        self.requested_models: list[str | None] = []
+        self.citations: tuple[Citation, ...] = ()
 
-    def explain(self, packet: EvidencePacket) -> Explanation:
+    def explain(self, packet: EvidencePacket, model: str | None = None) -> Explanation:
         self.calls.append(packet)
-        return Explanation(self.text, self.sources, self.model)
+        self.requested_models.append(model)
+        return Explanation(self.text, self.sources, self.model, self.citations)
 
 
 def doc(chunk_id: str, text: str, prov: Provenance = TEST_DOC_PROV) -> DocumentChunk:
@@ -75,8 +83,9 @@ def ask(
     metric: str | None = "flame_spread_rate",
     docs: Sequence[DocumentChunk] = (),
     explainer: ScriptedExplainer | None = None,
+    model: str | None = None,
 ) -> tuple[AssistantAnswer, ScriptedExplainer]:
     spy = explainer or ScriptedExplainer()
     use_case = AskResearchAssistant(FakeRepo(trials), StaticDocs(docs), spy)
-    answer = use_case.execute(AssistantQuery(question, criteria or TrialFilter(), metric))
+    answer = use_case.execute(AssistantQuery(question, criteria or TrialFilter(), metric, model))
     return answer, spy

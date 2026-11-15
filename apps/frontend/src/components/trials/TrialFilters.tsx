@@ -9,7 +9,7 @@ export function TrialFilters({ query }: { query: TrialQuery }) {
   const hasFilters = Object.values(query).some(Boolean);
   return (
     <section className="filter-panel" aria-label="Filter experiment records">
-      <details className="filter-disclosure" open={hasFilters}>
+      <details className="filter-disclosure" open>
         <summary>
           <span><Icon name="search" size={17} /> Filter recorded trials</span>
           <small>{hasFilters ? "Filters active" : "Material · investigation · geometry · flow"}</small>

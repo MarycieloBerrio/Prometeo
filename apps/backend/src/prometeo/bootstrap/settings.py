@@ -35,7 +35,10 @@ class Settings(BaseSettings):
     psi_base_url: str = "https://psi.nasa.gov"
 
     explainer: Literal["offline", "anthropic"] = "offline"
-    anthropic_model: str = "claude-opus-5-5"
+    # Model that writes the interpretation when a question does not pick one.
+    anthropic_model: str = "claude-sonnet-5-5"
+    # Comma-separated models a question may pick instead (the default is always offered).
+    anthropic_models: str = "claude-sonnet-5-5,claude-opus-5-5,claude-haiku-5-5"
     anthropic_effort: Literal["low", "medium", "high", "xhigh", "max"] = "high"
     # Read from the environment or from either .env file, under its standard SDK name. A real
     # environment variable wins over .env. Empty means "not set": the SDK then falls back to
@@ -56,6 +59,11 @@ class Settings(BaseSettings):
         if self.anthropic_api_key is None:
             return None
         return self.anthropic_api_key.get_secret_value().strip() or None
+
+    def anthropic_model_choices(self) -> list[str]:
+        """Models offered per question: the default first, then the configured list."""
+        listed = [m.strip() for m in self.anthropic_models.split(",") if m.strip()]
+        return list(dict.fromkeys([self.anthropic_model, *listed]))
 
     def trial_paths(self) -> list[Path]:
         return [self.data_dir / p.strip() for p in self.trial_files.split(",") if p.strip()]

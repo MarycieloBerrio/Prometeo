@@ -17,3 +17,6 @@ export type CompareResponse = Schemas["CompareResponse"];
 export type CoverageResponse = Schemas["CoverageResponse"];
 export type AskRequest = Schemas["AskRequest"];
 export type AskResponse = Schemas["AskResponse"];
+export type RetrievedDocument = Schemas["DocumentOut"];
+export type AssistantModel = Schemas["AssistantModelOut"];
+export type AssistantModelsResponse = Schemas["AssistantModelsResponse"];

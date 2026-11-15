@@ -89,6 +89,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/assistant/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Assistant Models
+         * @description Models a question may pick to write its interpretation (empty: none configured).
+         */
+        get: operations["assistant_models_api_v1_assistant_models_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{chunk_id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Source Document File
+         * @description The original document a retrieved excerpt was extracted from, to show it in place.
+         */
+        get: operations["source_document_file_api_v1_documents__chunk_id__file_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/assistant/ask": {
         parameters: {
             query?: never;
@@ -125,6 +165,11 @@ export interface components {
              * @default flame_spread_rate
              */
             metric: string | null;
+            /**
+             * Model
+             * @description Explanation model for this question, one of GET /assistant/models. Omit for the default. Ignored when no language model is configured.
+             */
+            model?: string | null;
         };
         /** AskResponse */
         AskResponse: {
@@ -159,6 +204,33 @@ export interface components {
             tier: string;
             /** Reasons */
             reasons: string[];
+            /**
+             * In Interpretation
+             * @description True when this trial's facts were given to the interpretation (it belongs to a comparable set). False on a refusal, and for a usable trial that had no comparable counterpart: `tier` rates the trial alone, not its use in the answer.
+             */
+            in_interpretation: boolean;
+        };
+        /** AssistantModelOut */
+        AssistantModelOut: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string;
+        };
+        /** AssistantModelsResponse */
+        AssistantModelsResponse: {
+            /**
+             * Default
+             * @description Model used when a question names none; null when no model is configured.
+             */
+            default: string | null;
+            /**
+             * Models
+             * @description Models a question may pick. Empty with the deterministic explainer.
+             */
+            models: components["schemas"]["AssistantModelOut"][];
         };
         /** CompareRequest */
         CompareRequest: {
@@ -233,11 +305,30 @@ export interface components {
         DocumentOut: {
             /** Id */
             id: string;
-            /** Excerpt */
+            /**
+             * Excerpt
+             * @description Full text of the retrieved chunk, exactly as given to the explanation model, so every statement attributed to a document can be checked against it.
+             */
             excerpt: string;
             /** Score */
             score: number;
             provenance: components["schemas"]["ProvenanceOut"];
+            /**
+             * Investigation
+             * @description Investigation the document belongs to, when recorded.
+             */
+            investigation?: string | null;
+            /**
+             * Relation
+             * @description How that investigation relates to the usable trials: the same one, one the catalog lists as related, or another (general background).
+             * @enum {string}
+             */
+            relation: "same" | "related" | "other";
+            /**
+             * Cited Passages
+             * @description Passages of this excerpt quoted by the interpretation, verbatim (whitespace collapsed). Empty when the interpretation does not quote it.
+             */
+            cited_passages: string[];
         };
         /**
          * FlowDirection
@@ -527,6 +618,62 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["CoverageResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assistant_models_api_v1_assistant_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantModelsResponse"];
+                };
+            };
+        };
+    };
+    source_document_file_api_v1_documents__chunk_id__file_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chunk_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No local copy of the source file */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

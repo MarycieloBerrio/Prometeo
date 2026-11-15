@@ -45,7 +45,7 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
         <div><span className="eyebrow">CHECKED AS CONTROLLED</span><span>{VARIABLES.filter((variable) => !result.varied.includes(variable.key)).map((variable) => variable.label).join(" · ") || "None"}</span></div>
       </div>
 
-      <details className="comparison-sources">
+      <details className="comparison-sources" open>
         <summary>Record identity and provenance <Icon name="plus" size={16} /></summary>
         <div className="comparison-source-pair">
           {[a, b].map((trial, index) => (
