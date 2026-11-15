@@ -1,6 +1,5 @@
 "use client";
 
-import Form from "next/form";
 import { type MouseEvent, useState } from "react";
 import { flushSync } from "react-dom";
 
@@ -41,8 +40,9 @@ export function CompareForm({
   }
   const metrics = [...new Set(trials.flatMap((trial) => trial.results.map((result) => result.name)))];
   if (!metrics.includes("flame_spread_rate")) metrics.unshift("flame_spread_rate");
+  // Native GET form: next/form was triggering a CompareForm hydration mismatch under Cache Components.
   return (
-    <Form action="/compare" className="compare-form card">
+    <form action="/compare" method="get" className="compare-form card">
       <input type="hidden" name="submitted" value="1" />
       <div className="compare-form-heading"><div><p className="eyebrow">EXPERIMENTAL SETUP / A : B</p><h2>Build a physical comparison</h2></div><p className="small muted">Select two records. Declare what changed; the remaining conditions are checked by the Evidence Engine.</p></div>
       <div className="compare-pick">
@@ -85,7 +85,7 @@ export function CompareForm({
           Run physics check <Icon name="arrowRight" size={16} />
         </button>
       </div>
-    </Form>
+    </form>
   );
 }
 

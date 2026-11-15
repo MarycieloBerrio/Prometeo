@@ -9,6 +9,7 @@ from fastapi import Request
 
 from prometeo.application.ports.outbound import ExplainerModel
 from prometeo.application.use_cases.ask_research_assistant import AskResearchAssistant
+from prometeo.application.use_cases.cfd_simulations import GetCfdSimulation, ListCfdSimulations
 from prometeo.application.use_cases.compare_trials import CompareTrials
 from prometeo.application.use_cases.coverage_map import BuildCoverageMap
 from prometeo.application.use_cases.explore_experiments import ExploreExperiments
@@ -29,6 +30,14 @@ def coverage(request: Request) -> BuildCoverageMap:
 
 def assistant(request: Request) -> AskResearchAssistant:
     return cast(AskResearchAssistant, request.app.state.assistant)
+
+
+def list_cfd(request: Request) -> ListCfdSimulations:
+    return cast(ListCfdSimulations, request.app.state.list_cfd)
+
+
+def get_cfd(request: Request) -> GetCfdSimulation:
+    return cast(GetCfdSimulation, request.app.state.get_cfd)
 
 
 def assistant_models(request: Request) -> Sequence[ExplainerModel]:

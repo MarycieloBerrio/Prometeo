@@ -572,6 +572,202 @@ h3 { font-size: 1.05rem; font-weight: 600; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 }
 
+/* CFD Physics Lab — instrument panel linked to Compare Lab */
+.cfd-lab {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.2rem;
+  border: 1px solid #43545a;
+  border-radius: 14px;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgb(72 110 118 / 0.18), transparent 55%),
+    linear-gradient(160deg, #15242c, #0d161d 70%);
+}
+.cfd-lab-empty { padding: 1.4rem; }
+.cfd-lab-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: start;
+}
+.cfd-lab-header h3 { margin: 0.2rem 0 0.45rem; font-size: 1.35rem; font-weight: 560; }
+.cfd-lab-header p { max-width: 62ch; color: #a8b9b8; line-height: 1.5; margin: 0; }
+.cfd-kicker {
+  margin: 0;
+  color: #d0b194;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cfd-badge {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #6d7f7a;
+  border-radius: 2px;
+  background: #1a2a2f;
+  color: #d7e4df;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+.cfd-badge.numerically_checked { border-color: #7ea58c; color: #c9ecd4; }
+.cfd-badge.solver_executed { border-color: #9a7a4e; color: #ffd5a5; }
+.cfd-badge.pending, .cfd-status.unavailable { border-color: #9a7a4e; color: #ffd5a5; }
+.cfd-case-rail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+.cfd-case-rail button {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 58px;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid #4a5d62;
+  border-radius: 2px;
+  background: #101b22;
+  color: #dce6e2;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.cfd-case-rail button small { color: #90a4a5; font-family: var(--font-geist-mono), monospace; font-size: 0.62rem; }
+.cfd-case-rail button.active,
+.cfd-case-rail button[aria-selected="true"] {
+  border-color: #ecae76;
+  box-shadow: inset 0 0 0 1px rgb(236 174 118 / 0.35);
+  background: linear-gradient(160deg, #2a241c, #151c22);
+}
+.cfd-lab-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.7fr);
+  gap: 1rem;
+}
+.cfd-side {
+  padding: 0.9rem 1rem;
+  border: 1px solid #3d4f55;
+  background: #101920;
+}
+.cfd-side h4, .cfd-main h4, .cfd-interpretation h4, .cfd-verify h4 {
+  margin: 0 0 0.55rem;
+  color: #d7c2a8;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cfd-dl { display: grid; gap: 0.55rem; margin: 0 0 1rem; }
+.cfd-dl > div { display: grid; gap: 0.15rem; padding-bottom: 0.45rem; border-bottom: 1px solid #2f4046; }
+.cfd-dl dt { color: #9eaea9; font-family: var(--font-geist-mono), monospace; font-size: 0.58rem; }
+.cfd-dl dd { margin: 0; font-size: 0.86rem; overflow-wrap: anywhere; }
+.cfd-list, .cfd-interp-block ul, .cfd-limitations ul { margin: 0; padding-left: 1.05rem; color: #b7c5c2; font-size: 0.78rem; line-height: 1.45; }
+.cfd-main { display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+.cfd-viewer { display: flex; flex-direction: column; gap: 0.55rem; }
+.cfd-viewer-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: end;
+}
+.cfd-viewer-toolbar label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  color: #b9c7c4;
+  font-size: 0.72rem;
+}
+.cfd-viewer-toolbar select,
+.cfd-viewer-toolbar button {
+  min-height: 34px;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #55666b;
+  border-radius: 2px;
+  background: #121d24;
+  color: #e8efec;
+  font: inherit;
+}
+.cfd-canvas {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #3f5258;
+  background: #0b0d10;
+}
+.cfd-viewer-meta { margin: 0; color: #93a6a6; font-size: 0.72rem; line-height: 1.45; }
+.cfd-verify {
+  padding: 0.85rem 1rem;
+  border: 1px solid #3d4f55;
+  background: #0f181f;
+  overflow-x: auto;
+}
+.cfd-verify table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.cfd-verify th {
+  width: 34%;
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  color: #c6b095;
+  font-weight: 550;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid #2e3f45;
+}
+.cfd-verify td {
+  padding: 0.4rem 0;
+  color: #d5e0dc;
+  border-bottom: 1px solid #2e3f45;
+  overflow-wrap: anywhere;
+}
+.cfd-verify-footnote { margin: 0.7rem 0 0; color: #9eaea9; font-size: 0.72rem; line-height: 1.45; }
+.cfd-interpretation {
+  padding: 1rem;
+  border: 1px solid #45565c;
+  background: linear-gradient(165deg, #16232b, #101920);
+}
+.cfd-question { margin: 0 0 0.85rem; color: #f0e2cf; font-size: 1.02rem; }
+.cfd-interp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.cfd-interp-block {
+  padding: 0.75rem;
+  border: 1px solid #3a4c52;
+  background: #0e171d;
+}
+.cfd-interp-label {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  margin: 0 0 0.45rem;
+  color: #e2c7a5;
+  font-size: 0.78rem;
+}
+.cfd-interp-label span {
+  display: grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid #7d664f;
+  background: #2a241c;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.68rem;
+}
+.cfd-sources { margin: 0.85rem 0 0; color: #8fa3a3; font-size: 0.7rem; overflow-wrap: anywhere; }
+.cfd-limitations { color: #aebdb9; font-size: 0.78rem; }
+.cfd-status {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #9a7a4e;
+  background: #221910;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.78rem;
+}
+@media (max-width: 900px) {
+  .cfd-lab-grid, .cfd-interp-grid, .cfd-case-rail { grid-template-columns: 1fr; }
+  .cfd-lab-header { flex-direction: column; }
+}
+
 /* The evidence index is a working ledger, with one contextual record inspector. */
 .index-workbench {
   display: grid;

@@ -481,6 +481,186 @@
           }
         }
       }
+    },
+    "/api/v1/cfd/simulations": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "List Simulations",
+        "operationId": "list_simulations_api_v1_cfd_simulations_get",
+        "parameters": [
+          {
+            "name": "trial_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Trial Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CfdSimulationOut"
+                  },
+                  "title": "Response List Simulations Api V1 Cfd Simulations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cfd/simulations/{simulation_id}": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "Get Simulation",
+        "operationId": "get_simulation_api_v1_cfd_simulations__simulation_id__get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CfdSimulationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cfd/simulations/{simulation_id}/field": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "Get Field",
+        "operationId": "get_field_api_v1_cfd_simulations__simulation_id__field_get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CfdFieldSampleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cfd/simulations/{simulation_id}/interpretation": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "Interpretation",
+        "description": "Deterministic contextual explanation \u2014 not an LLM causal claim from CFD.",
+        "operationId": "interpretation_api_v1_cfd_simulations__simulation_id__interpretation_get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CfdInterpretationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -739,6 +919,334 @@
           "models"
         ],
         "title": "AssistantModelsResponse"
+      },
+      "CfdFieldPointOut": {
+        "properties": {
+          "x": {
+            "type": "number",
+            "title": "X"
+          },
+          "y": {
+            "type": "number",
+            "title": "Y"
+          },
+          "z": {
+            "type": "number",
+            "title": "Z"
+          },
+          "u_mag": {
+            "type": "number",
+            "title": "U Mag"
+          },
+          "p": {
+            "type": "number",
+            "title": "P"
+          },
+          "ux": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ux"
+          },
+          "uy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uy"
+          },
+          "uz": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uz"
+          }
+        },
+        "type": "object",
+        "required": [
+          "x",
+          "y",
+          "z",
+          "u_mag",
+          "p"
+        ],
+        "title": "CfdFieldPointOut"
+      },
+      "CfdFieldSampleOut": {
+        "properties": {
+          "simulation_id": {
+            "type": "string",
+            "title": "Simulation Id"
+          },
+          "units": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Units"
+          },
+          "downsample_stride": {
+            "type": "integer",
+            "title": "Downsample Stride"
+          },
+          "n_points_source": {
+            "type": "integer",
+            "title": "N Points Source"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/CfdFieldPointOut"
+            },
+            "type": "array",
+            "title": "Points"
+          },
+          "viewer_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewer Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "simulation_id",
+          "units",
+          "downsample_stride",
+          "n_points_source",
+          "points"
+        ],
+        "title": "CfdFieldSampleOut"
+      },
+      "CfdInterpretationOut": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "nasa_measured": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nasa Measured"
+          },
+          "simulation_computed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Simulation Computed"
+          },
+          "literature_mechanisms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Literature Mechanisms"
+          },
+          "cannot_conclude": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cannot Conclude"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "nasa_measured",
+          "simulation_computed",
+          "literature_mechanisms",
+          "cannot_conclude",
+          "sources"
+        ],
+        "title": "CfdInterpretationOut"
+      },
+      "CfdSimulationOut": {
+        "properties": {
+          "simulation_id": {
+            "type": "string",
+            "title": "Simulation Id"
+          },
+          "reference_trial_id": {
+            "type": "string",
+            "title": "Reference Trial Id"
+          },
+          "result_kind": {
+            "type": "string",
+            "title": "Result Kind"
+          },
+          "solver": {
+            "type": "string",
+            "title": "Solver"
+          },
+          "solver_version": {
+            "type": "string",
+            "title": "Solver Version"
+          },
+          "model_type": {
+            "type": "string",
+            "title": "Model Type"
+          },
+          "inlet_velocity_m_s": {
+            "type": "number",
+            "title": "Inlet Velocity M S"
+          },
+          "inlet_velocity_cm_s": {
+            "type": "number",
+            "title": "Inlet Velocity Cm S"
+          },
+          "oxygen_context_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oxygen Context Percent"
+          },
+          "mesh_cell_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mesh Cell Count"
+          },
+          "residuals": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Residuals"
+          },
+          "mass_balance_error": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mass Balance Error"
+          },
+          "mass_balance_status": {
+            "type": "string",
+            "title": "Mass Balance Status"
+          },
+          "mesh_independence": {
+            "type": "string",
+            "title": "Mesh Independence"
+          },
+          "convergence_status": {
+            "type": "string",
+            "title": "Convergence Status"
+          },
+          "validation_status": {
+            "type": "string",
+            "title": "Validation Status"
+          },
+          "has_field_sample": {
+            "type": "boolean",
+            "title": "Has Field Sample"
+          },
+          "geometry_assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Geometry Assumptions"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "solver_announced_convergence": {
+            "type": "boolean",
+            "title": "Solver Announced Convergence",
+            "default": false
+          },
+          "convergence_evidence": {
+            "type": "string",
+            "title": "Convergence Evidence",
+            "default": ""
+          },
+          "mesh_quality_status": {
+            "type": "string",
+            "title": "Mesh Quality Status",
+            "default": "not_verified"
+          },
+          "continuity_global_abs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuity Global Abs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "simulation_id",
+          "reference_trial_id",
+          "result_kind",
+          "solver",
+          "solver_version",
+          "model_type",
+          "inlet_velocity_m_s",
+          "inlet_velocity_cm_s",
+          "oxygen_context_percent",
+          "mesh_cell_count",
+          "residuals",
+          "mass_balance_error",
+          "mass_balance_status",
+          "mesh_independence",
+          "convergence_status",
+          "validation_status",
+          "has_field_sample",
+          "geometry_assumptions",
+          "limitations"
+        ],
+        "title": "CfdSimulationOut"
       },
       "CompareRequest": {
         "properties": {

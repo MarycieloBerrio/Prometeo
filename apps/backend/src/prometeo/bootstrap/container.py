@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from prometeo.adapters.outbound.cfd.json_cfd_repository import JsonCfdRepository
 from prometeo.adapters.outbound.llm.offline_explainer import OfflineExplainer
 from prometeo.adapters.outbound.persistence.json_trial_repository import JsonTrialRepository
 from prometeo.adapters.outbound.persistence.postgres_trial_repository import (
@@ -21,6 +22,7 @@ from prometeo.application.ports.outbound import (
 )
 from prometeo.application.use_cases.ask_research_assistant import AskResearchAssistant
 from prometeo.application.use_cases.build_knowledge_base import BuildKnowledgeBase
+from prometeo.application.use_cases.cfd_simulations import GetCfdSimulation, ListCfdSimulations
 from prometeo.application.use_cases.compare_trials import CompareTrials
 from prometeo.application.use_cases.coverage_map import BuildCoverageMap
 from prometeo.application.use_cases.derive_bass2_flow import DeriveBass2FlowSpeeds
@@ -36,6 +38,8 @@ class Container:
     compare: CompareTrials
     coverage: BuildCoverageMap
     assistant: AskResearchAssistant
+    list_cfd: ListCfdSimulations
+    get_cfd: GetCfdSimulation
     source_document: LocateSourceDocument
     # Models a question may ask for, default first. Empty when no language model is wired in.
     explainer_models: tuple[ExplainerModel, ...] = ()
@@ -55,12 +59,15 @@ def build_container(
     # An injected explainer is a test double: it offers no model choice.
     models = _explainer_models(settings) if explainer is None else ()
     explainer = explainer or _explainer(settings)
+    cfd_repo = JsonCfdRepository(settings.data_dir / "simulations" / "cfd" / "manifests")
     return Container(
         settings=settings,
         explore=ExploreExperiments(trials),
         compare=CompareTrials(trials),
         coverage=BuildCoverageMap(trials),
         assistant=AskResearchAssistant(trials, documents, explainer),
+        list_cfd=ListCfdSimulations(cfd_repo),
+        get_cfd=GetCfdSimulation(cfd_repo, settings.data_dir),
         source_document=LocateSourceDocument(source_files or _source_files(settings)),
         explainer_models=models,
     )

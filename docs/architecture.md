@@ -6,7 +6,8 @@
 apps/backend      FastAPI · Python 3.12 · uv        Evidence Engine API (hexagonal)
 apps/frontend     Next.js 16 · TypeScript · pnpm    Dashboard, explorer, comparison lab, FlameVision player
 packages/contracts  OpenAPI → TypeScript types      Single source of truth for the HTTP contract
-data/             curated evidence, fixtures, (gitignored) raw downloads
+data/             curated evidence, fixtures, simulations/cfd (numerical), (gitignored) raw downloads
+tools/cfd/        OpenFOAM case templates + runner (optional Physics Lab)
 infra/db          Postgres + pgvector schema
 notebooks/        exploration only, never imported by apps
 docs/             architecture, science, ADRs
@@ -21,7 +22,8 @@ docs/             architecture, science, ADRs
                              ▼
              ┌──────────────── application ─────────────────────┐
              │ use_cases/: Explore, Compare, Coverage,          │
-             │             AskResearchAssistant, FlameVision    │
+             │             AskResearchAssistant, CFD list/get,  │
+             │             FlameVision                          │
              │ ports/outbound.py: TrialRepository,              │
              │   DocumentRetriever, ExplanationGenerator,       │
              │   FlameFrontDetector                             │
@@ -30,12 +32,13 @@ docs/             architecture, science, ADRs
              ┌──────────────── domain (pure) ───────────────────┐
              │ Quantity/units · Trial model · filters           │
              │ physics: metrics, compatibility (Physics Validator)│
-             │ evidence: EvidenceRank, coverage map             │
+             │ evidence: EvidenceRank, coverage map · cfd model │
              └──────────────────────────────────────────────────┘
                              ▲ implemented by
              ┌──────────────── adapters/outbound ───────────────┐
              │ JSON / Postgres repos · keyword / pgvector retriever│
              │ Claude explainer · offline explainer · OpenCV · NTRS│
+             │ JsonCfdRepository (data/simulations/cfd/manifests) │
              └──────────────────────────────────────────────────┘
   bootstrap/: settings, container (composition root), ASGI app, CLI
 ```

@@ -1,0 +1,30 @@
+[
+  {
+    "simulation_id": "CFD-B16-Vg072",
+    "reference_trial_id": "BASS-II-B16-Vg072",
+    "convergence_status": "converged",
+    "validation_status": "numerically_checked",
+    "field": "simulations/cfd/fields/CFD-B16-Vg072.json"
+  },
+  {
+    "simulation_id": "CFD-B16-Vg083",
+    "reference_trial_id": "BASS-II-B16-Vg083",
+    "convergence_status": "converged",
+    "validation_status": "numerically_checked",
+    "field": "simulations/cfd/fields/CFD-B16-Vg083.json"
+  },
+  {
+    "simulation_id": "CFD-B16-Vg167",
+    "reference_trial_id": "BASS-II-B16-Vg167",
+    "convergence_status": "max_iterations_reached",
+    "validation_status": "solver_executed",
+    "field": "simulations/cfd/fields/CFD-B16-Vg167.json"
+  },
+  {
+    "simulation_id": "CFD-B16-Vg755",
+    "reference_trial_id": "BASS-II-B16-Vg755",
+    "convergence_status": "max_iterations_reached",
+    "validation_status": "solver_executed",
+    "field": "simulations/cfd/fields/CFD-B16-Vg755.json"
+  }
+]

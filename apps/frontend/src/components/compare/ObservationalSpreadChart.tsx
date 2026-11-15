@@ -22,12 +22,22 @@ const SERIES_STYLE: Record<SeriesId, { stroke: string; label: string }> = {
 export function ObservationalSpreadChart({
   trials,
   highlight = [],
+  activeTrialId,
+  onSelectTrial,
 }: {
   trials: Trial[];
   highlight?: string[];
+  /** Controlled focus trial (synced with CFD Physics Lab when provided). */
+  activeTrialId?: string;
+  onSelectTrial?: (trialId: string) => void;
 }) {
   const points = observationalSpreadPoints(trials);
-  const [activeId, setActiveId] = useState(highlight[0] ?? points[0]?.trialId ?? "");
+  const [internalId, setInternalId] = useState(highlight[0] ?? points[0]?.trialId ?? "");
+  const activeId = activeTrialId ?? internalId;
+  const setActiveId = (trialId: string) => {
+    onSelectTrial?.(trialId);
+    if (activeTrialId === undefined) setInternalId(trialId);
+  };
   if (points.length < 2) return null;
   const active = points.find((point) => point.trialId === activeId) ?? points[0];
   const activeTrial = trials.find((trial) => trial.id === active.trialId);

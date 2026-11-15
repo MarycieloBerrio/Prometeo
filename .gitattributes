@@ -1,5 +1,8 @@
 # Normalize line endings (team works across Windows/macOS/Linux).
 * text=auto eol=lf
+# cmd.exe mis-parses labels/goto in LF-only batch files: keep Windows launchers CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
 *.{png,jpg,jpeg,gif,ico,mp4,mov,pdf} binary
 packages/contracts/src/generated.ts linguist-generated=true
 packages/contracts/openapi.json linguist-generated=true
