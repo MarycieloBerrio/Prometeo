@@ -13,8 +13,20 @@ experiments behind it, and the platform refuses to extrapolate when the evidence
 
 ## Quick start (curated MVP)
 
-Default API serves **curated BASS-II JSON** (7 trials, 0 synthetic). No Postgres and no
-Anthropic key required.
+Default API serves **curated BASS-II JSON** (7 trials, 0 synthetic). No Anthropic key required.
+Postgres is started by the Windows initializer (Docker) but the MVP API still reads curated JSON
+unless you switch `PROMETEO_DOCUMENT_STORE` / trial store in `.env`.
+
+**Windows (recommended):** double-click or run from the repo root:
+
+```bat
+init-prometeo.bat
+```
+
+That copies `.env` if missing, runs `pnpm install` + `uv sync`, starts Postgres (`pnpm db:up`),
+validates curated data, then opens API (`:8000`) and web (`:3000`) in new consoles.
+Use `init-prometeo.bat --setup-only` to skip launching servers, or `--with-knowledge` to also
+install the knowledge-base extras (`pnpm kb:build` later).
 
 ```powershell
 Copy-Item .env.example .env   # optional; defaults already point at curated JSON
