@@ -45,7 +45,7 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
         <div><span className="eyebrow">CHECKED AS CONTROLLED</span><span>{VARIABLES.filter((variable) => !result.varied.includes(variable.key)).map((variable) => variable.label).join(" · ") || "None"}</span></div>
       </div>
 
-      <details className="comparison-sources">
+      <details className="comparison-sources" open>
         <summary>Record identity and provenance <Icon name="plus" size={16} /></summary>
         <div className="comparison-source-pair">
           {[a, b].map((trial, index) => (
@@ -90,7 +90,10 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
               const measurement = trial.results.find((item) => item.name === metric);
               return (
                 <div key={trial.id} className="card separate-result">
-                  <span className="slot-letter">{index === 0 ? "A" : "B"} · {trial.id}</span>
+                  <div className="separate-result-heading">
+                    <span className="slot-letter">{index === 0 ? "A" : "B"}</span>
+                    <strong className="mono">{trial.id}</strong>
+                  </div>
                   {measurement ? (
                     <>
                       <strong className="big">{formatQuantity(measurement.value)}</strong>

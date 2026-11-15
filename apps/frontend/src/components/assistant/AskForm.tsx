@@ -1,6 +1,9 @@
 import Form from "next/form";
 import Link from "next/link";
 
+import type { AssistantModel } from "@prometeo/contracts";
+
+import { AskPendingNotice, AskSubmit, LinkPendingMark } from "@/components/assistant/AskStatus";
 import { Icon } from "@/components/ui/Icon";
 import { FLOW_DIRECTIONS, GEOMETRIES, humanize } from "@/domain/format";
 
@@ -9,6 +12,7 @@ export interface AskParams {
   material?: string;
   geometry?: string;
   flow_direction?: string;
+  model?: string;
 }
 
 const SUGGESTIONS = [
@@ -17,12 +21,21 @@ const SUGGESTIONS = [
   "How does oxygen concentration affect flame spread rate?",
 ];
 
-export function AskForm({ params }: { params: AskParams }) {
-  const hasScope = Boolean(params.material || params.geometry || params.flow_direction);
+export function AskForm({
+  params,
+  models = [],
+  defaultModel = null,
+}: {
+  params: AskParams;
+  /** Models that can write the interpretation; empty when the engine uses none. */
+  models?: AssistantModel[];
+  defaultModel?: string | null;
+}) {
+  const model = models.some((m) => m.id === params.model) ? params.model : (defaultModel ?? undefined);
   return (
     <Form action="/assistant" className="ask">
       <p className="eyebrow">ASK THE EVIDENCE</p>
-      <label className="field field-grow ask-input">
+      <div className="field field-grow ask-input">
         <Icon name="search" size={18} />
         <input
           name="q"
@@ -31,13 +44,23 @@ export function AskForm({ params }: { params: AskParams }) {
           aria-label="Question"
           required
         />
-        <button type="submit" className="btn btn-primary">
-          Examine evidence
-          <Icon name="arrowRight" size={16} />
-        </button>
-      </label>
+        {models.length > 0 && (
+          <label className="ask-model" title="Model that writes the interpretation. Facts and limitations never depend on it.">
+            <span>Model</span>
+            <select name="model" defaultValue={model} aria-label="Model that writes the interpretation">
+              {models.map((m) => (
+                <option key={m.id} value={m.id} title={m.description}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <AskSubmit />
+      </div>
+      <AskPendingNotice />
 
-      <details className="ask-scope" open={hasScope}>
+      <details className="ask-scope" open>
         <summary className="small">
           <Icon name="layers" size={14} /> Constrain the evidence search
         </summary>
@@ -77,6 +100,7 @@ export function AskForm({ params }: { params: AskParams }) {
           {SUGGESTIONS.map((s) => (
             <Link key={s} href={{ pathname: "/assistant", query: { q: s } }} className="suggestion">
               {s}
+              <LinkPendingMark />
             </Link>
           ))}
         </div>

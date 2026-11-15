@@ -380,6 +380,67 @@
         }
       }
     },
+    "/api/v1/assistant/models": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Assistant Models",
+        "description": "Models a question may pick to write its interpretation (empty: none configured).",
+        "operationId": "assistant_models_api_v1_assistant_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantModelsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{chunk_id}/file": {
+      "get": {
+        "tags": [
+          "analysis"
+        ],
+        "summary": "Source Document File",
+        "description": "The original document a retrieved excerpt was extracted from, to show it in place.",
+        "operationId": "source_document_file_api_v1_documents__chunk_id__file_get",
+        "parameters": [
+          {
+            "name": "chunk_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Chunk Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "No local copy of the source file"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/assistant/ask": {
       "post": {
         "tags": [
@@ -404,6 +465,186 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cfd/simulations": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "List Simulations",
+        "operationId": "list_simulations_api_v1_cfd_simulations_get",
+        "parameters": [
+          {
+            "name": "trial_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Trial Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CfdSimulationOut"
+                  },
+                  "title": "Response List Simulations Api V1 Cfd Simulations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cfd/simulations/{simulation_id}": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "Get Simulation",
+        "operationId": "get_simulation_api_v1_cfd_simulations__simulation_id__get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CfdSimulationOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cfd/simulations/{simulation_id}/field": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "Get Field",
+        "operationId": "get_field_api_v1_cfd_simulations__simulation_id__field_get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CfdFieldSampleOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/cfd/simulations/{simulation_id}/interpretation": {
+      "get": {
+        "tags": [
+          "cfd"
+        ],
+        "summary": "Interpretation",
+        "description": "Deterministic contextual explanation \u2014 not an LLM causal claim from CFD.",
+        "operationId": "interpretation_api_v1_cfd_simulations__simulation_id__interpretation_get",
+        "parameters": [
+          {
+            "name": "simulation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Simulation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CfdInterpretationOut"
                 }
               }
             }
@@ -475,6 +716,18 @@
             ],
             "title": "Metric",
             "default": "flame_spread_rate"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model",
+            "description": "Explanation model for this question, one of GET /assistant/models. Omit for the default. Ignored when no language model is configured."
           }
         },
         "type": "object",
@@ -596,6 +849,11 @@
             },
             "type": "array",
             "title": "Reasons"
+          },
+          "in_interpretation": {
+            "type": "boolean",
+            "title": "In Interpretation",
+            "description": "True when this trial's facts were given to the interpretation (it belongs to a comparable set). False on a refusal, and for a usable trial that had no comparable counterpart: `tier` rates the trial alone, not its use in the answer."
           }
         },
         "type": "object",
@@ -604,9 +862,391 @@
           "relevance",
           "quality",
           "tier",
-          "reasons"
+          "reasons",
+          "in_interpretation"
         ],
         "title": "AssessmentOut"
+      },
+      "AssistantModelOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "description"
+        ],
+        "title": "AssistantModelOut"
+      },
+      "AssistantModelsResponse": {
+        "properties": {
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default",
+            "description": "Model used when a question names none; null when no model is configured."
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantModelOut"
+            },
+            "type": "array",
+            "title": "Models",
+            "description": "Models a question may pick. Empty with the deterministic explainer."
+          }
+        },
+        "type": "object",
+        "required": [
+          "default",
+          "models"
+        ],
+        "title": "AssistantModelsResponse"
+      },
+      "CfdFieldPointOut": {
+        "properties": {
+          "x": {
+            "type": "number",
+            "title": "X"
+          },
+          "y": {
+            "type": "number",
+            "title": "Y"
+          },
+          "z": {
+            "type": "number",
+            "title": "Z"
+          },
+          "u_mag": {
+            "type": "number",
+            "title": "U Mag"
+          },
+          "p": {
+            "type": "number",
+            "title": "P"
+          },
+          "ux": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ux"
+          },
+          "uy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uy"
+          },
+          "uz": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uz"
+          }
+        },
+        "type": "object",
+        "required": [
+          "x",
+          "y",
+          "z",
+          "u_mag",
+          "p"
+        ],
+        "title": "CfdFieldPointOut"
+      },
+      "CfdFieldSampleOut": {
+        "properties": {
+          "simulation_id": {
+            "type": "string",
+            "title": "Simulation Id"
+          },
+          "units": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Units"
+          },
+          "downsample_stride": {
+            "type": "integer",
+            "title": "Downsample Stride"
+          },
+          "n_points_source": {
+            "type": "integer",
+            "title": "N Points Source"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/CfdFieldPointOut"
+            },
+            "type": "array",
+            "title": "Points"
+          },
+          "viewer_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewer Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "simulation_id",
+          "units",
+          "downsample_stride",
+          "n_points_source",
+          "points"
+        ],
+        "title": "CfdFieldSampleOut"
+      },
+      "CfdInterpretationOut": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "title": "Question"
+          },
+          "nasa_measured": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Nasa Measured"
+          },
+          "simulation_computed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Simulation Computed"
+          },
+          "literature_mechanisms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Literature Mechanisms"
+          },
+          "cannot_conclude": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cannot Conclude"
+          },
+          "sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question",
+          "nasa_measured",
+          "simulation_computed",
+          "literature_mechanisms",
+          "cannot_conclude",
+          "sources"
+        ],
+        "title": "CfdInterpretationOut"
+      },
+      "CfdSimulationOut": {
+        "properties": {
+          "simulation_id": {
+            "type": "string",
+            "title": "Simulation Id"
+          },
+          "reference_trial_id": {
+            "type": "string",
+            "title": "Reference Trial Id"
+          },
+          "result_kind": {
+            "type": "string",
+            "title": "Result Kind"
+          },
+          "solver": {
+            "type": "string",
+            "title": "Solver"
+          },
+          "solver_version": {
+            "type": "string",
+            "title": "Solver Version"
+          },
+          "model_type": {
+            "type": "string",
+            "title": "Model Type"
+          },
+          "inlet_velocity_m_s": {
+            "type": "number",
+            "title": "Inlet Velocity M S"
+          },
+          "inlet_velocity_cm_s": {
+            "type": "number",
+            "title": "Inlet Velocity Cm S"
+          },
+          "oxygen_context_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oxygen Context Percent"
+          },
+          "mesh_cell_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mesh Cell Count"
+          },
+          "residuals": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Residuals"
+          },
+          "mass_balance_error": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mass Balance Error"
+          },
+          "mass_balance_status": {
+            "type": "string",
+            "title": "Mass Balance Status"
+          },
+          "mesh_independence": {
+            "type": "string",
+            "title": "Mesh Independence"
+          },
+          "convergence_status": {
+            "type": "string",
+            "title": "Convergence Status"
+          },
+          "validation_status": {
+            "type": "string",
+            "title": "Validation Status"
+          },
+          "has_field_sample": {
+            "type": "boolean",
+            "title": "Has Field Sample"
+          },
+          "geometry_assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Geometry Assumptions"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Limitations"
+          },
+          "solver_announced_convergence": {
+            "type": "boolean",
+            "title": "Solver Announced Convergence",
+            "default": false
+          },
+          "convergence_evidence": {
+            "type": "string",
+            "title": "Convergence Evidence",
+            "default": ""
+          },
+          "mesh_quality_status": {
+            "type": "string",
+            "title": "Mesh Quality Status",
+            "default": "not_verified"
+          },
+          "continuity_global_abs": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuity Global Abs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "simulation_id",
+          "reference_trial_id",
+          "result_kind",
+          "solver",
+          "solver_version",
+          "model_type",
+          "inlet_velocity_m_s",
+          "inlet_velocity_cm_s",
+          "oxygen_context_percent",
+          "mesh_cell_count",
+          "residuals",
+          "mass_balance_error",
+          "mass_balance_status",
+          "mesh_independence",
+          "convergence_status",
+          "validation_status",
+          "has_field_sample",
+          "geometry_assumptions",
+          "limitations"
+        ],
+        "title": "CfdSimulationOut"
       },
       "CompareRequest": {
         "properties": {
@@ -834,7 +1474,8 @@
           },
           "excerpt": {
             "type": "string",
-            "title": "Excerpt"
+            "title": "Excerpt",
+            "description": "Full text of the retrieved chunk, exactly as given to the explanation model, so every statement attributed to a document can be checked against it."
           },
           "score": {
             "type": "number",
@@ -842,6 +1483,36 @@
           },
           "provenance": {
             "$ref": "#/components/schemas/ProvenanceOut"
+          },
+          "investigation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Investigation",
+            "description": "Investigation the document belongs to, when recorded."
+          },
+          "relation": {
+            "type": "string",
+            "enum": [
+              "same",
+              "related",
+              "other"
+            ],
+            "title": "Relation",
+            "description": "How that investigation relates to the usable trials: the same one, one the catalog lists as related, or another (general background)."
+          },
+          "cited_passages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cited Passages",
+            "description": "Passages of this excerpt quoted by the interpretation, verbatim (whitespace collapsed). Empty when the interpretation does not quote it."
           }
         },
         "type": "object",
@@ -849,7 +1520,9 @@
           "id",
           "excerpt",
           "score",
-          "provenance"
+          "provenance",
+          "relation",
+          "cited_passages"
         ],
         "title": "DocumentOut"
       },

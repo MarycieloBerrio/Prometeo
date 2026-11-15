@@ -17,6 +17,9 @@ export function PageHeader({ slug, children }: { slug: string; children?: ReactN
   const mod = moduleBySlug(slug);
   const index = FLOW.findIndex((item) => item.slug === slug);
   const next = FLOW[(index + 1) % FLOW.length];
+  // Step back along the flow; the first step (and pages outside the flow) go back to the
+  // landing page, so no working page is a dead end.
+  const previous = index > 0 ? FLOW[index - 1] : null;
   return (
     <header className="research-header">
       <div className="research-route">
@@ -24,7 +27,12 @@ export function PageHeader({ slug, children }: { slug: string; children?: ReactN
         <div className="research-route-lines" aria-hidden="true">
           {FLOW.map((item) => <i key={item.slug} className={item.slug === slug ? "is-current" : ""} />)}
         </div>
-        <Link href={`/${next.slug}`}>{ACTIONS[slug] ?? "Browse experiments"} <Icon name="arrowRight" size={15} /></Link>
+        <nav className="research-route-links" aria-label="Research path">
+          <Link href={previous ? `/${previous.slug}` : "/"}>
+            <Icon name="arrowLeft" size={15} /> {previous ? `Back to ${previous.label}` : "Back to home"}
+          </Link>
+          <Link href={`/${next.slug}`}>{ACTIONS[slug] ?? "Browse experiments"} <Icon name="arrowRight" size={15} /></Link>
+        </nav>
       </div>
       <div className="research-heading">
         <h1>{mod.name}</h1>

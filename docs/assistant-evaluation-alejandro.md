@@ -114,7 +114,9 @@ files. No data file was edited.
 ### Example on the BASS-II curated corpus (offline explainer, abbreviated)
 
 Question: *How does flame spread over a solid change with ventilation speed in
-microgravity?* (material=PMMA, flow_direction=opposed, metric=flame_spread_rate) → `direct`
+microgravity?* (material=PMMA, flow_direction=opposed, metric=flame_spread_rate) → `partial`
+(`direct` before the controlled-comparison rule: oxygen also differs, pressure is unknown and
+the points are series on two physical samples)
 
 ```
 Observed evidence
@@ -123,7 +125,9 @@ Observed evidence
 Interpretation
 No language model was used for this interpretation. … compare two trials from the same comparable set in the Comparison Lab …
 Limitations
-- … Comparable set 1 [6 trials] shares PMMA, cylinder (thick), opposed flow. Within it these conditions differ or are unknown: flow_speed …
+- … Comparable set 1 [6 trials] shares PMMA, cylinder (thick), opposed flow. Within it these conditions differ: flow_speed, oxygen. These conditions are unknown for at least one trial: pressure …
+- Same physical sample: sample B16 [4 trials]; sample B19 [2 trials]. … not independent replicates …
+- Evidence tier is partial, not direct: comparable set 1 is not a controlled comparison …
 - Excluded from the interpretation (no comparable counterpart): BASS-II-FILM-100um-SR-extinction-context.
 ```
 

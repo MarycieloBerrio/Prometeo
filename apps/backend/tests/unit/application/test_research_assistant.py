@@ -44,7 +44,7 @@ class SpyExplainer:
     def __init__(self) -> None:
         self.calls: list[EvidencePacket] = []
 
-    def explain(self, packet: EvidencePacket) -> Explanation:
+    def explain(self, packet: EvidencePacket, model: str | None = None) -> Explanation:
         self.calls.append(packet)
         return Explanation("ok", (), "spy")
 

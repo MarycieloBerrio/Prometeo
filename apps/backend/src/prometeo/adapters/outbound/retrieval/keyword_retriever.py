@@ -2,6 +2,7 @@
 pgvector hybrid search; same `DocumentRetriever` port, so swapping is a wiring change.
 
 Chunk file format: [{"id": str, "text": str, "provenance": {"reference": str, ...}}]
+An entry may also name its "investigation" (e.g. "BASS-II"); it is never guessed from the text.
 
 What this does — and does not — mean:
 * Ranking is lexical (IDF-weighted term overlap plus a small bonus for adjacent query terms
@@ -22,7 +23,7 @@ import json
 import math
 import re
 import unicodedata
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from itertools import pairwise
 from pathlib import Path
 from typing import Any
@@ -159,9 +160,10 @@ class KeywordRetriever:
                 rejected.append(f"{chunk_id}: no indexable words")
                 continue
             terms = frozenset(tokens)
+            investigation = str(entry.get("investigation") or "").strip() or None
             self._index.append(
                 _Indexed(
-                    DocumentChunk(chunk_id, text, provenance),
+                    DocumentChunk(chunk_id, text, provenance, investigation=investigation),
                     terms,
                     frozenset(_bigrams(tokens)),
                 )
@@ -199,8 +201,6 @@ class KeywordRetriever:
             phrase = len(q_bigrams & item.bigrams) / len(q_bigrams) if q_bigrams else 0.0
             score = round((1 - _PHRASE_WEIGHT) * coverage + _PHRASE_WEIGHT * phrase, 6)
             c = item.chunk
-            scored.append(
-                (score, len(matched), c.id, DocumentChunk(c.id, c.text, c.provenance, score))
-            )
+            scored.append((score, len(matched), c.id, replace(c, score=score)))
         scored.sort(key=lambda s: (-s[0], -s[1], s[2]))
         return [s[3] for s in scored[:limit]]

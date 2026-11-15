@@ -1,7 +1,7 @@
 "use client";
 
-import Form from "next/form";
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
+import { flushSync } from "react-dom";
 
 import type { Trial } from "@prometeo/contracts";
 
@@ -27,17 +27,36 @@ export function CompareForm({
   const [selectedA, setSelectedA] = useState(a ?? "");
   const [selectedB, setSelectedB] = useState(b ?? "");
   const sameTrial = Boolean(selectedA && selectedB && selectedA === selectedB);
+
+  function swap(event: MouseEvent<HTMLButtonElement>) {
+    const form = event.currentTarget.form;
+    // Commit the swapped selection before submitting, so the form sends the new order.
+    flushSync(() => {
+      setSelectedA(selectedB);
+      setSelectedB(selectedA);
+    });
+    // With both records chosen the comparison is re-run at once: A and B label every result.
+    if (selectedA && selectedB && !sameTrial) form?.requestSubmit();
+  }
   const metrics = [...new Set(trials.flatMap((trial) => trial.results.map((result) => result.name)))];
   if (!metrics.includes("flame_spread_rate")) metrics.unshift("flame_spread_rate");
+  // Native GET form: next/form was triggering a CompareForm hydration mismatch under Cache Components.
   return (
-    <Form action="/compare" className="compare-form card">
+    <form action="/compare" method="get" className="compare-form card">
       <input type="hidden" name="submitted" value="1" />
       <div className="compare-form-heading"><div><p className="eyebrow">EXPERIMENTAL SETUP / A : B</p><h2>Build a physical comparison</h2></div><p className="small muted">Select two records. Declare what changed; the remaining conditions are checked by the Evidence Engine.</p></div>
       <div className="compare-pick">
         <TrialSelect name="a" letter="A" trials={trials} value={selectedA} onSelect={setSelectedA} />
-        <span className="compare-vs" aria-hidden>
-          <Icon name="compare" size={23} />
-        </span>
+        <button
+          type="button"
+          className="compare-vs"
+          onClick={swap}
+          disabled={!selectedA && !selectedB}
+          aria-label="Swap trial A and trial B"
+          title="Swap trial A and trial B"
+        >
+          <Icon name="compare" size={20} />
+        </button>
         <TrialSelect name="b" letter="B" trials={trials} value={selectedB} onSelect={setSelectedB} />
       </div>
       {sameTrial && <p className="compare-selection-warning" role="alert">Choose two different records to run a comparison.</p>}
@@ -66,7 +85,7 @@ export function CompareForm({
           Run physics check <Icon name="arrowRight" size={16} />
         </button>
       </div>
-    </Form>
+    </form>
   );
 }
 

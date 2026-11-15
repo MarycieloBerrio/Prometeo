@@ -45,10 +45,25 @@ fused AS (
     GROUP BY id
 )
 SELECT c.id, c.text, c.page, c.section, s.reference, s.doi, s.url, s.source_file, s.version,
-       f.score
+       f.score, i.code,
+       ARRAY(
+           SELECT related.code
+           FROM (
+               SELECT b.code FROM investigation_relations r
+               JOIN investigations b ON b.id = r.related_id
+               WHERE r.investigation_id = c.investigation_id
+               UNION
+               SELECT a.code FROM investigation_relations r
+               JOIN investigations a ON a.id = r.investigation_id
+               WHERE r.related_id = c.investigation_id
+           ) related
+           WHERE related.code IS NOT NULL
+           ORDER BY related.code
+       ) AS related_codes
 FROM fused f
 JOIN document_chunks c ON c.id = f.id
 JOIN sources s ON s.id = c.source_id
+LEFT JOIN investigations i ON i.id = c.investigation_id
 ORDER BY f.score DESC, c.id
 LIMIT %(limit)s
 """
@@ -85,6 +100,8 @@ class PgVectorRetriever:
                     version=row[8],
                 ),
                 score=float(row[9]),
+                investigation=row[10],
+                related_investigations=tuple(row[11] or ()),
             )
             for row in rows
         ]

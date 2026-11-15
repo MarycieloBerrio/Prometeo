@@ -17,7 +17,8 @@ from prometeo.application.use_cases.ask_research_assistant import (
 
 
 class OfflineExplainer:
-    def explain(self, packet: EvidencePacket) -> Explanation:
+    def explain(self, packet: EvidencePacket, model: str | None = None) -> Explanation:
+        # `model` is ignored: no language model is involved.
         # Only documents that the text actually names are cited, and only by their recorded
         # reference — no DOI, page or URL is ever synthesized here.
         sources = tuple(dict.fromkeys(d.provenance.reference for d in packet.documents))

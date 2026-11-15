@@ -1,12 +1,11 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import type { AskResponse } from "@prometeo/contracts";
 
-import { SourceLine } from "@/components/trials/SourceLine";
+import { EvidenceSources } from "@/components/assistant/EvidenceSources";
+import { Group } from "@/components/assistant/Group";
 import { TierBadge } from "@/components/ui/Badges";
-import { Icon, type IconName } from "@/components/ui/Icon";
-import { externalUrl } from "@/domain/format";
+import { Icon } from "@/components/ui/Icon";
 
 const TIER_TONE: Record<string, string> = { direct: "ok", partial: "warn", insufficient: "danger" };
 
@@ -38,19 +37,9 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
 
       <div className="answer-section-label"><span className="eyebrow">TRACE THE RESPONSE</span><span className="small muted">Open each register to inspect its basis</span></div>
 
-      <Group icon="book" title="Cited sources" count={response.cited_sources.length} open>
-        <ul className="bullets">
-          {response.cited_sources.map((source, index) => (
-            <li key={`${source}-${index}`}>
-              {externalUrl(source) ? (
-                <a className="link" href={externalUrl(source) ?? undefined} target="_blank" rel="noreferrer">{source}</a>
-              ) : source}
-            </li>
-          ))}
-        </ul>
-      </Group>
+      <EvidenceSources sources={response.cited_sources} documents={response.documents} />
 
-      <Group icon="alert" title="Limits of this answer" count={response.limitations.length} open>
+      <Group icon="alert" title="Limits of this answer" count={response.limitations.length}>
         <ul className="bullets">
           {response.limitations.map((l) => (
             <li key={l}>{l}</li>
@@ -60,24 +49,43 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
 
       <Group icon="search" title="Experimental evidence · trials assessed" count={response.assessments.length}>
         <ul className="list">
-          {response.assessments.map((a) => (
-            <li key={a.trial_id} className="list-row">
-              <div>
-                <Link href={`/explorer/${encodeURIComponent(a.trial_id)}`} className="mono link">
-                  {a.trial_id}
-                </Link>
-                <div className="small muted">
-                  Relevance {a.relevance} · Quality {a.quality}
-                </div>
-                {a.reasons.map((r) => (
-                  <div key={r} className="small muted">
-                    {r}
+          {response.assessments.map((a) => {
+            // A trial can rate well on its own and still be left out of the interpretation
+            // because no other usable trial is comparable with it. Showing its own tier as
+            // the headline would read as "this answer relies on it".
+            const excluded = !refused && a.tier !== "insufficient" && !a.in_interpretation;
+            return (
+              <li key={a.trial_id} className="list-row">
+                <div>
+                  <Link href={`/explorer/${encodeURIComponent(a.trial_id)}`} className="mono link">
+                    {a.trial_id}
+                  </Link>
+                  <div className="small muted">
+                    Relevance {a.relevance} · Quality {a.quality}
                   </div>
-                ))}
-              </div>
-              <TierBadge tier={a.tier} />
-            </li>
-          ))}
+                  {a.reasons.map((r) => (
+                    <div key={r} className="small muted">
+                      {r}
+                    </div>
+                  ))}
+                  {excluded && (
+                    <div className="small muted">
+                      No comparable counterpart among the usable trials, so it is excluded from
+                      the interpretation. The rating above describes this trial alone.
+                    </div>
+                  )}
+                </div>
+                {excluded ? (
+                  <span className="pill tone-neutral">
+                    <Icon name="info" size={14} />
+                    Not used in interpretation
+                  </span>
+                ) : (
+                  <TierBadge tier={a.tier} />
+                )}
+              </li>
+            );
+          })}
         </ul>
       </Group>
 
@@ -88,42 +96,6 @@ export function AnswerPanel({ response }: { response: AskResponse }) {
           ))}
         </ul>
       </Group>
-
-      <Group icon="book" title="Documents" count={response.documents.length}>
-        <ul className="list">
-          {response.documents.map((d) => (
-            <li key={d.id} className="list-col">
-              <p className="small">“{d.excerpt}”</p>
-              <SourceLine provenance={d.provenance} />
-            </li>
-          ))}
-        </ul>
-      </Group>
     </div>
-  );
-}
-
-function Group({
-  icon,
-  title,
-  count,
-  open = false,
-  children,
-}: {
-  icon: IconName;
-  title: string;
-  count: number;
-  open?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <details className={`group${count === 0 ? " group-empty" : ""}`} open={open && count > 0}>
-      <summary>
-        <Icon name={icon} size={16} />
-        <span>{title}</span>
-        <span className="count">{count}</span>
-      </summary>
-      <div className="group-body">{count > 0 ? children : <p className="small muted">No entries returned in this register.</p>}</div>
-    </details>
   );
 }

@@ -18,6 +18,8 @@ def build_app(container: Container) -> FastAPI:
         assistant=container.assistant,
         list_cfd=container.list_cfd,
         get_cfd=container.get_cfd,
+        source_document=container.source_document,
+        assistant_models=container.explainer_models,
         cors_origins=[o.strip() for o in s.cors_origins.split(",") if o.strip()],
         include_synthetic=s.include_synthetic,
     )

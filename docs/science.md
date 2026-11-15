@@ -57,6 +57,12 @@ Three independent dimensions: relevance, quality/traceability and coverage. They
 tiers `direct`, `partial` and `insufficient`. There is **no** "% confidence" or "% safe" score
 without a validated statistical model.
 
+In the Research Assistant an answer is `direct` only when every interpreted comparable set is a
+controlled comparison: at most one condition differs, none is unknown, and the trials are not
+condition points on one physical sample. Otherwise the answer is `partial` and its limitations
+say why. This keeps the assistant consistent with the Comparison Lab, which calls the same
+pairs `partially_comparable`. A single trial's own tier (relevance and quality) is unchanged.
+
 ## CFD Physics Lab (optional numerical module)
 
 - Solver: OpenFOAM 11 `foamRun` / `incompressibleFluid`, laminar SIMPLE, isothermal air.

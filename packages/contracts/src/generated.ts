@@ -89,6 +89,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/assistant/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Assistant Models
+         * @description Models a question may pick to write its interpretation (empty: none configured).
+         */
+        get: operations["assistant_models_api_v1_assistant_models_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/documents/{chunk_id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Source Document File
+         * @description The original document a retrieved excerpt was extracted from, to show it in place.
+         */
+        get: operations["source_document_file_api_v1_documents__chunk_id__file_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/assistant/ask": {
         parameters: {
             query?: never;
@@ -100,6 +140,77 @@ export interface paths {
         put?: never;
         /** Ask */
         post: operations["ask_api_v1_assistant_ask_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cfd/simulations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Simulations */
+        get: operations["list_simulations_api_v1_cfd_simulations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cfd/simulations/{simulation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Simulation */
+        get: operations["get_simulation_api_v1_cfd_simulations__simulation_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cfd/simulations/{simulation_id}/field": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Field */
+        get: operations["get_field_api_v1_cfd_simulations__simulation_id__field_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/cfd/simulations/{simulation_id}/interpretation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Interpretation
+         * @description Deterministic contextual explanation — not an LLM causal claim from CFD.
+         */
+        get: operations["interpretation_api_v1_cfd_simulations__simulation_id__interpretation_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -125,6 +236,11 @@ export interface components {
              * @default flame_spread_rate
              */
             metric: string | null;
+            /**
+             * Model
+             * @description Explanation model for this question, one of GET /assistant/models. Omit for the default. Ignored when no language model is configured.
+             */
+            model?: string | null;
         };
         /** AskResponse */
         AskResponse: {
@@ -159,6 +275,144 @@ export interface components {
             tier: string;
             /** Reasons */
             reasons: string[];
+            /**
+             * In Interpretation
+             * @description True when this trial's facts were given to the interpretation (it belongs to a comparable set). False on a refusal, and for a usable trial that had no comparable counterpart: `tier` rates the trial alone, not its use in the answer.
+             */
+            in_interpretation: boolean;
+        };
+        /** AssistantModelOut */
+        AssistantModelOut: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Description */
+            description: string;
+        };
+        /** AssistantModelsResponse */
+        AssistantModelsResponse: {
+            /**
+             * Default
+             * @description Model used when a question names none; null when no model is configured.
+             */
+            default: string | null;
+            /**
+             * Models
+             * @description Models a question may pick. Empty with the deterministic explainer.
+             */
+            models: components["schemas"]["AssistantModelOut"][];
+        };
+        /** CfdFieldPointOut */
+        CfdFieldPointOut: {
+            /** X */
+            x: number;
+            /** Y */
+            y: number;
+            /** Z */
+            z: number;
+            /** U Mag */
+            u_mag: number;
+            /** P */
+            p: number;
+            /** Ux */
+            ux?: number | null;
+            /** Uy */
+            uy?: number | null;
+            /** Uz */
+            uz?: number | null;
+        };
+        /** CfdFieldSampleOut */
+        CfdFieldSampleOut: {
+            /** Simulation Id */
+            simulation_id: string;
+            /** Units */
+            units: {
+                [key: string]: string;
+            };
+            /** Downsample Stride */
+            downsample_stride: number;
+            /** N Points Source */
+            n_points_source: number;
+            /** Points */
+            points: components["schemas"]["CfdFieldPointOut"][];
+            /** Viewer Note */
+            viewer_note?: string | null;
+        };
+        /** CfdInterpretationOut */
+        CfdInterpretationOut: {
+            /** Question */
+            question: string;
+            /** Nasa Measured */
+            nasa_measured: string[];
+            /** Simulation Computed */
+            simulation_computed: string[];
+            /** Literature Mechanisms */
+            literature_mechanisms: string[];
+            /** Cannot Conclude */
+            cannot_conclude: string[];
+            /** Sources */
+            sources: string[];
+        };
+        /** CfdSimulationOut */
+        CfdSimulationOut: {
+            /** Simulation Id */
+            simulation_id: string;
+            /** Reference Trial Id */
+            reference_trial_id: string;
+            /** Result Kind */
+            result_kind: string;
+            /** Solver */
+            solver: string;
+            /** Solver Version */
+            solver_version: string;
+            /** Model Type */
+            model_type: string;
+            /** Inlet Velocity M S */
+            inlet_velocity_m_s: number;
+            /** Inlet Velocity Cm S */
+            inlet_velocity_cm_s: number;
+            /** Oxygen Context Percent */
+            oxygen_context_percent: number | null;
+            /** Mesh Cell Count */
+            mesh_cell_count: number | null;
+            /** Residuals */
+            residuals: {
+                [key: string]: number;
+            };
+            /** Mass Balance Error */
+            mass_balance_error: number | null;
+            /** Mass Balance Status */
+            mass_balance_status: string;
+            /** Mesh Independence */
+            mesh_independence: string;
+            /** Convergence Status */
+            convergence_status: string;
+            /** Validation Status */
+            validation_status: string;
+            /** Has Field Sample */
+            has_field_sample: boolean;
+            /** Geometry Assumptions */
+            geometry_assumptions: string[];
+            /** Limitations */
+            limitations: string[];
+            /**
+             * Solver Announced Convergence
+             * @default false
+             */
+            solver_announced_convergence: boolean;
+            /**
+             * Convergence Evidence
+             * @default
+             */
+            convergence_evidence: string;
+            /**
+             * Mesh Quality Status
+             * @default not_verified
+             */
+            mesh_quality_status: string;
+            /** Continuity Global Abs */
+            continuity_global_abs?: number | null;
         };
         /** CompareRequest */
         CompareRequest: {
@@ -233,11 +487,30 @@ export interface components {
         DocumentOut: {
             /** Id */
             id: string;
-            /** Excerpt */
+            /**
+             * Excerpt
+             * @description Full text of the retrieved chunk, exactly as given to the explanation model, so every statement attributed to a document can be checked against it.
+             */
             excerpt: string;
             /** Score */
             score: number;
             provenance: components["schemas"]["ProvenanceOut"];
+            /**
+             * Investigation
+             * @description Investigation the document belongs to, when recorded.
+             */
+            investigation?: string | null;
+            /**
+             * Relation
+             * @description How that investigation relates to the usable trials: the same one, one the catalog lists as related, or another (general background).
+             * @enum {string}
+             */
+            relation: "same" | "related" | "other";
+            /**
+             * Cited Passages
+             * @description Passages of this excerpt quoted by the interpretation, verbatim (whitespace collapsed). Empty when the interpretation does not quote it.
+             */
+            cited_passages: string[];
         };
         /**
          * FlowDirection
@@ -539,6 +812,62 @@ export interface operations {
             };
         };
     };
+    assistant_models_api_v1_assistant_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantModelsResponse"];
+                };
+            };
+        };
+    };
+    source_document_file_api_v1_documents__chunk_id__file_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chunk_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No local copy of the source file */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     ask_api_v1_assistant_ask_post: {
         parameters: {
             query?: never;
@@ -559,6 +888,130 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AskResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_simulations_api_v1_cfd_simulations_get: {
+        parameters: {
+            query?: {
+                trial_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CfdSimulationOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_simulation_api_v1_cfd_simulations__simulation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                simulation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CfdSimulationOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_field_api_v1_cfd_simulations__simulation_id__field_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                simulation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CfdFieldSampleOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    interpretation_api_v1_cfd_simulations__simulation_id__interpretation_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                simulation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CfdInterpretationOut"];
                 };
             };
             /** @description Validation Error */

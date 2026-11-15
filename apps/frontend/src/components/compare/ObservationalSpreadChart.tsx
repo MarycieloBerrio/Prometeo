@@ -44,7 +44,8 @@ export function ObservationalSpreadChart({
 
   const width = 640;
   const height = 320;
-  const pad = { top: 24, right: 24, bottom: 44, left: 56 };
+  // Left padding holds the rotated axis title AND the widest tick value side by side.
+  const pad = { top: 24, right: 24, bottom: 44, left: 84 };
   const innerW = width - pad.left - pad.right;
   const innerH = height - pad.top - pad.bottom;
 
@@ -112,10 +113,10 @@ export function ObservationalSpreadChart({
         </text>
         <text
           className="obs-axis-label"
-          x={16}
-          y={height / 2}
+          x={14}
+          y={pad.top + innerH / 2}
           textAnchor="middle"
-          transform={`rotate(-90 16 ${height / 2})`}
+          transform={`rotate(-90 14 ${pad.top + innerH / 2})`}
         >
           Flame spread rate ({spreadUnit})
         </text>
@@ -139,29 +140,29 @@ export function ObservationalSpreadChart({
           const selected = highlightSet.has(p.trialId);
           return (
             <g key={p.trialId}>
-              <g>
+              <circle
+                cx={xScale(p.flow)}
+                cy={yScale(p.spread)}
+                r={active.trialId === p.trialId ? 9 : selected ? 7 : 6}
+                fill={SERIES_STYLE[p.series].stroke}
+                className={"obs-point" + (selected ? " obs-point-hl" : "") + (active.trialId === p.trialId ? " obs-point-active" : "")}
+                role="button"
+                tabIndex={0}
+                aria-label={`${p.trialId}: ventilation ${p.flow} ${p.flowUnit}, flame spread ${p.spread} ${p.spreadUnit}`}
+                aria-pressed={active.trialId === p.trialId}
+                onClick={() => setActiveId(p.trialId)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setActiveId(p.trialId);
+                  }
+                }}
+              >
+                {/* One string: a <title> with several text children fails hydration. */}
                 <title>
-                  {`${p.trialId}: Vg=${p.flow} ${p.flowUnit}, Vf=${p.spread} ${p.spreadUnit}${p.oxygenLabel ? `, O2=${p.oxygenLabel}` : ""}`}
+                  {`${p.trialId}: Vg=${p.flow} ${p.flowUnit}, Vf=${p.spread} ${p.spreadUnit}${p.oxygenLabel ? `, O₂=${p.oxygenLabel}` : ""}`}
                 </title>
-                <circle
-                  cx={xScale(p.flow)}
-                  cy={yScale(p.spread)}
-                  r={active.trialId === p.trialId ? 9 : selected ? 7 : 6}
-                  fill={SERIES_STYLE[p.series].stroke}
-                  className={"obs-point" + (selected ? " obs-point-hl" : "") + (active.trialId === p.trialId ? " obs-point-active" : "")}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`${p.trialId}: ventilation ${p.flow} ${p.flowUnit}, flame spread ${p.spread} ${p.spreadUnit}`}
-                  aria-pressed={active.trialId === p.trialId}
-                  onClick={() => setActiveId(p.trialId)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setActiveId(p.trialId);
-                    }
-                  }}
-                />
-              </g>
+              </circle>
               {selected && (
                 <text
                   className="obs-point-label"

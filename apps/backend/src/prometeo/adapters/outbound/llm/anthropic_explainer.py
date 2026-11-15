@@ -7,11 +7,16 @@ itself and audits this output (unknown numbers -> deterministic fallback).
 
 Citations are resolved from the API's structured citation objects by `document_index`,
 i.e. to the exact chunk we sent. A citation whose index does not point at a document of
-the packet is discarded, so a reference can never appear that was not retrieved.
+the packet is discarded, so a reference can never appear that was not retrieved. The quoted
+passage (`cited_text`) is kept with the chunk id, so the UI can highlight it in the source.
+
+The model is chosen per question from the offered list (`MODEL_CATALOG`); the configured
+default applies when a question names none.
 """
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Literal
 
 import anthropic
@@ -23,13 +28,43 @@ from anthropic.types.beta import (
     BetaUserMessageParam,
 )
 
-from prometeo.application.ports.outbound import EvidencePacket, Explanation
+from prometeo.application.ports.outbound import (
+    Citation,
+    EvidencePacket,
+    ExplainerModel,
+    Explanation,
+)
 from prometeo.application.use_cases.ask_research_assistant import (
     DETERMINISTIC_MODEL,
     deterministic_interpretation,
 )
 
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
+
+DEFAULT_MODEL = "claude-sonnet-5-5"
+
+# Models a question may choose, with the label and one-line trade-off shown in the picker.
+MODEL_CATALOG: dict[str, tuple[str, str]] = {
+    "claude-sonnet-5-5": ("Claude Sonnet 5.5", "Balanced speed and depth (default)"),
+    "claude-opus-5-5": ("Claude Opus 5.5", "Most thorough reasoning, slower"),
+    "claude-haiku-5-5": ("Claude Haiku 5.5", "Fastest, shortest interpretations"),
+}
+
+_FALLBACK_BETA = "server-side-fallback-2026-07-01"
+
+
+def explainer_models(model_ids: Sequence[str]) -> tuple[ExplainerModel, ...]:
+    """Picker entries for `model_ids`, in order; an id outside the catalog is shown as is."""
+    out: list[ExplainerModel] = []
+    for model_id in dict.fromkeys(model_ids):
+        label, description = MODEL_CATALOG.get(model_id, (model_id, "Configured model"))
+        out.append(ExplainerModel(model_id, label, description))
+    return tuple(out)
+
+
+def _has_server_side_fallback(model: str) -> bool:
+    # Claude Haiku has no server-side refusal fallback: `fallbacks` must not be sent with it.
+    return not model.startswith("claude-haiku")
 
 SYSTEM_PROMPT = """\
 You are the interpretation layer of Prometeo, a scientific evidence engine for microgravity \
@@ -44,6 +79,15 @@ Rules:
 - Use only the facts and documents provided. Never compute, convert, average, or estimate a \
 number. If you mention a value, copy it exactly as written in a fact, with its unit.
 - Reference trials by their [id]. Cite a document only when you rely on its text.
+- A document may describe another material, geometry, flow direction or investigation than \
+the trials in the facts. When it does, say so where you use it and present it as background, \
+not as an explanation of these trials. A number quoted from a document belongs to that \
+document's conditions; never present it as a result of the listed trials.
+- Describe uncontrolled conditions exactly as the limitations do: a condition listed as \
+unknown is unknown, not different.
+- When a limitation says trials are condition points on the same physical sample, say so \
+when you describe a trend across them: they are one experimental sequence, not independent \
+replicates.
 - Keep three things distinct: what was observed (facts), the mechanism the documents propose \
 for it, and what remains unsupported by this evidence.
 - Treat each "Comparable set" as separate; never compare trials across sets. Never merge \
@@ -57,7 +101,7 @@ Never state or imply that a material is safe, certified, or has a probability of
 class AnthropicExplainer:
     def __init__(
         self,
-        model: str = "claude-opus-5-5",
+        model: str = DEFAULT_MODEL,
         effort: Effort = "high",
         client: anthropic.Anthropic | None = None,
     ) -> None:
@@ -65,7 +109,8 @@ class AnthropicExplainer:
         self._model = model
         self._effort = effort
 
-    def explain(self, packet: EvidencePacket) -> Explanation:
+    def explain(self, packet: EvidencePacket, model: str | None = None) -> Explanation:
+        model_id = model or self._model
         content: list[BetaContentBlockParam] = [
             BetaRequestDocumentBlockParam(
                 type="document",
@@ -87,16 +132,28 @@ class AnthropicExplainer:
         content.append(BetaTextBlockParam(type="text", text=prompt))
 
         output_config: BetaOutputConfigParam = {"effort": self._effort}
+        messages = [BetaUserMessageParam(role="user", content=content)]
         try:
-            response = self._client.beta.messages.create(
-                model=self._model,
-                max_tokens=16000,
-                system=SYSTEM_PROMPT,
-                output_config=output_config,
-                betas=["server-side-fallback-2026-07-01"],
-                fallbacks="default",
-                messages=[BetaUserMessageParam(role="user", content=content)],
-            )
+            if _has_server_side_fallback(model_id):
+                # On a safety-classifier decline the API re-runs the request on a fallback
+                # model inside the same call, routed by refusal category.
+                response = self._client.beta.messages.create(
+                    model=model_id,
+                    max_tokens=16000,
+                    system=SYSTEM_PROMPT,
+                    output_config=output_config,
+                    betas=[_FALLBACK_BETA],
+                    fallbacks="default",
+                    messages=messages,
+                )
+            else:
+                response = self._client.beta.messages.create(
+                    model=model_id,
+                    max_tokens=16000,
+                    system=SYSTEM_PROMPT,
+                    output_config=output_config,
+                    messages=messages,
+                )
         except anthropic.AnthropicError as exc:
             # Missing credentials, network or API failure: degrade to the deterministic
             # interpretation instead of failing the request. The model field says why.
@@ -107,15 +164,21 @@ class AnthropicExplainer:
 
         parts: list[str] = []
         sources: list[str] = []
+        quoted: list[Citation] = []
         for block in response.content:
             if block.type != "text":
                 continue
             parts.append(block.text)
             for citation in getattr(block, "citations", None) or []:
                 ref = _resolve_citation(citation, packet)
-                if ref and ref not in sources:
+                if ref is None:
+                    continue
+                if ref not in sources:
                     sources.append(ref)
-        return Explanation("".join(parts).strip(), tuple(sources), response.model)
+                passage = _quoted_passage(citation, packet)
+                if passage and passage not in quoted:
+                    quoted.append(passage)
+        return Explanation("".join(parts).strip(), tuple(sources), response.model, tuple(quoted))
 
     @staticmethod
     def _deterministic(packet: EvidencePacket, why: str) -> Explanation:
@@ -133,3 +196,12 @@ def _resolve_citation(citation: object, packet: EvidencePacket) -> str | None:
     if not 0 <= index < len(packet.documents):
         return None
     return packet.documents[index].provenance.reference
+
+
+def _quoted_passage(citation: object, packet: EvidencePacket) -> Citation | None:
+    """The chunk and the text the model quoted from it. Call after `_resolve_citation`."""
+    text = getattr(citation, "cited_text", None)
+    if not isinstance(text, str) or not text.strip():
+        return None
+    index = getattr(citation, "document_index", 0)
+    return Citation(packet.documents[index].id, text.strip())

@@ -113,7 +113,7 @@ export async function ProcessedRunGallery() {
             </p>
 
             {track && <TrackScrubber observations={track.observations} />}
-            <details className="fv-keyframes">
+            <details className="fv-keyframes" open>
               <summary>View source keyframes <Icon name="plus" size={16} /></summary>
               <figure className="fv-media">
                 {/* Static processed artifact from Juanfer's validation pipeline */}
@@ -122,7 +122,7 @@ export async function ProcessedRunGallery() {
                 <figcaption className="small muted">Keyframes of the luminous edge. This sequence is not a live overlay.</figcaption>
               </figure>
             </details>
-            <details className="fv-exported-curve">
+            <details className="fv-exported-curve" open>
               <summary>View exported static curve</summary>
               <figure className="fv-media">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -165,7 +165,7 @@ export async function ProcessedRunGallery() {
             {track?.feature_note && <p className="muted small">{track.feature_note}</p>}
 
             {sample.length > 0 && (
-              <details className="fv-log">
+              <details className="fv-log" open>
                 <summary>Inspect first five raw log rows</summary>
                 <table>
                   <thead>

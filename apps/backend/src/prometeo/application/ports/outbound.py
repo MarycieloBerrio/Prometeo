@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Protocol
 
 from prometeo.domain.experiments.filters import TrialFilter
@@ -27,6 +28,10 @@ class DocumentChunk:
     text: str
     provenance: Provenance
     score: float = 0.0
+    # Investigation the document belongs to (e.g. "BASS-II"), and the investigations its
+    # catalog lists as related. Unknown stays None / empty: nothing is inferred from the text.
+    investigation: str | None = None
+    related_investigations: tuple[str, ...] = ()
 
 
 class DocumentRetriever(Protocol):
@@ -47,16 +52,51 @@ class EvidencePacket:
 
 
 @dataclass(frozen=True, slots=True)
+class Citation:
+    """A passage of a retrieved chunk that the explanation relies on, quoted verbatim."""
+
+    chunk_id: str
+    cited_text: str
+
+
+@dataclass(frozen=True, slots=True)
 class Explanation:
     text: str
     cited_sources: tuple[str, ...]
     model: str
+    citations: tuple[Citation, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ExplainerModel:
+    """A model a question may ask to write its interpretation."""
+
+    id: str
+    label: str
+    description: str
 
 
 class ExplanationGenerator(Protocol):
     """Writes the narrative. Runs LAST, after retrieval, validation and computation."""
 
-    def explain(self, packet: EvidencePacket) -> Explanation: ...
+    def explain(self, packet: EvidencePacket, model: str | None = None) -> Explanation:
+        """`model` picks one of the offered models; None means the configured default."""
+        ...
+
+
+@dataclass(frozen=True, slots=True)
+class SourceFile:
+    """A source document held locally (raw downloads are optional and never in git)."""
+
+    path: Path
+    media_type: str
+    file_name: str
+
+
+class SourceFileStore(Protocol):
+    """Finds the original file a retrieved chunk was extracted from."""
+
+    def locate(self, chunk_id: str) -> SourceFile | None: ...
 
 
 class FlameFrontDetector(Protocol):

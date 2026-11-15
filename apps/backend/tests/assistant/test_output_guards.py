@@ -212,6 +212,10 @@ def test_anthropic_request_sends_documents_with_citations_and_only_packet_conten
     prompt = sent["messages"][0]["content"][-1]["text"]
     assert "[TEST-SLOW] fact" in prompt and "limit" in prompt
     assert "Never compute" in sent["system"]
+    # Rules that keep the prose honest about its basis.
+    assert "not independent replicates" in sent["system"]
+    assert "present it as background" in sent["system"]
+    assert "unknown is unknown, not different" in sent["system"]
 
 
 def test_anthropic_api_failure_degrades_to_deterministic_text() -> None:
@@ -234,9 +238,9 @@ def test_end_to_end_simulated_claude_answer_with_invented_number_is_rejected() -
     explainer = AnthropicExplainer(client=cast(anthropic.Anthropic, client))
 
     class Adapter(ScriptedExplainer):
-        def explain(self, packet: EvidencePacket) -> Explanation:
+        def explain(self, packet: EvidencePacket, model: str | None = None) -> Explanation:
             self.calls.append(packet)
-            return explainer.explain(packet)
+            return explainer.explain(packet, model)
 
     answer, _ = ask(_pair(), docs=[CONTEXT], explainer=Adapter())
     assert answer.explanation is not None

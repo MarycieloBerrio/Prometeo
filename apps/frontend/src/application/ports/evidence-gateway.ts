@@ -5,6 +5,7 @@
 import type {
   AskRequest,
   AskResponse,
+  AssistantModelsResponse,
   CompareRequest,
   CompareResponse,
   CoverageResponse,
@@ -21,6 +22,17 @@ export interface TrialQuery {
   flow_direction?: string;
 }
 
+/** An original source file, or the byte range of it that was asked for, streamed as stored. */
+export interface SourceDocumentFile {
+  body: ReadableStream<Uint8Array>;
+  /** 200 for the whole file, 206 for a byte range. */
+  status: number;
+  contentType: string;
+  contentLength: string | null;
+  contentRange: string | null;
+  acceptRanges: string | null;
+}
+
 export interface EvidenceGateway {
   listTrials(query?: TrialQuery): Promise<Trial[]>;
   getTrial(id: string): Promise<Trial>;
@@ -30,4 +42,8 @@ export interface EvidenceGateway {
   listCfdSimulations(trialId?: string): Promise<CfdSimulation[]>;
   getCfdField(simulationId: string): Promise<CfdFieldSample>;
   getCfdInterpretation(simulationId: string): Promise<CfdInterpretation>;
+  /** Models a question may pick; none when the engine runs without a language model. */
+  assistantModels(): Promise<AssistantModelsResponse>;
+  /** The file a retrieved excerpt was extracted from; null when there is no local copy. */
+  sourceDocument(chunkId: string, range?: string | null): Promise<SourceDocumentFile | null>;
 }
