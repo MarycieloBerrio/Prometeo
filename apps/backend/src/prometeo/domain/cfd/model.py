@@ -15,7 +15,11 @@ class CfdValidationStatus(StrEnum):
 
 class ConvergenceStatus(StrEnum):
     CONVERGED = "converged"
-    NOT_CONVERGED = "not_converged_or_not_run"
+    MAX_ITERATIONS_REACHED = "max_iterations_reached"
+    SOLVER_FAILED = "solver_failed"
+    NOT_RUN = "not_run"
+    # Legacy value retained for reading older manifests during transition.
+    NOT_CONVERGED_OR_NOT_RUN = "not_converged_or_not_run"
 
 
 @dataclass(frozen=True, slots=True)
@@ -39,3 +43,7 @@ class CfdSimulation:
     geometry_assumptions: tuple[str, ...]
     limitations: tuple[str, ...]
     result_kind: str = "numerical_simulation"
+    solver_announced_convergence: bool = False
+    convergence_evidence: str = ""
+    mesh_quality_status: str = "not_verified"
+    continuity_global_abs: float | None = None

@@ -22,12 +22,22 @@ const SERIES_STYLE: Record<SeriesId, { stroke: string; label: string }> = {
 export function ObservationalSpreadChart({
   trials,
   highlight = [],
+  activeTrialId,
+  onSelectTrial,
 }: {
   trials: Trial[];
   highlight?: string[];
+  /** Controlled focus trial (synced with CFD Physics Lab when provided). */
+  activeTrialId?: string;
+  onSelectTrial?: (trialId: string) => void;
 }) {
   const points = observationalSpreadPoints(trials);
-  const [activeId, setActiveId] = useState(highlight[0] ?? points[0]?.trialId ?? "");
+  const [internalId, setInternalId] = useState(highlight[0] ?? points[0]?.trialId ?? "");
+  const activeId = activeTrialId ?? internalId;
+  const setActiveId = (trialId: string) => {
+    onSelectTrial?.(trialId);
+    if (activeTrialId === undefined) setInternalId(trialId);
+  };
   if (points.length < 2) return null;
   const active = points.find((point) => point.trialId === activeId) ?? points[0];
   const activeTrial = trials.find((trial) => trial.id === active.trialId);
@@ -129,29 +139,29 @@ export function ObservationalSpreadChart({
           const selected = highlightSet.has(p.trialId);
           return (
             <g key={p.trialId}>
-              <circle
-                cx={xScale(p.flow)}
-                cy={yScale(p.spread)}
-                r={active.trialId === p.trialId ? 9 : selected ? 7 : 6}
-                fill={SERIES_STYLE[p.series].stroke}
-                className={"obs-point" + (selected ? " obs-point-hl" : "") + (active.trialId === p.trialId ? " obs-point-active" : "")}
-                role="button"
-                tabIndex={0}
-                aria-label={`${p.trialId}: ventilation ${p.flow} ${p.flowUnit}, flame spread ${p.spread} ${p.spreadUnit}`}
-                aria-pressed={active.trialId === p.trialId}
-                onClick={() => setActiveId(p.trialId)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    setActiveId(p.trialId);
-                  }
-                }}
-              >
+              <g>
                 <title>
-                  {p.trialId}: Vg={p.flow} {p.flowUnit}, Vf={p.spread} {p.spreadUnit}
-                  {p.oxygenLabel ? `, O₂=${p.oxygenLabel}` : ""}
+                  {`${p.trialId}: Vg=${p.flow} ${p.flowUnit}, Vf=${p.spread} ${p.spreadUnit}${p.oxygenLabel ? `, O2=${p.oxygenLabel}` : ""}`}
                 </title>
-              </circle>
+                <circle
+                  cx={xScale(p.flow)}
+                  cy={yScale(p.spread)}
+                  r={active.trialId === p.trialId ? 9 : selected ? 7 : 6}
+                  fill={SERIES_STYLE[p.series].stroke}
+                  className={"obs-point" + (selected ? " obs-point-hl" : "") + (active.trialId === p.trialId ? " obs-point-active" : "")}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${p.trialId}: ventilation ${p.flow} ${p.flowUnit}, flame spread ${p.spread} ${p.spreadUnit}`}
+                  aria-pressed={active.trialId === p.trialId}
+                  onClick={() => setActiveId(p.trialId)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setActiveId(p.trialId);
+                    }
+                  }}
+                />
+              </g>
               {selected && (
                 <text
                   className="obs-point-label"

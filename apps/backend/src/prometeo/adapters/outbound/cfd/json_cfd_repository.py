@@ -35,6 +35,7 @@ class JsonCfdRepository:
     def _load(self, path: Path) -> CfdSimulation:
         raw = json.loads(path.read_text(encoding="utf-8"))
         field = (raw.get("result_files") or {}).get("field_sample")
+        mesh_q = raw.get("mesh_quality") or {}
         return CfdSimulation(
             simulation_id=raw["simulation_id"],
             reference_trial_id=raw["reference_trial_id"],
@@ -50,7 +51,7 @@ class JsonCfdRepository:
             mass_balance_status=str(raw.get("mass_balance_status", "not_verified")),
             mesh_independence=str(raw.get("mesh_independence", "not_demonstrated")),
             convergence_status=ConvergenceStatus(
-                raw.get("convergence_status", "not_converged_or_not_run")
+                raw.get("convergence_status", "not_run")
             ),
             validation_status=CfdValidationStatus(
                 raw.get("validation_status", "pending_execution")
@@ -59,4 +60,12 @@ class JsonCfdRepository:
             geometry_assumptions=tuple(raw.get("geometry_assumptions") or ()),
             limitations=tuple(raw.get("limitations") or ()),
             result_kind=str(raw.get("result_kind", "numerical_simulation")),
+            solver_announced_convergence=bool(raw.get("solver_announced_convergence", False)),
+            convergence_evidence=str(raw.get("convergence_evidence", "")),
+            mesh_quality_status=str(mesh_q.get("status", "not_verified")),
+            continuity_global_abs=(
+                float(raw["continuity_global_abs"])
+                if raw.get("continuity_global_abs") is not None
+                else None
+            ),
         )

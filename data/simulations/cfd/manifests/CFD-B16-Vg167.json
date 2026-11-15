@@ -11,7 +11,12 @@
     "rod_radius_m": 0.0032,
     "duct_outer_radius_m": 0.038,
     "domain_length_m": 0.12,
-    "wedge_degrees": 5.0
+    "wedge_degrees": 5.0,
+    "mesh_resolution_nr_ntheta_nz": [
+      24,
+      1,
+      80
+    ]
   },
   "geometry_assumptions": [
     "Axial flow along the rod axis (NOT cross-flow).",
@@ -38,33 +43,58 @@
     "duct": "noSlip",
     "front_back": "wedge"
   },
-  "mesh_cell_count": 1920,
-  "residuals": {
-    "Ux": 2.6716144e-09,
-    "Uy": 0.00034126551,
-    "Uz": 3.523129e-10,
-    "p": 3.4302889e-09
+  "solver_controls": {
+    "endTime": 5000,
+    "residualControl_U": 0.0001,
+    "residualControl_p": 0.0001
   },
-  "mass_balance_error": 1.7003538e-10,
-  "mass_balance_status": "continuity_global_from_solver_log",
+  "mesh_cell_count": 1920,
+  "mesh_quality": {
+    "status": "mesh_ok",
+    "cells": 1920,
+    "points": 4050,
+    "faces": 7784,
+    "max_aspect_ratio": 1.2267359,
+    "summary": "Mesh OK."
+  },
+  "residuals": {
+    "Ux": 2.0625119e-09,
+    "Uy": 0.00040994831,
+    "Uz": 2.667949e-10,
+    "p": 2.5264262e-09
+  },
+  "continuity_global_abs": 1.9942863e-11,
+  "continuity_global_note": "Absolute value of OpenFOAM SIMPLE 'time step continuity errors ... global' from the final iteration \u2014 not a patch-integrated mass/volume flux balance.",
+  "mass_balance_error": null,
+  "mass_balance_status": "not_verified",
+  "patch_flow_balance": {
+    "status": "not_verified",
+    "reason": "could not parse surfaceFieldValue phi sums",
+    "inlet_phi": null,
+    "outlet_phi": null
+  },
   "mesh_independence": "not_demonstrated",
-  "convergence_status": "converged",
+  "convergence_status": "max_iterations_reached",
+  "solver_announced_convergence": false,
+  "convergence_evidence": "No 'SIMPLE solution converged' announcement in log; run finished at endTime / max iterations. Final Time=5000s; configured endTime=5000. Final Uy initial residual=0.000409948 (residualControl U=1e-4).",
   "result_files": {
     "field_sample": "simulations/cfd/fields/CFD-B16-Vg167.json"
   },
-  "generated_at": "2026-11-15T09:46:19.823698+00:00",
-  "validation_status": "numerically_checked",
+  "generated_at": "2026-11-15T10:22:45.442657+00:00",
+  "validation_status": "solver_executed",
   "limitations": [
     "Does not predict flame spread rate Vf.",
     "Does not predict temperature, pyrolysis, or oxygen consumption.",
     "Cannot claim 0g vs 1g differences (isothermal forced flow).",
     "Absolute B16 cabin pressure remains unverified in curated data \u2014 not invented here.",
-    "Mesh independence study not completed for the hackathon MVP."
+    "SIMPLE 'continuity errors ... global' is not a patch mass-flux balance.",
+    "Mesh independence is not demonstrated for the published base mesh.",
+    "Fields may exist from a finished run, but residual convergence was not announced by OpenFOAM \u2014 do not treat this case as converged."
   ],
   "provenance": {
     "reference_geometry": "Link et al., Sci. Rep. 8:120 (2018)",
     "url": "https://www.nature.com/articles/s41598-017-18398-4",
     "vg_source": "curated BASS-II B16 opposed-flow condition points / Table S1",
-    "log_excerpt": "ulative = 2.3025785e-07\nExecutionTime = 3.009941 s  ClockTime = 8 s\n\nTime = 399s\n\nsmoothSolver:  Solving for Ux, Initial residual = 2.7597244e-09, Final residual = 2.7597244e-09, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00044374875, Final residual = 1.0947658e-05, No Iterations 2\nsmoothSolver:  Solving for Uz, Initial residual = 3.6277967e-10, Final residual = 3.6277967e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 2.5618126e-09, Final residual = 2.5618126e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 2.5618126e-09, Final residual = 2.5618126e-09, No Iterations 0\ntime step continuity errors : sum local = 6.9528464e-10, global = -1.3542308e-10, cumulative = 2.3012242e-07\nExecutionTime = 3.015975 s  ClockTime = 8 s\n\nTime = 400s\n\nsmoothSolver:  Solving for Ux, Initial residual = 2.6716144e-09, Final residual = 2.6716144e-09, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00034126551, Final residual = 1.0421037e-05, No Iterations 2\nsmoothSolver:  Solving for Uz, Initial residual = 3.523129e-10, Final residual = 3.523129e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 3.4302889e-09, Final residual = 3.4302889e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 3.4302889e-09, Final residual = 3.4302889e-09, No Iterations 0\ntime step continuity errors : sum local = 9.3099192e-10, global = -1.7003538e-10, cumulative = 2.2995239e-07\nExecutionTime = 3.033665 s  ClockTime = 8 s\n\nEnd\n\n"
+    "log_excerpt": "tive = 2.269624e-07\nExecutionTime = 29.571509 s  ClockTime = 73 s\n\nTime = 4999s\n\nsmoothSolver:  Solving for Ux, Initial residual = 2.1928778e-09, Final residual = 2.1928778e-09, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00083097093, Final residual = 7.3696971e-05, No Iterations 1\nsmoothSolver:  Solving for Uz, Initial residual = 2.7856369e-10, Final residual = 2.7856369e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 1.4636902e-09, Final residual = 1.4636902e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 1.4636902e-09, Final residual = 1.4636902e-09, No Iterations 0\ntime step continuity errors : sum local = 3.9725055e-10, global = 1.2530461e-12, cumulative = 2.2696365e-07\nExecutionTime = 29.578185 s  ClockTime = 73 s\n\nTime = 5000s\n\nsmoothSolver:  Solving for Ux, Initial residual = 2.0625119e-09, Final residual = 2.0625119e-09, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00040994831, Final residual = 9.6649232e-06, No Iterations 2\nsmoothSolver:  Solving for Uz, Initial residual = 2.667949e-10, Final residual = 2.667949e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 2.5264262e-09, Final residual = 2.5264262e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 2.5264262e-09, Final residual = 2.5264262e-09, No Iterations 0\ntime step continuity errors : sum local = 6.856806e-10, global = 1.9942863e-11, cumulative = 2.269836e-07\nExecutionTime = 29.599252 s  ClockTime = 74 s\n\nEnd\n\n"
   }
 }

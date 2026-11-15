@@ -1,0 +1,110 @@
+{
+  "status": "completed",
+  "base_mesh": [
+    24,
+    1,
+    80
+  ],
+  "fine_mesh": [
+    48,
+    1,
+    160
+  ],
+  "residualControl_unchanged": true,
+  "cases": {
+    "CFD-B16-Vg072": {
+      "base": {
+        "mesh": [
+          24,
+          1,
+          80
+        ],
+        "cells": 1920,
+        "convergence_status": "converged",
+        "evidence": "OpenFOAM announced: SIMPLE solution converged in 330 iterations.",
+        "residuals": {
+          "Ux": 2.004426e-08,
+          "Uy": 9.9428646e-05,
+          "Uz": 6.6227773e-09,
+          "p": 2.4565301e-09
+        },
+        "metrics": {
+          "uz_midgap_midspecimen_m_s": 0.010724774,
+          "delta_p_inlet_minus_outlet_m2_s2": 0.0001260096215481771
+        }
+      },
+      "fine": {
+        "mesh": [
+          48,
+          1,
+          160
+        ],
+        "cells": 7680,
+        "convergence_status": "max_iterations_reached",
+        "evidence": "No 'SIMPLE solution converged' announcement in log; run finished at endTime / max iterations. Final Time=5000s; configured endTime=5000. Final Uy initial residual=0.000189757 (residualControl U=1e-4).",
+        "residuals": {
+          "Ux": 1.8055086e-10,
+          "Uy": 0.0001897572,
+          "Uz": 7.3591376e-11,
+          "p": 6.7563999e-10
+        },
+        "metrics": {
+          "uz_midgap_midspecimen_m_s": 0.010832058,
+          "delta_p_inlet_minus_outlet_m2_s2": 0.0001268897364406901
+        }
+      },
+      "relative_difference_fine_vs_base": {
+        "uz_midgap_midspecimen_m_s": 0.010003380957025378,
+        "delta_p_inlet_minus_outlet_m2_s2": 0.006984505482198403
+      },
+      "mesh_independence": "not_demonstrated"
+    },
+    "CFD-B16-Vg755": {
+      "base": {
+        "mesh": [
+          24,
+          1,
+          80
+        ],
+        "cells": 1920,
+        "convergence_status": "max_iterations_reached",
+        "evidence": "No 'SIMPLE solution converged' announcement in log; run finished at endTime / max iterations. Final Time=5000s; configured endTime=5000. Final Uy initial residual=0.000616876 (residualControl U=1e-4).",
+        "residuals": {
+          "Ux": 2.8531641e-15,
+          "Uy": 0.00061687612,
+          "Uz": 1.2579605e-15,
+          "p": 5.7719927e-09
+        },
+        "metrics": {
+          "uz_midgap_midspecimen_m_s": 0.095338253,
+          "delta_p_inlet_minus_outlet_m2_s2": 0.0025483966030822917
+        }
+      },
+      "fine": {
+        "mesh": [
+          48,
+          1,
+          160
+        ],
+        "cells": 7680,
+        "convergence_status": "max_iterations_reached",
+        "evidence": "No 'SIMPLE solution converged' announcement in log; run finished at endTime / max iterations. Final Time=5000s; configured endTime=5000. Final Uy initial residual=0.000562069 (residualControl U=1e-4).",
+        "residuals": {
+          "Ux": 6.3282235e-16,
+          "Uy": 0.00056206907,
+          "Uz": 1.0125032e-15,
+          "p": 6.0652613e-09
+        },
+        "metrics": {
+          "uz_midgap_midspecimen_m_s": 0.095294115,
+          "delta_p_inlet_minus_outlet_m2_s2": 0.0025535694053881505
+        }
+      },
+      "relative_difference_fine_vs_base": {
+        "uz_midgap_midspecimen_m_s": 0.0004629621228742163,
+        "delta_p_inlet_minus_outlet_m2_s2": 0.0020298262443146755
+      },
+      "mesh_independence": "not_demonstrated"
+    }
+  }
+}

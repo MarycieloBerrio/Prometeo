@@ -48,15 +48,39 @@ def test_unit_conversion_cm_s_to_m_s() -> None:
 
 
 def test_manifest_validation_requires_convergence_fields(repo: JsonCfdRepository) -> None:
+    allowed = {
+        ConvergenceStatus.CONVERGED,
+        ConvergenceStatus.MAX_ITERATIONS_REACHED,
+        ConvergenceStatus.SOLVER_FAILED,
+        ConvergenceStatus.NOT_RUN,
+        ConvergenceStatus.NOT_CONVERGED_OR_NOT_RUN,
+    }
     for sim in repo.list_all():
         raw = json.loads((MANIFESTS / f"{sim.simulation_id}.json").read_text(encoding="utf-8"))
         assert raw["result_kind"] == "numerical_simulation"
         assert raw["not_experimental_observation"] is True
         assert "residuals" in raw
-        assert "mass_balance_error" in raw
-        assert raw["mesh_independence"] == "not_demonstrated"
-        assert sim.convergence_status == ConvergenceStatus.CONVERGED
-        assert sim.validation_status == CfdValidationStatus.NUMERICALLY_CHECKED
+        assert "mass_balance_status" in raw
+        assert sim.convergence_status in allowed
+        # Converged only when OpenFOAM announced it — never because a container printed DONE.
+        if sim.convergence_status == ConvergenceStatus.CONVERGED:
+            assert raw.get("solver_announced_convergence") is True
+            assert "SIMPLE solution converged" in raw.get("convergence_evidence", "")
+            assert sim.validation_status == CfdValidationStatus.NUMERICALLY_CHECKED
+        if sim.convergence_status == ConvergenceStatus.MAX_ITERATIONS_REACHED:
+            assert raw.get("solver_announced_convergence") is False
+            assert sim.validation_status == CfdValidationStatus.SOLVER_EXECUTED
+
+
+def test_vg072_is_the_only_announced_converged_case_or_honest_status(
+    repo: JsonCfdRepository,
+) -> None:
+    """Regression guard: non-announced finishes must not be labelled converged."""
+    for sim in repo.list_all():
+        if sim.solver_announced_convergence:
+            assert sim.convergence_status == ConvergenceStatus.CONVERGED
+        else:
+            assert sim.convergence_status != ConvergenceStatus.CONVERGED
 
 
 def test_experimental_and_simulated_are_distinct(repo: JsonCfdRepository) -> None:

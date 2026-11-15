@@ -24,6 +24,7 @@ class CfdFieldSample:
     units: dict[str, str]
     downsample_stride: int
     n_points_source: int
+    viewer_note: str | None = None
 
 
 class ListCfdSimulations:
@@ -60,10 +61,12 @@ class GetCfdSimulation:
             return None
         raw = json.loads(path.read_text(encoding="utf-8"))
         points = tuple(raw.get("points") or ())
+        note = raw.get("viewer_note")
         return CfdFieldSample(
             simulation_id=simulation_id,
             points=points,
             units=dict(raw.get("units") or {}),
             downsample_stride=int(raw.get("downsample_stride") or 1),
             n_points_source=int(raw.get("n_points_source") or len(points)),
+            viewer_note=str(note) if note else None,
         )

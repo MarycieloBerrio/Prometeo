@@ -9,8 +9,8 @@ export function NumericalVerificationPanel({ simulation }: { simulation: CfdSimu
     <section className="cfd-verify" aria-label="Numerical Verification">
       <h4>Numerical Verification</h4>
       <p className="muted">
-        Distinguishes solver execution, numerical checks, and experimental model validation —
-        these are not equivalent.
+        Distinguishes solver execution, residual convergence announced by OpenFOAM, and
+        experimental model validation — these are not equivalent.
       </p>
       <table>
         <tbody>
@@ -25,21 +25,40 @@ export function NumericalVerificationPanel({ simulation }: { simulation: CfdSimu
                 : "not verified"
             }
           />
-          <Row label="Mesh quality metrics" value="not verified (MVP)" />
           <Row
-            label="Residuals (final)"
+            label="Mesh quality (checkMesh)"
+            value={simulation.mesh_quality_status ?? "not verified"}
+          />
+          <Row
+            label="Residuals (final initial)"
             value={
               residualEntries.length > 0
                 ? residualEntries.map(([k, v]) => `${k}=${v.toExponential(3)}`).join(" · ")
                 : "not verified"
             }
           />
-          <Row label="Convergence" value={simulation.convergence_status} />
+          <Row label="Convergence status" value={simulation.convergence_status} />
           <Row
-            label="Mass / continuity balance"
+            label="OpenFOAM announced convergence"
+            value={simulation.solver_announced_convergence ? "yes" : "no"}
+          />
+          <Row
+            label="Convergence evidence"
+            value={simulation.convergence_evidence || "not verified"}
+          />
+          <Row
+            label="Patch mass/volume flux balance"
             value={
               simulation.mass_balance_error != null
-                ? `${simulation.mass_balance_error.toExponential(3)} (${simulation.mass_balance_status})`
+                ? `relative imbalance ${simulation.mass_balance_error.toExponential(3)} (${simulation.mass_balance_status})`
+                : "not verified"
+            }
+          />
+          <Row
+            label="SIMPLE continuity global (log)"
+            value={
+              simulation.continuity_global_abs != null
+                ? `${simulation.continuity_global_abs.toExponential(3)} (not a patch flux balance)`
                 : "not verified"
             }
           />
@@ -60,9 +79,10 @@ export function NumericalVerificationPanel({ simulation }: { simulation: CfdSimu
         </tbody>
       </table>
       <p className="cfd-verify-footnote">
-        Mesh independence is <strong>not demonstrated</strong> for this MVP. Status{" "}
-        <code>numerically_checked</code> means residuals/continuity were read from a real solver
-        log — not that the model is experimentally validated.
+        Status <code>numerically_checked</code> requires an explicit{" "}
+        <code>SIMPLE solution converged</code> announcement. Finishing at endTime without that
+        message is <code>max_iterations_reached</code>, not convergence. Mesh independence remains
+        separate from residual convergence.
       </p>
     </section>
   );

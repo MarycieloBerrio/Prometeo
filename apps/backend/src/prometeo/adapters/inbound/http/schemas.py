@@ -251,6 +251,10 @@ class CfdSimulationOut(BaseModel):
     has_field_sample: bool
     geometry_assumptions: list[str]
     limitations: list[str]
+    solver_announced_convergence: bool = False
+    convergence_evidence: str = ""
+    mesh_quality_status: str = "not_verified"
+    continuity_global_abs: float | None = None
 
 
 class CfdFieldPointOut(BaseModel):
@@ -259,6 +263,9 @@ class CfdFieldPointOut(BaseModel):
     z: float
     u_mag: float
     p: float
+    ux: float | None = None
+    uy: float | None = None
+    uz: float | None = None
 
 
 class CfdFieldSampleOut(BaseModel):
@@ -267,6 +274,7 @@ class CfdFieldSampleOut(BaseModel):
     downsample_stride: int
     n_points_source: int
     points: list[CfdFieldPointOut]
+    viewer_note: str | None = None
 
 
 class CfdInterpretationOut(BaseModel):
@@ -302,6 +310,10 @@ def cfd_out(s: object) -> CfdSimulationOut:
         has_field_sample=bool(s.field_sample_path),
         geometry_assumptions=list(s.geometry_assumptions),
         limitations=list(s.limitations),
+        solver_announced_convergence=s.solver_announced_convergence,
+        convergence_evidence=s.convergence_evidence,
+        mesh_quality_status=s.mesh_quality_status,
+        continuity_global_abs=s.continuity_global_abs,
     )
 
 

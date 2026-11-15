@@ -61,8 +61,26 @@ Outputs:
 python3 tools/cfd/scripts/generate_and_run.py --run
 ```
 
+## Convergence classification (important)
+
+| Outcome | Meaning |
+|---|---|
+| `converged` | Log contains `SIMPLE solution converged in N iterations` |
+| `max_iterations_reached` | Process exited 0 but reached `endTime` **without** that announcement |
+| `solver_failed` | Non-zero foamRun / blockMesh exit |
+| `not_run` | Solver not executed |
+
+Container stdout `DONE` is **never** treated as convergence.
+
+`endTime` is 5000 iterations (raised from 400 to give Uy residual time to meet
+`residualControl` 1e-4). Residual thresholds themselves are unchanged.
+
 ## Validation notes
 
-- Convergence and continuity errors are parsed from real `log.foamRun` output.
-- Mesh independence is **not demonstrated** in the MVP (`mesh_independence: not_demonstrated`).
+- Residuals and SIMPLE continuity `global` are parsed from real `log.foamRun` output.
+- Patch flux balance (when available) comes from `surfaceFieldValue` on `phi` — distinct
+  from the SIMPLE continuity `global` residual.
+- `checkMesh` metrics are stored under `mesh_quality` in each manifesto.
+- Mesh study (optional): `python tools/cfd/scripts/generate_and_run.py --run --mesh-study`
+  compares base `(24,1,80)` vs fine `(48,1,160)` for Vg072 and Vg755.
 - Absolute B16 cabin pressure is **not invented**.

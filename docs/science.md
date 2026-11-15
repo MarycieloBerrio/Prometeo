@@ -63,8 +63,9 @@ without a validated statistical model.
 - Solved: mass + momentum (velocity, kinematic pressure). **Not** solved: energy, species, pyrolysis, Vf.
 - Geometry: axial annular wedge approximating the Link et al. (2018) rod-in-duct layout; square duct circularised; tips not resolved.
 - Linked trial IDs: `BASS-II-B16-Vg072|083|167|755`. O₂ 18.2% is scenario context only.
-- Status ladder: solver executed ≠ numerically checked ≠ experimentally validated model.
-- Mesh independence is **not demonstrated** in the hackathon MVP. See `tools/cfd/README.md`.
+- Status ladder: solver executed ≠ residual-converged (`SIMPLE solution converged`) ≠ experimentally validated model.
+- `DONE` / container exit alone never implies convergence. See `tools/cfd/scripts/convergence.py`.
+- Mesh independence remains **not demonstrated** unless a documented base/fine study with both converged solutions says otherwise.
 
 ## Out of scope / limitations
 

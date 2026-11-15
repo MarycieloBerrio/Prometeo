@@ -2,18 +2,16 @@ import { Suspense } from "react";
 
 import type { CompareRequest, CompareResponse, CoverageResponse, Trial } from "@prometeo/contracts";
 
-import { CfdPhysicsLab } from "@/components/compare/CfdPhysicsLab";
+import { CompareCfdWorkbench } from "@/components/compare/CompareCfdWorkbench";
 import { CompareForm } from "@/components/compare/CompareForm";
 import { ComparisonResult } from "@/components/compare/ComparisonResult";
 import { CoverageMap } from "@/components/compare/CoverageMap";
-import { ObservationalSpreadChart } from "@/components/compare/ObservationalSpreadChart";
 import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { PageHeader, Section } from "@/components/ui/PageHeader";
 import { LoadingState } from "@/components/ui/LoadingState";
 import type { CfdFieldSample, CfdInterpretation, CfdSimulation } from "@/domain/cfd";
 import { allParams, firstParam, VARIABLES } from "@/domain/format";
-import { observationalSpreadPoints } from "@/domain/observational-spread";
 import { gateway } from "@/infrastructure/gateway";
 
 type SearchParams = PageProps<"/compare">["searchParams"];
@@ -144,34 +142,14 @@ async function CompareLab({ searchParams }: { searchParams: SearchParams }) {
 
       {result && <ComparisonResult result={result} metric={metric} />}
 
-      {observationalSpreadPoints(trials).length >= 2 && (
-        <Section
-          title="Observed flame spread vs ventilation"
-          hint="BASS-II B16 / B19 condition points · measured values only"
-        >
-          <ObservationalSpreadChart trials={trials} highlight={highlightIds} />
-        </Section>
-      )}
-
-      <Section
-        title="CFD Physics Lab"
-        hint="numerical_simulation · linked to B16 · not a flame model"
-      >
-        {cfdError && (
-          <Callout tone="warn" title="CFD API unavailable">
-            {cfdError}. Experimental Comparison Lab above remains usable.
-          </Callout>
-        )}
-        {!cfdError && (
-          <CfdPhysicsLab
-            simulations={cfdSims}
-            fields={cfdFields}
-            interpretations={cfdInterpretations}
-            trials={trials}
-            preferredTrialIds={highlightIds}
-          />
-        )}
-      </Section>
+      <CompareCfdWorkbench
+        trials={trials}
+        highlightIds={highlightIds}
+        simulations={cfdSims}
+        fields={cfdFields}
+        interpretations={cfdInterpretations}
+        cfdError={cfdError}
+      />
 
       {coverageError && <Callout tone="warn" title="Coverage unavailable">{coverageError}</Callout>}
       {coverage && (

@@ -44,12 +44,27 @@ def get_field(
     sample = use_case.field_sample(simulation_id)
     if sample is None:
         raise NotFoundError(f"No field sample for CFD simulation '{simulation_id}'")
+    points_out: list[CfdFieldPointOut] = []
+    for p in sample.points:
+        points_out.append(
+            CfdFieldPointOut(
+                x=float(p["x"]),
+                y=float(p["y"]),
+                z=float(p["z"]),
+                u_mag=float(p["u_mag"]),
+                p=float(p["p"]),
+                ux=float(p["ux"]) if "ux" in p else None,
+                uy=float(p["uy"]) if "uy" in p else None,
+                uz=float(p["uz"]) if "uz" in p else None,
+            )
+        )
     return CfdFieldSampleOut(
         simulation_id=sample.simulation_id,
         units=sample.units,
         downsample_stride=sample.downsample_stride,
         n_points_source=sample.n_points_source,
-        points=[CfdFieldPointOut(**p) for p in sample.points],
+        points=points_out,
+        viewer_note=sample.viewer_note,
     )
 
 
@@ -81,6 +96,10 @@ def interpretation(
             "No temperature, O₂ species, pyrolysis, or flame-spread rate is computed.",
             f"Validation status: {sim.validation_status.value}; "
             f"convergence: {sim.convergence_status.value}.",
+            (
+                sim.convergence_evidence
+                or "Convergence evidence not recorded in the CFD manifesto."
+            ),
         ],
         literature_mechanisms=[
             "Link et al. 2018 attribute non-monotonic Vf(Vg) in microgravity to competing "

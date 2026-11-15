@@ -613,6 +613,7 @@ h3 { font-size: 1.05rem; font-weight: 600; }
   white-space: nowrap;
 }
 .cfd-badge.numerically_checked { border-color: #7ea58c; color: #c9ecd4; }
+.cfd-badge.solver_executed { border-color: #9a7a4e; color: #ffd5a5; }
 .cfd-badge.pending, .cfd-status.unavailable { border-color: #9a7a4e; color: #ffd5a5; }
 .cfd-case-rail {
   display: grid;

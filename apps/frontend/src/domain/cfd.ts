@@ -20,6 +20,10 @@ export type CfdSimulation = {
   has_field_sample: boolean;
   geometry_assumptions: string[];
   limitations: string[];
+  solver_announced_convergence?: boolean;
+  convergence_evidence?: string;
+  mesh_quality_status?: string;
+  continuity_global_abs?: number | null;
 };
 
 export type CfdFieldSample = {
@@ -27,7 +31,17 @@ export type CfdFieldSample = {
   units: Record<string, string>;
   downsample_stride: number;
   n_points_source: number;
-  points: Array<{ x: number; y: number; z: number; u_mag: number; p: number }>;
+  points: Array<{
+    x: number;
+    y: number;
+    z: number;
+    u_mag: number;
+    p: number;
+    ux?: number;
+    uy?: number;
+    uz?: number;
+  }>;
+  viewer_note?: string | null;
 };
 
 export type CfdInterpretation = {

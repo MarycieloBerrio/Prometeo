@@ -15,6 +15,8 @@ type Props = {
   interpretations: Record<string, CfdInterpretation>;
   trials: Trial[];
   preferredTrialIds?: string[];
+  selectedTrialId?: string;
+  onSelectTrial?: (trialId: string) => void;
 };
 
 /**
@@ -27,6 +29,8 @@ export function CfdPhysicsLab({
   interpretations,
   trials,
   preferredTrialIds = [],
+  selectedTrialId,
+  onSelectTrial,
 }: Props) {
   const ordered = useMemo(
     () => [...simulations].sort((a, b) => a.inlet_velocity_cm_s - b.inlet_velocity_cm_s),
@@ -34,19 +38,39 @@ export function CfdPhysicsLab({
   );
 
   const initialId = useMemo(() => {
+    const focus = selectedTrialId ?? preferredTrialIds[0];
+    if (focus) {
+      const match = ordered.find((s) => s.reference_trial_id === focus);
+      if (match) return match.simulation_id;
+    }
     for (const trialId of preferredTrialIds) {
       const match = ordered.find((s) => s.reference_trial_id === trialId);
       if (match) return match.simulation_id;
     }
     return ordered[0]?.simulation_id ?? "";
-  }, [ordered, preferredTrialIds]);
+  }, [ordered, preferredTrialIds, selectedTrialId]);
 
-  const [selectedId, setSelectedId] = useState(initialId);
+  const [internalId, setInternalId] = useState(initialId);
+  const selectedFromTrial = selectedTrialId
+    ? ordered.find((s) => s.reference_trial_id === selectedTrialId)?.simulation_id
+    : undefined;
+  const selectedId = selectedFromTrial ?? internalId;
+  const setSelectedId = (simulationId: string) => {
+    const simMatch = ordered.find((s) => s.simulation_id === simulationId);
+    if (simMatch) onSelectTrial?.(simMatch.reference_trial_id);
+    if (selectedTrialId === undefined) setInternalId(simulationId);
+  };
+
   const sim = ordered.find((s) => s.simulation_id === selectedId) ?? ordered[0] ?? null;
   const trial = sim ? trials.find((t) => t.id === sim.reference_trial_id) : undefined;
   const field = sim ? fields[sim.simulation_id] : undefined;
   const interpretation = sim ? interpretations[sim.simulation_id] : undefined;
   const vf = trial?.results.find((r) => r.name === "flame_spread_rate");
+  const sharedVelocityScale = useMemo(() => {
+    const vals = Object.values(fields).flatMap((f) => f.points.map((p) => p.u_mag));
+    if (vals.length === 0) return undefined;
+    return { min: Math.min(...vals), max: Math.max(...vals) };
+  }, [fields]);
 
   if (ordered.length === 0) {
     return (
@@ -139,8 +163,17 @@ export function CfdPhysicsLab({
           </aside>
 
           <div className="cfd-main">
+            {sim.convergence_status !== "converged" && (
+              <p className="cfd-status unavailable">
+                Convergence not confirmed — {sim.convergence_status.split("_").join(" ")}.
+                {sim.convergence_evidence ? ` ${sim.convergence_evidence}` : ""}
+                {field
+                  ? " Field samples may still be shown for inspection, but must not be labelled converged."
+                  : ""}
+              </p>
+            )}
             {field ? (
-              <CfdFieldViewer sample={field} />
+              <CfdFieldViewer sample={field} sharedVelocityScale={sharedVelocityScale} />
             ) : (
               <p className="cfd-status unavailable">
                 CFD result not available — solver execution or validation pending
@@ -218,7 +251,13 @@ function InterpBlock({
 
 function statusLabel(sim: CfdSimulation | null | undefined): string {
   if (!sim) return "not available";
-  if (sim.validation_status === "numerically_checked") return "numerically checked";
-  if (sim.validation_status === "solver_executed") return "solver executed";
+  if (sim.convergence_status === "converged" && sim.validation_status === "numerically_checked") {
+    return "converged · numerically checked";
+  }
+  if (sim.convergence_status === "max_iterations_reached") {
+    return "max iterations · not converged";
+  }
+  if (sim.convergence_status === "solver_failed") return "solver failed";
+  if (sim.validation_status === "solver_executed") return "solver executed · not converged";
   return "pending";
 }
