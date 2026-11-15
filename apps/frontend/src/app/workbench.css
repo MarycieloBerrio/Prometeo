@@ -371,3 +371,10 @@ body { background: #050505; color: var(--foreground); }
   .reader-pane { position: static; max-height: none; }
   .pdf-scroll { max-height: 70vh; }
 }
+
+/* Comparison Lab: swap control between the two records, and result card headings */
+button.compare-vs { align-self: center; justify-self: center; width: 34px; height: 34px; padding: 0; border: 1px solid #5b4432; border-radius: 2px; background: #15100c; font: inherit; cursor: pointer; transition: border-color .15s ease, color .15s ease; }
+button.compare-vs:hover:not(:disabled) { border-color: #e8a570; color: #ffe2c5; }
+button.compare-vs:disabled { opacity: .4; cursor: default; }
+.separate-result-heading { display: flex; align-items: center; gap: .6rem; min-width: 0; }
+.separate-result-heading strong { color: #c4ae9a; font-size: .78rem; font-weight: 600; overflow-wrap: anywhere; }

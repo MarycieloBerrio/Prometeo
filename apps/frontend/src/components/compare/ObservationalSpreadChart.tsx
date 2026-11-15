@@ -34,7 +34,8 @@ export function ObservationalSpreadChart({
 
   const width = 640;
   const height = 320;
-  const pad = { top: 24, right: 24, bottom: 44, left: 56 };
+  // Left padding holds the rotated axis title AND the widest tick value side by side.
+  const pad = { top: 24, right: 24, bottom: 44, left: 84 };
   const innerW = width - pad.left - pad.right;
   const innerH = height - pad.top - pad.bottom;
 
@@ -102,10 +103,10 @@ export function ObservationalSpreadChart({
         </text>
         <text
           className="obs-axis-label"
-          x={16}
-          y={height / 2}
+          x={14}
+          y={pad.top + innerH / 2}
           textAnchor="middle"
-          transform={`rotate(-90 16 ${height / 2})`}
+          transform={`rotate(-90 14 ${pad.top + innerH / 2})`}
         >
           Flame spread rate ({spreadUnit})
         </text>
@@ -147,9 +148,9 @@ export function ObservationalSpreadChart({
                   }
                 }}
               >
+                {/* One string: a <title> with several text children fails hydration. */}
                 <title>
-                  {p.trialId}: Vg={p.flow} {p.flowUnit}, Vf={p.spread} {p.spreadUnit}
-                  {p.oxygenLabel ? `, O₂=${p.oxygenLabel}` : ""}
+                  {`${p.trialId}: Vg=${p.flow} ${p.flowUnit}, Vf=${p.spread} ${p.spreadUnit}${p.oxygenLabel ? `, O₂=${p.oxygenLabel}` : ""}`}
                 </title>
               </circle>
               {selected && (

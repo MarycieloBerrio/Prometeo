@@ -90,7 +90,10 @@ export function ComparisonResult({ result, metric }: { result: CompareResponse; 
               const measurement = trial.results.find((item) => item.name === metric);
               return (
                 <div key={trial.id} className="card separate-result">
-                  <span className="slot-letter">{index === 0 ? "A" : "B"} · {trial.id}</span>
+                  <div className="separate-result-heading">
+                    <span className="slot-letter">{index === 0 ? "A" : "B"}</span>
+                    <strong className="mono">{trial.id}</strong>
+                  </div>
                   {measurement ? (
                     <>
                       <strong className="big">{formatQuantity(measurement.value)}</strong>
