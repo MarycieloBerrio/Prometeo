@@ -64,3 +64,24 @@ def test_assistant_refuses_on_synthetic_data(client: TestClient) -> None:
     ).json()
     assert body["tier"] == "insufficient"
     assert body["answer"] is None
+
+
+def test_cfd_simulations_list_and_field(client: TestClient) -> None:
+    sims = client.get("/api/v1/cfd/simulations").json()
+    assert len(sims) >= 4
+    ids = {s["simulation_id"] for s in sims}
+    assert "CFD-B16-Vg072" in ids
+    assert all(s["result_kind"] == "numerical_simulation" for s in sims)
+    linked = client.get(
+        "/api/v1/cfd/simulations", params={"trial_id": "BASS-II-B16-Vg072"}
+    ).json()
+    assert len(linked) == 1
+    assert linked[0]["reference_trial_id"] == "BASS-II-B16-Vg072"
+    field = client.get("/api/v1/cfd/simulations/CFD-B16-Vg072/field").json()
+    assert field["simulation_id"] == "CFD-B16-Vg072"
+    assert len(field["points"]) > 0
+    interp = client.get("/api/v1/cfd/simulations/CFD-B16-Vg072/interpretation").json()
+    assert "cannot_conclude" in interp
+    joined = " ".join(interp["cannot_conclude"]).lower()
+    assert "non-reactive" in joined or "cannot" in joined
+    assert client.get("/api/v1/cfd/simulations/CFD-MISSING").status_code == 404

@@ -231,6 +231,80 @@ def coverage_out(c: CoverageMap) -> CoverageResponse:
     )
 
 
+class CfdSimulationOut(BaseModel):
+    simulation_id: str
+    reference_trial_id: str
+    result_kind: str
+    solver: str
+    solver_version: str
+    model_type: str
+    inlet_velocity_m_s: float
+    inlet_velocity_cm_s: float
+    oxygen_context_percent: float | None
+    mesh_cell_count: int | None
+    residuals: dict[str, float]
+    mass_balance_error: float | None
+    mass_balance_status: str
+    mesh_independence: str
+    convergence_status: str
+    validation_status: str
+    has_field_sample: bool
+    geometry_assumptions: list[str]
+    limitations: list[str]
+
+
+class CfdFieldPointOut(BaseModel):
+    x: float
+    y: float
+    z: float
+    u_mag: float
+    p: float
+
+
+class CfdFieldSampleOut(BaseModel):
+    simulation_id: str
+    units: dict[str, str]
+    downsample_stride: int
+    n_points_source: int
+    points: list[CfdFieldPointOut]
+
+
+class CfdInterpretationOut(BaseModel):
+    question: str
+    nasa_measured: list[str]
+    simulation_computed: list[str]
+    literature_mechanisms: list[str]
+    cannot_conclude: list[str]
+    sources: list[str]
+
+
+def cfd_out(s: object) -> CfdSimulationOut:
+    from prometeo.domain.cfd.model import CfdSimulation
+
+    assert isinstance(s, CfdSimulation)
+    return CfdSimulationOut(
+        simulation_id=s.simulation_id,
+        reference_trial_id=s.reference_trial_id,
+        result_kind=s.result_kind,
+        solver=s.solver,
+        solver_version=s.solver_version,
+        model_type=s.model_type,
+        inlet_velocity_m_s=s.inlet_velocity_m_s,
+        inlet_velocity_cm_s=s.inlet_velocity_cm_s,
+        oxygen_context_percent=s.oxygen_context_percent,
+        mesh_cell_count=s.mesh_cell_count,
+        residuals=dict(s.residuals),
+        mass_balance_error=s.mass_balance_error,
+        mass_balance_status=s.mass_balance_status,
+        mesh_independence=s.mesh_independence,
+        convergence_status=s.convergence_status.value,
+        validation_status=s.validation_status.value,
+        has_field_sample=bool(s.field_sample_path),
+        geometry_assumptions=list(s.geometry_assumptions),
+        limitations=list(s.limitations),
+    )
+
+
 def ask_out(a: AssistantAnswer) -> AskResponse:
     return AskResponse(
         tier=a.tier.value,

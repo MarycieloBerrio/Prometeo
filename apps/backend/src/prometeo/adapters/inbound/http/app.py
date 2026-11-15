@@ -10,8 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from prometeo import __version__
-from prometeo.adapters.inbound.http.routers import analysis, experiments
+from prometeo.adapters.inbound.http.routers import analysis, cfd, experiments
 from prometeo.application.use_cases.ask_research_assistant import AskResearchAssistant
+from prometeo.application.use_cases.cfd_simulations import GetCfdSimulation, ListCfdSimulations
 from prometeo.application.use_cases.compare_trials import CompareTrials
 from prometeo.application.use_cases.coverage_map import BuildCoverageMap
 from prometeo.application.use_cases.explore_experiments import ExploreExperiments
@@ -24,6 +25,8 @@ def create_http_app(
     compare: CompareTrials,
     coverage: BuildCoverageMap,
     assistant: AskResearchAssistant,
+    list_cfd: ListCfdSimulations,
+    get_cfd: GetCfdSimulation,
     cors_origins: list[str],
     include_synthetic: bool,
 ) -> FastAPI:
@@ -36,6 +39,8 @@ def create_http_app(
     app.state.compare = compare
     app.state.coverage = coverage
     app.state.assistant = assistant
+    app.state.list_cfd = list_cfd
+    app.state.get_cfd = get_cfd
     app.state.include_synthetic = include_synthetic
 
     app.add_middleware(
@@ -59,4 +64,5 @@ def create_http_app(
 
     app.include_router(experiments.router)
     app.include_router(analysis.router)
+    app.include_router(cfd.router)
     return app

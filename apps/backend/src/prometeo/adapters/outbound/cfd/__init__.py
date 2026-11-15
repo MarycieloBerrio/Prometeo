@@ -1,0 +1,1 @@
+"""Outbound CFD persistence adapters."""

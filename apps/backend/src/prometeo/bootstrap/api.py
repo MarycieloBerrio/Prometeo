@@ -16,6 +16,8 @@ def build_app(container: Container) -> FastAPI:
         compare=container.compare,
         coverage=container.coverage,
         assistant=container.assistant,
+        list_cfd=container.list_cfd,
+        get_cfd=container.get_cfd,
         cors_origins=[o.strip() for o in s.cors_origins.split(",") if o.strip()],
         include_synthetic=s.include_synthetic,
     )
