@@ -9,6 +9,7 @@ import type {
 } from "@prometeo/contracts";
 
 import type { EvidenceGateway, TrialQuery } from "@/application/ports/evidence-gateway";
+import type { CfdFieldSample, CfdInterpretation, CfdSimulation } from "@/domain/cfd";
 
 export class ApiError extends Error {
   constructor(
@@ -40,6 +41,19 @@ export class HttpEvidenceGateway implements EvidenceGateway {
 
   ask(request: AskRequest): Promise<AskResponse> {
     return this.post("/api/v1/assistant/ask", request);
+  }
+
+  listCfdSimulations(trialId?: string): Promise<CfdSimulation[]> {
+    const q = trialId ? `?trial_id=${encodeURIComponent(trialId)}` : "";
+    return this.get(`/api/v1/cfd/simulations${q}`);
+  }
+
+  getCfdField(simulationId: string): Promise<CfdFieldSample> {
+    return this.get(`/api/v1/cfd/simulations/${encodeURIComponent(simulationId)}/field`);
+  }
+
+  getCfdInterpretation(simulationId: string): Promise<CfdInterpretation> {
+    return this.get(`/api/v1/cfd/simulations/${encodeURIComponent(simulationId)}/interpretation`);
   }
 
   private async get<T>(path: string): Promise<T> {

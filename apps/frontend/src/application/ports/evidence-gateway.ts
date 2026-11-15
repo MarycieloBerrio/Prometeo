@@ -11,6 +11,8 @@ import type {
   Trial,
 } from "@prometeo/contracts";
 
+import type { CfdFieldSample, CfdInterpretation, CfdSimulation } from "@/domain/cfd";
+
 export interface TrialQuery {
   investigation?: string;
   material?: string;
@@ -25,4 +27,7 @@ export interface EvidenceGateway {
   compare(request: CompareRequest): Promise<CompareResponse>;
   coverage(query?: Pick<TrialQuery, "material" | "geometry" | "flow_direction">): Promise<CoverageResponse>;
   ask(request: AskRequest): Promise<AskResponse>;
+  listCfdSimulations(trialId?: string): Promise<CfdSimulation[]>;
+  getCfdField(simulationId: string): Promise<CfdFieldSample>;
+  getCfdInterpretation(simulationId: string): Promise<CfdInterpretation>;
 }

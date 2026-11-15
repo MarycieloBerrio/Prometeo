@@ -1,7 +1,11 @@
 # Scientific foundations and limits
 
-Prometeo relates experimental variables. It does not solve the governing equations (no CFD in
-the MVP). The equations below explain *which variables matter* and justify the comparability
+Prometeo relates experimental variables. The Physics Validator does **not** require CFD.
+An optional **CFD Physics Lab** (`tools/cfd/`, `data/simulations/cfd/`) may attach
+**numerical_simulation** fields to B16 trial IDs; those results never replace curated
+`experimental_observation` values and do not predict flame spread.
+
+The equations below explain *which variables matter* and justify the comparability
 rules in `domain/physics/compatibility.py`.
 
 ## Why microgravity is different
@@ -53,9 +57,19 @@ Three independent dimensions: relevance, quality/traceability and coverage. They
 tiers `direct`, `partial` and `insufficient`. There is **no** "% confidence" or "% safe" score
 without a validated statistical model.
 
+## CFD Physics Lab (optional numerical module)
+
+- Solver: OpenFOAM 11 `foamRun` / `incompressibleFluid`, laminar SIMPLE, isothermal air.
+- Solved: mass + momentum (velocity, kinematic pressure). **Not** solved: energy, species, pyrolysis, Vf.
+- Geometry: axial annular wedge approximating the Link et al. (2018) rod-in-duct layout; square duct circularised; tips not resolved.
+- Linked trial IDs: `BASS-II-B16-Vg072|083|167|755`. O₂ 18.2% is scenario context only.
+- Status ladder: solver executed ≠ numerically checked ≠ experimentally validated model.
+- Mesh independence is **not demonstrated** in the hackathon MVP. See `tools/cfd/README.md`.
+
 ## Out of scope / limitations
 
 - No prediction for untested conditions in the MVP, and only after independent validation later.
+- Non-reactive CFD must not be presented as a flame or as the cause of non-monotonic Vf(Vg).
 - Microgravity does not transfer directly to partial gravity (Moon, Mars).
 - Small samples do not predict full-scale fires (that is why SAFFIRE exists).
 - Not a substitute for flammability testing, certification, standards or validated fire models.

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import type { CompareRequest, CompareResponse, CoverageResponse, Trial } from "@prometeo/contracts";
 
+import { CfdPhysicsLab } from "@/components/compare/CfdPhysicsLab";
 import { CompareForm } from "@/components/compare/CompareForm";
 import { ComparisonResult } from "@/components/compare/ComparisonResult";
 import { CoverageMap } from "@/components/compare/CoverageMap";
@@ -10,6 +11,7 @@ import { ApiDown, Callout, EmptyState } from "@/components/ui/Callout";
 import { DemoBanner } from "@/components/ui/DemoBanner";
 import { PageHeader, Section } from "@/components/ui/PageHeader";
 import { LoadingState } from "@/components/ui/LoadingState";
+import type { CfdFieldSample, CfdInterpretation, CfdSimulation } from "@/domain/cfd";
 import { allParams, firstParam, VARIABLES } from "@/domain/format";
 import { observationalSpreadPoints } from "@/domain/observational-spread";
 import { gateway } from "@/infrastructure/gateway";
@@ -78,6 +80,44 @@ async function CompareLab({ searchParams }: { searchParams: SearchParams }) {
     coverageError = e instanceof Error ? e.message : "Unknown error";
   }
 
+  let cfdSims: CfdSimulation[] = [];
+  let cfdFields: Record<string, CfdFieldSample> = {};
+  let cfdInterpretations: Record<string, CfdInterpretation> = {};
+  let cfdError: string | null = null;
+  try {
+    cfdSims = await gateway.listCfdSimulations();
+    const fieldEntries = await Promise.all(
+      cfdSims.map(async (sim) => {
+        if (!sim.has_field_sample) return null;
+        try {
+          const [field, interpretation] = await Promise.all([
+            gateway.getCfdField(sim.simulation_id),
+            gateway.getCfdInterpretation(sim.simulation_id),
+          ]);
+          return [sim.simulation_id, field, interpretation] as const;
+        } catch {
+          return null;
+        }
+      }),
+    );
+    const nextFields: Record<string, CfdFieldSample> = {};
+    const nextInterp: Record<string, CfdInterpretation> = {};
+    for (const entry of fieldEntries) {
+      if (!entry) continue;
+      const [id, field, interpretation] = entry;
+      nextFields[id] = field;
+      nextInterp[id] = interpretation;
+    }
+    cfdFields = nextFields;
+    cfdInterpretations = nextInterp;
+  } catch (e) {
+    cfdError = e instanceof Error ? e.message : "Unknown error";
+  }
+
+  const highlightIds = result
+    ? result.trials.map((t) => t.id)
+    : [a, b].filter((id): id is string => Boolean(id));
+
   return (
     <>
       {trialsError && <ApiDown message={trialsError} />}
@@ -109,12 +149,29 @@ async function CompareLab({ searchParams }: { searchParams: SearchParams }) {
           title="Observed flame spread vs ventilation"
           hint="BASS-II B16 / B19 condition points · measured values only"
         >
-          <ObservationalSpreadChart
-            trials={trials}
-            highlight={result ? result.trials.map((t) => t.id) : [a, b].filter((id): id is string => Boolean(id))}
-          />
+          <ObservationalSpreadChart trials={trials} highlight={highlightIds} />
         </Section>
       )}
+
+      <Section
+        title="CFD Physics Lab"
+        hint="numerical_simulation · linked to B16 · not a flame model"
+      >
+        {cfdError && (
+          <Callout tone="warn" title="CFD API unavailable">
+            {cfdError}. Experimental Comparison Lab above remains usable.
+          </Callout>
+        )}
+        {!cfdError && (
+          <CfdPhysicsLab
+            simulations={cfdSims}
+            fields={cfdFields}
+            interpretations={cfdInterpretations}
+            trials={trials}
+            preferredTrialIds={highlightIds}
+          />
+        )}
+      </Section>
 
       {coverageError && <Callout tone="warn" title="Coverage unavailable">{coverageError}</Callout>}
       {coverage && (

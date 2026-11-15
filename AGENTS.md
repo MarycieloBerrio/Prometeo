@@ -36,7 +36,7 @@ can intensify when ventilation increases, and the response to flow is non-monoto
 | # | Module | Purpose | Hackathon MVP (Nov 14–15, 2026) |
 |---|---|---|---|
 | 01 | **Experiment Explorer** | Filter trials by fuel, O₂, ventilation, geometry, phenomenon; trial sheet with media, measurements, sources | Curated, verifiable BASS-II sample |
-| 02 | **Combustion Comparison Lab** | Compare ≥2 trials, incompatibility warnings, deltas, **O₂ × ventilation coverage map** | Pairwise comparison + coverage map |
+| 02 | **Combustion Comparison Lab** | Compare ≥2 trials, incompatibility warnings, deltas, **O₂ × ventilation coverage map**; optional CFD Physics Lab for B16 | Pairwise comparison + coverage map + linked non-reactive CFD |
 | 03 | **FlameVision** | Overlay the tracked flame front on NASA video, derive spread velocity | One processed **and validated** video |
 | 04 | **Research Assistant** | Natural-language Q&A with evidence tier, trials, facts, citations, limitations | Cited answers, rule-based EvidenceRank |
 | 05 | **Mission Safety Explorer** | Which evidence applies to a mission scenario, and where the gaps are | Post-MVP |
@@ -48,7 +48,8 @@ original videos, compare measurements, and get an interpretation that states val
 speed in microgravity?* Use the same material and geometry from BASS-II and two flow conditions.
 
 **Out of scope:** predicting untested conditions, safety certification, "% safe" or "% confidence"
-scores, full CFD.
+scores, reactive/full CFD as a flame predictor. Optional non-reactive OpenFOAM cases under
+`tools/cfd/` and `data/simulations/cfd/` are **numerical_simulation** only — never replace curated trials.
 
 ## 3. Repository map
 
