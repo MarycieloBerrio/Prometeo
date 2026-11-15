@@ -82,13 +82,11 @@ if not exist "%ROOT%\.env" (
   echo [1/6] .env already present — leaving it untouched
 )
 
-if not exist "%ROOT%\apps\backend\.env" (
-  if exist "%ROOT%\.env" (
-    echo       Linking apps\backend\.env from repo-root .env
-    copy /Y "%ROOT%\.env" "%ROOT%\apps\backend\.env" >nul
-  )
-) else (
-  echo       apps\backend\.env already present — leaving it untouched
+REM The API reads the repo-root .env directly. A copy in apps\backend\.env would override it,
+REM so later edits to the root file would seem to have no effect.
+if exist "%ROOT%\apps\backend\.env" (
+  echo [WARN] apps\backend\.env exists and overrides the repo-root .env.
+  echo        Move its settings into the root .env and delete it.
 )
 
 REM ---- JS workspace --------------------------------------------------------

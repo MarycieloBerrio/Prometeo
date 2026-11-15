@@ -13,7 +13,8 @@ _REPO_ROOT = Path(__file__).resolve().parents[5]
 
 
 class Settings(BaseSettings):
-    # The repo-root .env (shared with docker compose) is read first; apps/backend/.env wins.
+    # The repo-root .env (shared with docker compose) is the one settings file. A .env in the
+    # working directory (apps/backend when run via `pnpm dev:api`) is read after it and wins.
     model_config = SettingsConfigDict(
         env_prefix="PROMETEO_", env_file=(_REPO_ROOT / ".env", ".env"), extra="ignore"
     )

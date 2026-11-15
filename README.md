@@ -51,7 +51,8 @@ UI-only work without curated semantics: `pnpm dev:api:synthetic` (labels data as
 `SYNTHETIC` — never mix into jury claims). Verified smoke notes:
 [`docs/integration/mvp-quickstart-smoke-yulian.md`](docs/integration/mvp-quickstart-smoke-yulian.md).
 
-Other settings go in `apps/backend/.env` or the repo-root `.env` (see `.env.example`).
+Other settings go in the repo-root `.env` (copy `.env.example`). Keep only that one file: an
+`apps/backend/.env` would override it.
 Run all checks with `pnpm check`.
 
 ## Repository
