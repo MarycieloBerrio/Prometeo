@@ -1,0 +1,70 @@
+{
+  "simulation_id": "CFD-B16-Vg755",
+  "reference_trial_id": "BASS-II-B16-Vg755",
+  "result_kind": "numerical_simulation",
+  "not_experimental_observation": true,
+  "solver": "OpenFOAM foamRun / incompressibleFluid (SIMPLE, laminar)",
+  "solver_version": "OpenFOAM 11 (Docker image openfoam/openfoam11-paraview510)",
+  "model_type": "forced_laminar_isothermal_incompressible_nonreactive_axial_annular",
+  "geometry": {
+    "rod_diameter_m": 0.0064,
+    "rod_radius_m": 0.0032,
+    "duct_outer_radius_m": 0.038,
+    "domain_length_m": 0.12,
+    "wedge_degrees": 5.0
+  },
+  "geometry_assumptions": [
+    "Axial flow along the rod axis (NOT cross-flow).",
+    "Square 76x76 mm BASS-II duct circularised to outer radius 38 mm.",
+    "Rod treated as continuous cylindrical wall along the domain (finite length and hemispherical tips not resolved).",
+    "Axisymmetric wedge (5\u00b0) representation of the annular gap.",
+    "Isothermal non-reactive air; no buoyancy; no O2 transport equation; no flame."
+  ],
+  "inlet_velocity_m_s": 0.0755,
+  "inlet_velocity_cm_s": 7.55,
+  "oxygen_context": {
+    "mole_percent": 18.2,
+    "role": "experimental scenario identifier for B16 only; not solved as a species field"
+  },
+  "fluid_properties": {
+    "nu_m2_s": 1.5e-05,
+    "assumption": "constant kinematic viscosity of air ~300 K, 1 atm",
+    "source": "standard air property tables (isothermal model hypothesis)"
+  },
+  "boundary_conditions": {
+    "inlet": "fixedValue U = (0,0,Vg); p zeroGradient",
+    "outlet": "U zeroGradient; p = 0",
+    "rod": "noSlip",
+    "duct": "noSlip",
+    "front_back": "wedge"
+  },
+  "mesh_cell_count": 1920,
+  "residuals": {
+    "Ux": 8.5708616e-10,
+    "Uy": 0.0007636437,
+    "Uz": 2.4119857e-10,
+    "p": 8.4539321e-09
+  },
+  "mass_balance_error": 1.1594554e-10,
+  "mass_balance_status": "continuity_global_from_solver_log",
+  "mesh_independence": "not_demonstrated",
+  "convergence_status": "converged",
+  "result_files": {
+    "field_sample": "simulations/cfd/fields/CFD-B16-Vg755.json"
+  },
+  "generated_at": "2026-11-15T09:46:19.834354+00:00",
+  "validation_status": "numerically_checked",
+  "limitations": [
+    "Does not predict flame spread rate Vf.",
+    "Does not predict temperature, pyrolysis, or oxygen consumption.",
+    "Cannot claim 0g vs 1g differences (isothermal forced flow).",
+    "Absolute B16 cabin pressure remains unverified in curated data \u2014 not invented here.",
+    "Mesh independence study not completed for the hackathon MVP."
+  ],
+  "provenance": {
+    "reference_geometry": "Link et al., Sci. Rep. 8:120 (2018)",
+    "url": "https://www.nature.com/articles/s41598-017-18398-4",
+    "vg_source": "curated BASS-II B16 opposed-flow condition points / Table S1",
+    "log_excerpt": "ulative = 6.9245234e-06\nExecutionTime = 2.482482 s  ClockTime = 6 s\n\nTime = 399s\n\nsmoothSolver:  Solving for Ux, Initial residual = 8.7224619e-10, Final residual = 8.7224619e-10, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00078763461, Final residual = 5.6102041e-05, No Iterations 1\nsmoothSolver:  Solving for Uz, Initial residual = 2.4124254e-10, Final residual = 2.4124254e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 8.3169396e-09, Final residual = 8.3169396e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 8.3169396e-09, Final residual = 8.3169396e-09, No Iterations 0\ntime step continuity errors : sum local = 7.8993696e-09, global = -9.4590999e-11, cumulative = 6.9244288e-06\nExecutionTime = 2.48799 s  ClockTime = 6 s\n\nTime = 400s\n\nsmoothSolver:  Solving for Ux, Initial residual = 8.5708616e-10, Final residual = 8.5708616e-10, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.0007636437, Final residual = 5.6469168e-05, No Iterations 1\nsmoothSolver:  Solving for Uz, Initial residual = 2.4119857e-10, Final residual = 2.4119857e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 8.4539321e-09, Final residual = 8.4539321e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 8.4539321e-09, Final residual = 8.4539321e-09, No Iterations 0\ntime step continuity errors : sum local = 8.0294844e-09, global = -1.1594554e-10, cumulative = 6.9243129e-06\nExecutionTime = 2.504354 s  ClockTime = 6 s\n\nEnd\n\n"
+  }
+}
