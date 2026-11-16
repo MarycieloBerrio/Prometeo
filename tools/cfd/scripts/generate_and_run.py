@@ -22,6 +22,7 @@ if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 
 from convergence import RunOutcome, classify_foam_run  # noqa: E402
+from foam_logs import parse_surface_field_value, patch_flow_balance  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[3]
 TEMPLATE = ROOT / "tools" / "cfd" / "openfoam" / "templates" / "axial_annular"
@@ -31,7 +32,10 @@ FIELDS = ROOT / "data" / "simulations" / "cfd" / "fields"
 MESH_STUDY = ROOT / "data" / "simulations" / "cfd" / "mesh_study"
 DOCKER_IMAGE = "openfoam/openfoam11-paraview510"
 # Keep residualControl unchanged; only raise iteration budget so slow Uy decay can finish.
+# Steady SIMPLE: endTime is an ITERATION budget (deltaT = 1 pseudo-time), not seconds.
 END_TIME = 5000
+# Relative |phi_in + phi_out| / |phi_in| accepted as a verified patch volume balance.
+PATCH_BALANCE_TOLERANCE = 1e-6
 RESIDUAL_CONTROL_U = 1e-4
 BASE_MESH = (24, 1, 80)  # nr, ntheta, nz
 FINE_MESH = (48, 1, 160)
@@ -489,73 +493,45 @@ def parse_check_mesh(case: Path) -> dict[str, object]:
 
 
 def compute_patch_flow_balance(case: Path) -> dict[str, object]:
-    """Integrate volumetric flux on inlet/outlet via OpenFOAM surfaceFieldValue.
+    """Integrate the volumetric flux on the inlet/outlet patches of the final iteration.
 
-    Distinct from SIMPLE continuity ``global`` residual printed each iteration.
+    Uses OpenFOAM 11's packaged ``patchFlowRate(patch=...)`` function (surfaceFieldValue,
+    sum of phi). The previous implementation wrote the function wrapped in a named
+    sub-dictionary, which OpenFOAM rejected ("keyword type is undefined"), so no flux was ever
+    produced. Distinct from the SIMPLE ``continuity errors ... global`` residual.
     """
     times = _time_dirs(case)
     if not times:
         return {"status": "not_verified", "reason": "no time directories"}
     latest = times[-1].name
-    for patch in ("inlet", "outlet"):
-        func = (
-            f"surfaceFieldValue1\n{{\n"
-            f"    type            surfaceFieldValue;\n"
-            f"    libs            (fieldFunctionObjects);\n"
-            f"    writeControl    timeStep;\n"
-            f"    writeInterval   1;\n"
-            f"    log             true;\n"
-            f"    writeFields     false;\n"
-            f"    regionType      patch;\n"
-            f"    name            {patch};\n"
-            f"    operation       sum;\n"
-            f"    fields          (phi);\n"
-            f"}}\n"
-        )
-        (case / "system" / f"flowRate_{patch}").write_text(func, encoding="utf-8")
     script = (
-        f"postProcess -func flowRate_inlet -time {latest} > log.flow_inlet 2>&1 || true; "
-        f"postProcess -func flowRate_outlet -time {latest} > log.flow_outlet 2>&1 || true"
+        f"foamPostProcess -func 'patchFlowRate(patch=inlet)' -time {latest} "
+        "> log.flow_inlet 2>&1 || true; "
+        f"foamPostProcess -func 'patchFlowRate(patch=outlet)' -time {latest} "
+        "> log.flow_outlet 2>&1 || true"
     )
     try:
-        _docker_bash(case, script, timeout=180)
+        _docker_bash(case, script, timeout=300)
     except subprocess.TimeoutExpired:
-        return {"status": "not_verified", "reason": "flowRate postProcess timeout"}
+        return {"status": "not_verified", "reason": "patchFlowRate post-processing timeout"}
 
-    def _read_phi(log_name: str) -> float | None:
-        path = case / log_name
-        if not path.exists():
-            return None
-        text = path.read_text(encoding="utf-8", errors="replace")
-        # OF11 surfaceFieldValue: "sum(inlet) of phi = <value>"
-        m = re.findall(r"of phi\s*=\s*([+-]?[0-9.eE+-]+)", text)
-        if not m:
-            m = re.findall(r"sum\([^)]+\)\s+of\s+phi\s*=\s*([+-]?[0-9.eE+-]+)", text)
-        return float(m[-1]) if m else None
+    def _flux(patch: str) -> float | None:
+        base = case / "postProcessing" / f"patchFlowRate(patch={patch})"
+        files = sorted(base.rglob("*.dat")) if base.exists() else []
+        series = parse_surface_field_value(files[-1]) if files else {}
+        return series[max(series)] if series else None
 
-    q_in = _read_phi("log.flow_inlet")
-    q_out = _read_phi("log.flow_outlet")
-    if q_in is None or q_out is None:
-        return {
-            "status": "not_verified",
-            "reason": "could not parse surfaceFieldValue phi sums",
-            "inlet_phi": q_in,
-            "outlet_phi": q_out,
-        }
-    # For a closed domain, inlet flux and outlet flux should cancel (signs opposite).
-    imbalance = q_in + q_out
-    denom = max(abs(q_in), abs(q_out), 1e-30)
-    return {
-        "status": "verified_from_patch_phi",
-        "inlet_phi_m3_s": q_in,
-        "outlet_phi_m3_s": q_out,
-        "imbalance_m3_s": imbalance,
-        "relative_imbalance": abs(imbalance) / denom,
-        "note": (
-            "Volumetric flux sum(phi) on inlet/outlet patches. "
-            "Not the same quantity as SIMPLE 'continuity errors ... global'."
-        ),
-    }
+    return patch_flow_balance(_flux("inlet"), _flux("outlet"))
+
+
+def balance_status(patch_flow: dict[str, object] | None) -> tuple[float | None, str]:
+    """(relative imbalance, manifest status) — verified only within PATCH_BALANCE_TOLERANCE."""
+    if not patch_flow or patch_flow.get("status") != "computed":
+        return None, "not_verified"
+    rel = float(patch_flow["relative_imbalance"])  # type: ignore[arg-type]
+    if rel <= PATCH_BALANCE_TOLERANCE:
+        return rel, "verified"
+    return rel, "imbalance_above_tolerance"
 
 
 def count_cells(case: Path) -> int | None:
@@ -619,7 +595,8 @@ def export_field_sample(case: Path, sim_id: str, u_inlet: float) -> Path | None:
         return None
     points, u_vecs, p_vals = parsed
 
-    stride = max(1, len(points) // 800)
+    # Full resolution: every cell of the mesh, in OpenFOAM cell order (no decimation).
+    stride = 1
     payload = {
         "simulation_id": sim_id,
         "kind": "numerical_simulation",
@@ -630,6 +607,9 @@ def export_field_sample(case: Path, sim_id: str, u_inlet: float) -> Path | None:
             "length": "m",
         },
         "inlet_velocity_m_s": u_inlet,
+        "mesh_resolution_nr_ntheta_nz": list(BASE_MESH),
+        "cell_order": "OpenFOAM cell index order (blockMesh hex block: radial index fastest, then axial)",
+        "source_iteration": int(float(latest.name)),
         "n_points_exported": len(points[::stride]),
         "n_points_source": len(points),
         "downsample_stride": stride,
@@ -771,9 +751,7 @@ def write_manifest(
     assert isinstance(classified, ClassifiedRun)
     MANIFESTS.mkdir(parents=True, exist_ok=True)
 
-    patch_rel = None
-    if patch_flow and patch_flow.get("status") == "verified_from_patch_phi":
-        patch_rel = float(patch_flow["relative_imbalance"])  # type: ignore[arg-type]
+    patch_rel, patch_status = balance_status(patch_flow)
 
     limitations = [
         "Does not predict flame spread rate Vf.",
@@ -833,6 +811,7 @@ def write_manifest(
         },
         "solver_controls": {
             "endTime": END_TIME,
+            "endTime_meaning": "SIMPLE iteration budget (deltaT = 1 pseudo-time), not seconds",
             "residualControl_U": RESIDUAL_CONTROL_U,
             "residualControl_p": 1e-4,
         },
@@ -844,12 +823,9 @@ def write_manifest(
             "Absolute value of OpenFOAM SIMPLE 'time step continuity errors ... global' "
             "from the final iteration — not a patch-integrated mass/volume flux balance."
         ),
+        # Legacy key names kept for the API: the quantity is a VOLUMETRIC flux balance.
         "mass_balance_error": patch_rel,
-        "mass_balance_status": (
-            "patch_phi_relative_imbalance"
-            if patch_rel is not None
-            else "not_verified"
-        ),
+        "mass_balance_status": patch_status,
         "patch_flow_balance": patch_flow or {"status": "not_verified"},
         "mesh_independence": mesh_independence,
         "convergence_status": classified.convergence_status,

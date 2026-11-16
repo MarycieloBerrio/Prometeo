@@ -1,0 +1,49 @@
+{
+  "experiment": "component_keys",
+  "simulation_id": "CFD-B16-Vg755",
+  "inlet_velocity_m_s": 0.0755,
+  "residualControl": {
+    "Ux": 1e-06,
+    "Uz": 1e-06,
+    "p": 1e-06
+  },
+  "configured_end_iteration": 5000,
+  "returncode": 0,
+  "solver_announced_convergence": true,
+  "convergence_status": "converged",
+  "evidence": "OpenFOAM announced: SIMPLE solution converged in 108 iterations.",
+  "final_simple_iteration": 108,
+  "final_initial_residuals": {
+    "Ux": 1.7999125e-05,
+    "Uy": 0.0046041387,
+    "Uz": 1.9478321e-06,
+    "p": 9.8852229e-07
+  },
+  "final_continuity_global_abs": 7.2763348e-10,
+  "max_abs_uy_m_s": 9.3914208e-17,
+  "uy_over_vg": 1.2438967947019868e-15,
+  "patch_flux": {
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -4.71725928e-06,
+    "outlet_phi_m3_s": 4.71725928e-06,
+    "status": "computed",
+    "sign_convention_ok": true,
+    "imbalance_m3_s": 0.0,
+    "relative_imbalance": 0.0
+  },
+  "analytic_inlet_flux_m3_s": 4.723248418990598e-06,
+  "stationarity": {
+    "window_iterations": 1000,
+    "available": true,
+    "iterations_in_window": 108,
+    "dp_max_relative_change": 1.3497236246803737,
+    "outlet_flux_max_relative_change": 2.8554716203655836e-06,
+    "max_initial_residual_in_window": {
+      "Ux": 0.29520046,
+      "Uy": 0.033116377,
+      "Uz": 1.0,
+      "p": 1.0
+    }
+  },
+  "history_csv": "component_keys/CFD-B16-Vg755_history.csv"
+}

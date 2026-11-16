@@ -1,0 +1,90 @@
+[
+  {
+    "simulation_id": "CFD-B16-Vg072",
+    "convergence_status_unchanged": "converged",
+    "final_simple_iteration": 330,
+    "configured_end_iteration": 5000.0,
+    "patch_balance": {
+      "relative_imbalance": 4.445848993180564e-09,
+      "status": "verified"
+    },
+    "field_cells_before_after": [
+      960,
+      1920
+    ],
+    "before": {
+      "manifest_sha256": "f29911c735ab2681479194c0d6e6906c5e6bbf32742467a0a15ea0de874d099d",
+      "field_sha256": "367eb2aa665282e3200a38feb1d53a4af4ba8703eda9e3da9034b2860dbfa669"
+    },
+    "after": {
+      "manifest_sha256": "b8aae6b41fbbe5fb49c71ab833e2d2cbb8ae18c6e150f27527872dfa608ce796",
+      "field_sha256": "af41886eba870ad017ecda5f8e0f4bfa424abc0c15b5219fdea82a81e32dd066"
+    }
+  },
+  {
+    "simulation_id": "CFD-B16-Vg083",
+    "convergence_status_unchanged": "converged",
+    "final_simple_iteration": 619,
+    "configured_end_iteration": 5000.0,
+    "patch_balance": {
+      "relative_imbalance": 3.85664006444096e-09,
+      "status": "verified"
+    },
+    "field_cells_before_after": [
+      960,
+      1920
+    ],
+    "before": {
+      "manifest_sha256": "3d4807d09303e9310f797f0affdf9729ad6e6c144f0baf5f9a786005f8b10789",
+      "field_sha256": "ce3f6f8456e26875726047bd9b0f14360a6b1713bf0a10d8697264e9c2d6d1a4"
+    },
+    "after": {
+      "manifest_sha256": "221ffe96ee2af6de6a706b2d845872a1a057a256d9d27de9ffcdec634e326300",
+      "field_sha256": "0ad9c9291c4e754c217c12b58c1eb35cdc313f872666f51deb5c4ea035a1c102"
+    }
+  },
+  {
+    "simulation_id": "CFD-B16-Vg167",
+    "convergence_status_unchanged": "max_iterations_reached",
+    "final_simple_iteration": 5000,
+    "configured_end_iteration": 5000.0,
+    "patch_balance": {
+      "relative_imbalance": 9.583866079306277e-09,
+      "status": "verified"
+    },
+    "field_cells_before_after": [
+      960,
+      1920
+    ],
+    "before": {
+      "manifest_sha256": "dfa0a8fec8c3e333e36342fdcdf371fb7dedc73cb73f20188e660a9d4923f8cc",
+      "field_sha256": "e812fef6dc9af3bf91ebdc6d60f2efdba726f2022dd40f82fa54b091353b6e4d"
+    },
+    "after": {
+      "manifest_sha256": "c73734a09fd46b715053458c362084d856852a576933b15a2245f780aedcaec7",
+      "field_sha256": "66bdcbdec23e3b3352ee68a8dce559465efb6b8e87d5110554cf26a749814c56"
+    }
+  },
+  {
+    "simulation_id": "CFD-B16-Vg755",
+    "convergence_status_unchanged": "max_iterations_reached",
+    "final_simple_iteration": 5000,
+    "configured_end_iteration": 5000.0,
+    "patch_balance": {
+      "relative_imbalance": 2.1198749638615262e-09,
+      "status": "verified"
+    },
+    "field_cells_before_after": [
+      960,
+      1920
+    ],
+    "before": {
+      "manifest_sha256": "14f2be85f9229d044d7da2b4fc931c10d0bb8a081e207f410518b146fb38b905",
+      "field_sha256": "ec253a89d7e80c83d7ec343ab25cc200e13c2a33818d6b14ab1a6bf250c5c056"
+    },
+    "after": {
+      "manifest_sha256": "9b5dca4bd4e2df554f1d9bf9a41da6329d5a2e325de831c4639e3078c7bbc4dc",
+      "field_sha256": "308ef762b90ea5217ed700afca76200e2c810062e70137fa4160bc7f27a6a833"
+    }
+  }
+]

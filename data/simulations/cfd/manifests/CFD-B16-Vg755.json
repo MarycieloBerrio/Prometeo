@@ -46,7 +46,8 @@
   "solver_controls": {
     "endTime": 5000,
     "residualControl_U": 0.0001,
-    "residualControl_p": 0.0001
+    "residualControl_p": 0.0001,
+    "endTime_meaning": "SIMPLE iteration budget (deltaT = 1 pseudo-time), not seconds"
   },
   "mesh_cell_count": 1920,
   "mesh_quality": {
@@ -65,18 +66,24 @@
   },
   "continuity_global_abs": 4.0596266e-11,
   "continuity_global_note": "Absolute value of OpenFOAM SIMPLE 'time step continuity errors ... global' from the final iteration \u2014 not a patch-integrated mass/volume flux balance.",
-  "mass_balance_error": null,
-  "mass_balance_status": "not_verified",
+  "mass_balance_error": 2.1198749638615262e-09,
+  "mass_balance_status": "verified",
   "patch_flow_balance": {
-    "status": "not_verified",
-    "reason": "could not parse surfaceFieldValue phi sums",
-    "inlet_phi": null,
-    "outlet_phi": null
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -4.71725927e-06,
+    "outlet_phi_m3_s": 4.71725928e-06,
+    "imbalance_m3_s": 9.9999998245167e-15,
+    "relative_imbalance": 2.1198749638615262e-09,
+    "sign_convention_ok": true,
+    "status": "computed",
+    "tolerance": 1e-06,
+    "method": "foamPostProcess -func 'patchFlowRate(patch=inlet|outlet)' on a copy of the published final iteration (5000); see data/simulations/cfd/verification/",
+    "precision_note": "Fluxes are written with 9 significant digits, so relative imbalances near 1e-8 are at the output-precision floor."
   },
   "mesh_independence": "not_demonstrated",
   "convergence_status": "max_iterations_reached",
   "solver_announced_convergence": false,
-  "convergence_evidence": "No 'SIMPLE solution converged' announcement in log; run finished at endTime / max iterations. Final Time=5000s; configured endTime=5000. Final Uy initial residual=0.000616876 (residualControl U=1e-4).",
+  "convergence_evidence": "No 'SIMPLE solution converged' announcement in log; run finished at endTime / max iterations. Final SIMPLE iteration: 5000 (iteration budget endTime = 5000; pseudo-time, not seconds). Final Uy initial residual=0.000616876 (residualControl U=1e-4 applies to the largest velocity-component residual).",
   "result_files": {
     "field_sample": "simulations/cfd/fields/CFD-B16-Vg755.json"
   },
@@ -87,7 +94,7 @@
     "Does not predict temperature, pyrolysis, or oxygen consumption.",
     "Cannot claim 0g vs 1g differences (isothermal forced flow).",
     "Absolute B16 cabin pressure remains unverified in curated data \u2014 not invented here.",
-    "SIMPLE 'continuity errors ... global' is not a patch mass-flux balance.",
+    "SIMPLE 'continuity errors ... global' is not a patch flux balance; the patch balance is a volumetric flux (no density) through the 5\u00b0 wedge sector.",
     "Mesh independence is not demonstrated for the published base mesh.",
     "Fields may exist from a finished run, but residual convergence was not announced by OpenFOAM \u2014 do not treat this case as converged."
   ],
@@ -96,5 +103,13 @@
     "url": "https://www.nature.com/articles/s41598-017-18398-4",
     "vg_source": "curated BASS-II B16 opposed-flow condition points / Table S1",
     "log_excerpt": "= 7.1019879e-06\nExecutionTime = 28.702542 s  ClockTime = 72 s\n\nTime = 4999s\n\nsmoothSolver:  Solving for Ux, Initial residual = 2.8312622e-15, Final residual = 2.8312622e-15, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00058865385, Final residual = 4.1295963e-05, No Iterations 1\nsmoothSolver:  Solving for Uz, Initial residual = 1.2767776e-15, Final residual = 1.2767776e-15, No Iterations 0\nGAMG:  Solving for p, Initial residual = 5.7719934e-09, Final residual = 5.7719934e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 5.7719934e-09, Final residual = 5.7719934e-09, No Iterations 0\ntime step continuity errors : sum local = 5.4821982e-09, global = 4.0596449e-11, cumulative = 7.1020285e-06\nExecutionTime = 28.708646 s  ClockTime = 72 s\n\nTime = 5000s\n\nsmoothSolver:  Solving for Ux, Initial residual = 2.8531641e-15, Final residual = 2.8531641e-15, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00061687612, Final residual = 3.9134575e-05, No Iterations 1\nsmoothSolver:  Solving for Uz, Initial residual = 1.2579605e-15, Final residual = 1.2579605e-15, No Iterations 0\nGAMG:  Solving for p, Initial residual = 5.7719927e-09, Final residual = 5.7719927e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 5.7719927e-09, Final residual = 5.7719927e-09, No Iterations 0\ntime step continuity errors : sum local = 5.4821977e-09, global = 4.0596266e-11, cumulative = 7.1020691e-06\nExecutionTime = 28.726544 s  ClockTime = 73 s\n\nEnd\n\n"
-  }
+  },
+  "final_simple_iteration": 5000,
+  "field_export": {
+    "cells_exported": 1920,
+    "mesh_cells": 1920,
+    "downsample_stride": 1,
+    "previous_export": "stride 2 (960 cells), reproduced exactly"
+  },
+  "artifacts_refreshed_at": "2026-11-16T04:21:51.122671+00:00"
 }

@@ -1,0 +1,78 @@
+{
+  "CFD-B16-Vg072": {
+    "source_case": "tools/cfd/openfoam/cases/CFD-B16-Vg072",
+    "final_simple_iteration": 330,
+    "fields_sha256": {
+      "U": "5a888336d010f745b97eae04ff5236ac33524ceb45564735f3235d67bb324071",
+      "p": "8b92d9153b679951a3393658208c11845f21c356d412b37b2214ee3a367c6141",
+      "phi": "a0d2d79834798536a8b026c285cda0c03422c2f8bfc62ceca9f43cef5069602e"
+    },
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -4.49857836e-07,
+    "outlet_phi_m3_s": 4.49857838e-07,
+    "status": "computed",
+    "sign_convention_ok": true,
+    "imbalance_m3_s": 2.0000000072549875e-15,
+    "relative_imbalance": 4.445848993180564e-09,
+    "analytic_inlet_flux_m3_s": 4.504289883010902e-07,
+    "mean_p_inlet_m2_s2": 0.000161423583,
+    "mean_p_outlet_m2_s2": 0.0
+  },
+  "CFD-B16-Vg083": {
+    "source_case": "tools/cfd/openfoam/cases/CFD-B16-Vg083",
+    "final_simple_iteration": 619,
+    "fields_sha256": {
+      "U": "798077c967c1169a2350e7034069fe5445f65f9dd30ab435387a737b301c53b3",
+      "p": "781a97b3c32d8cb8dc4e2d3fca4169bb87db3b6c2626b483dac84007e5b9c951",
+      "phi": "eb80e36b012bda17c2acca24a2c0449de5c1a97224059ac818a971ea7ed6294b"
+    },
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -5.1858612e-07,
+    "outlet_phi_m3_s": 5.18586118e-07,
+    "status": "computed",
+    "sign_convention_ok": true,
+    "imbalance_m3_s": -2.0000000072549875e-15,
+    "relative_imbalance": 3.85664006444096e-09,
+    "analytic_inlet_flux_m3_s": 5.192445281804234e-07,
+    "mean_p_inlet_m2_s2": 0.00018974753,
+    "mean_p_outlet_m2_s2": 0.0
+  },
+  "CFD-B16-Vg167": {
+    "source_case": "tools/cfd/openfoam/cases/CFD-B16-Vg167",
+    "final_simple_iteration": 5000,
+    "fields_sha256": {
+      "U": "5f09d82604c50e79afe97dfc779682c11d15b78645d4524c3a43251007037e76",
+      "p": "64c2540638c9bbcb2bee9f33d66a4d24dd69c59ed8bf43f832932eb67e6cbcca",
+      "phi": "99ef797790374d4448b87bf4ff1be4a4372ad9e3b6ed4a0d2b146b9eabe9165c"
+    },
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -1.04342026e-06,
+    "outlet_phi_m3_s": 1.04342027e-06,
+    "status": "computed",
+    "sign_convention_ok": true,
+    "imbalance_m3_s": 1.0000000036274937e-14,
+    "relative_imbalance": 9.583866079306277e-09,
+    "analytic_inlet_flux_m3_s": 1.0447450145316954e-06,
+    "mean_p_inlet_m2_s2": 0.000437204069,
+    "mean_p_outlet_m2_s2": 0.0
+  },
+  "CFD-B16-Vg755": {
+    "source_case": "tools/cfd/openfoam/cases/CFD-B16-Vg755",
+    "final_simple_iteration": 5000,
+    "fields_sha256": {
+      "U": "1d88523f41f7069ba4bcd339d2cd5785e39b15a82eb6bc224b25df3d2be0a3b1",
+      "p": "27e61109aa7105962ebc57a6dac790ecc5a404e818a18cccb2e29a6c4c82312e",
+      "phi": "71485d964fcbeafabe46f12971c682e7f141ee4500a8c9279e90d910b1236d05"
+    },
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -4.71725927e-06,
+    "outlet_phi_m3_s": 4.71725928e-06,
+    "status": "computed",
+    "sign_convention_ok": true,
+    "imbalance_m3_s": 9.9999998245167e-15,
+    "relative_imbalance": 2.1198749638615262e-09,
+    "analytic_inlet_flux_m3_s": 4.723248418990598e-06,
+    "mean_p_inlet_m2_s2": 0.00320001281,
+    "mean_p_outlet_m2_s2": 0.0
+  }
+}

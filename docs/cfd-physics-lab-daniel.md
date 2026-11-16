@@ -20,10 +20,10 @@ See `tools/cfd/scripts/convergence.py` and unit tests under
 
 | Case | Executed | Converged | validation_status | continuity_global (log, not patch flux) | Mesh (checkMesh) | Patch flux balance |
 |---|---|---|---|---|---|---|
-| CFD-B16-Vg072 | yes (endTime≤5000) | **yes** — `SIMPLE solution converged in 330 iterations` | numerically_checked | 1.35e-10 | mesh_ok | not_verified |
-| CFD-B16-Vg083 | yes | **yes** — `SIMPLE solution converged in 619 iterations` | numerically_checked | 8.97e-12 | mesh_ok | not_verified |
-| CFD-B16-Vg167 | yes (Time=5000s) | **no** — max_iterations_reached; final Uy initial residual > 1e-4 | solver_executed | 1.99e-11 | mesh_ok | not_verified |
-| CFD-B16-Vg755 | yes (Time=5000s) | **no** — max_iterations_reached; final Uy initial residual > 1e-4 | solver_executed | 4.06e-11 | mesh_ok | not_verified |
+| CFD-B16-Vg072 | yes (330 SIMPLE iterations) | **yes** — `SIMPLE solution converged in 330 iterations` | numerically_checked | 1.35e-10 | mesh_ok | verified (4.4e-9) |
+| CFD-B16-Vg083 | yes (619 SIMPLE iterations) | **yes** — `SIMPLE solution converged in 619 iterations` | numerically_checked | 8.97e-12 | mesh_ok | verified (3.9e-9) |
+| CFD-B16-Vg167 | yes (final SIMPLE iteration 5000) | **no** — max_iterations_reached; final Uy initial residual > 1e-4 | solver_executed | 1.99e-11 | mesh_ok | verified (9.6e-9) |
+| CFD-B16-Vg755 | yes (final SIMPLE iteration 5000) | **no** — max_iterations_reached; final Uy initial residual > 1e-4 | solver_executed | 4.06e-11 | mesh_ok | verified (2.1e-9) |
 
 UI screenshots (honest labels): `docs/assets/cfd-audit/`.
 
@@ -35,6 +35,23 @@ UI screenshots (honest labels): `docs/assets/cfd-audit/`.
 - Does not claim 0g vs 1g from isothermal forced flow.
 - Mesh independence documented per case (`not_demonstrated` unless a base/fine study reports otherwise).
 - Field viewer shows a **scalar** sampled field (|U| or p); no streamlines fabricated from |U|.
+
+"Time = 5000" in a steady SIMPLE log is the iteration counter (deltaT = 1 pseudo-time), not
+seconds. Patch balance = abs(phi_in + phi_out) / abs(phi_in) of the volumetric flux through the
+5-degree wedge (tolerance 1e-6), measured on the published solutions on 2026-11-16.
+
+### Numerical verification 2026-11-16 (`data/simulations/cfd/verification/2026-11-16-uy-audit/`)
+
+- OpenFOAM 11 checks the U criterion on the **largest** component residual; `residualControl`
+  keys `Ux`/`Uz` are silently ignored (a test run "converged" on `p` alone).
+- In all four cases the deciding component is **Uy**, the analytically null wedge-tangential
+  component (abs(Uy) ~ 1e-15 Vg). Rerunning Vg167/Vg755 to 30000 iterations with the unchanged
+  criterion: Uy stays at 2e-4 to 1e-3, never below 1e-4; Ux/Uz/p <= 1e-8, and dp / outlet flux
+  change <= 1e-8 relative over the last 1000 iterations and versus the published fields.
+- Status kept `max_iterations_reached` (OpenFOAM did not announce convergence). The evidence
+  supports, but does not prove, a Uy-normalisation artefact.
+- Fields are now exported at full resolution (1920 cells); the former stride-2 export is
+  reproduced exactly.
 
 ## Mesh study (base 24×1×80 vs fine 48×1×160)
 

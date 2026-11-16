@@ -1,0 +1,17 @@
+{
+  "run_id": "2026-11-16-uy-audit",
+  "started_utc": "2026-11-16T04:20:23.098599+00:00",
+  "docker_image": "openfoam/openfoam11-paraview510",
+  "criteria": {
+    "window_iterations": 1000,
+    "qoi_relative_change_max": 1e-06,
+    "residual_max_Ux_Uz_p": 1e-06,
+    "patch_flux_relative_imbalance_max": 1e-06,
+    "uy_over_vg_max": 1e-09
+  },
+  "experiments": [
+    "component_keys",
+    "extended_budget"
+  ],
+  "finished_utc": "2026-11-16T04:32:36.837184+00:00"
+}

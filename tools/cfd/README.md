@@ -52,7 +52,7 @@ Outputs:
 
 - Case trees under `tools/cfd/openfoam/cases/` (gitignored runtime mesh/time dirs).
 - Manifests: `data/simulations/cfd/manifests/`
-- Downsampled field samples: `data/simulations/cfd/fields/` (stride documented in each file)
+- Field samples: `data/simulations/cfd/fields/` — every mesh cell (1920), with mesh dimensions and cell order in each file
 
 ## WSL2
 
@@ -72,15 +72,27 @@ python3 tools/cfd/scripts/generate_and_run.py --run
 
 Container stdout `DONE` is **never** treated as convergence.
 
-`endTime` is 5000 iterations (raised from 400 to give Uy residual time to meet
+`endTime` is an iteration budget for steady SIMPLE (deltaT = 1 pseudo-time: "Time = 5000" means iteration 5000, not seconds). It is 5000 iterations (raised from 400 to give Uy residual time to meet
 `residualControl` 1e-4). Residual thresholds themselves are unchanged.
 
 ## Validation notes
 
 - Residuals and SIMPLE continuity `global` are parsed from real `log.foamRun` output.
-- Patch flux balance (when available) comes from `surfaceFieldValue` on `phi` — distinct
+- Patch flux balance comes from the packaged OpenFOAM 11 function `patchFlowRate(patch=inlet|outlet)` (sum of `phi`, a volumetric flux through the 5-degree wedge sector), verified when abs(phi_in + phi_out)/abs(phi_in) <= 1e-6 — distinct
   from the SIMPLE continuity `global` residual.
 - `checkMesh` metrics are stored under `mesh_quality` in each manifesto.
 - Mesh study (optional): `python tools/cfd/scripts/generate_and_run.py --run --mesh-study`
   compares base `(24,1,80)` vs fine `(48,1,160)` for Vg072 and Vg755.
 - Absolute B16 cabin pressure is **not invented**.
+
+## Numerical verification (`verify_numerics.py`)
+
+```powershell
+python tools/cfd/scripts/verify_numerics.py --run-id <id> [--only flux_published component_keys extended_budget]
+python tools/cfd/scripts/reclassify_manifests.py --run-id <id>   # refresh wording, flux and full fields; statuses unchanged
+```
+
+Runs on copies under `tools/cfd/openfoam/verification_runs/` (gitignored); results and
+pre-registered criteria in `data/simulations/cfd/verification/<id>/`. OpenFOAM 11 applies the
+`U` residual criterion to the largest component (Uy here) and silently ignores per-component
+keys such as `Ux`/`Uz` — never use them to "fix" convergence.
