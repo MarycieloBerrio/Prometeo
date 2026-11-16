@@ -24,10 +24,18 @@ function conditionsOf(trial: Trial): Condition[] {
       value: humanize(trial.geometry),
       detail: trial.thermal_regime === "unknown" ? undefined : `thermally ${trial.thermal_regime}`,
     },
-    {
-      label: "Thickness",
-      value: formatQuantity(trial.thickness),
-    },
+    // Rods record an explicit diameter; their legacy `thickness` field repeats it and is not a
+    // film thickness, so it is not shown as one.
+    trial.diameter
+      ? {
+          label: "Diameter",
+          value: formatQuantity(trial.diameter),
+          detail: "rod diameter (legacy thickness field repeats it)",
+        }
+      : {
+          label: "Thickness",
+          value: formatQuantity(trial.thickness),
+        },
     {
       label: "Pressure",
       value: formatQuantity(trial.pressure),

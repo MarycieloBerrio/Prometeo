@@ -40,4 +40,6 @@ jobs:
       # https://nextjs.org/docs/app/api-reference/cli/next#next-typegen-options
       - run: pnpm --filter @prometeo/frontend exec next typegen
       - run: pnpm typecheck:web
+      # Pure-logic unit tests (node:test + type stripping; no extra dependencies).
+      - run: pnpm test:web
       - run: pnpm build:web

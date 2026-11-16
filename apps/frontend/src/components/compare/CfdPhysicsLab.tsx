@@ -7,6 +7,7 @@ import type { Trial } from "@prometeo/contracts";
 import { CfdFieldViewer } from "@/components/compare/CfdFieldViewer";
 import { NumericalVerificationPanel } from "@/components/compare/NumericalVerificationPanel";
 import type { CfdFieldSample, CfdInterpretation, CfdSimulation } from "@/domain/cfd";
+import { globalRanges } from "@/domain/cfd-field";
 import { formatQuantity } from "@/domain/format";
 
 type Props = {
@@ -66,11 +67,8 @@ export function CfdPhysicsLab({
   const field = sim ? fields[sim.simulation_id] : undefined;
   const interpretation = sim ? interpretations[sim.simulation_id] : undefined;
   const vf = trial?.results.find((r) => r.name === "flame_spread_rate");
-  const sharedVelocityScale = useMemo(() => {
-    const vals = Object.values(fields).flatMap((f) => f.points.map((p) => p.u_mag));
-    if (vals.length === 0) return undefined;
-    return { min: Math.min(...vals), max: Math.max(...vals) };
-  }, [fields]);
+  // Shared colour ranges per variable across every loaded case ("Global" scale mode).
+  const sharedRanges = useMemo(() => globalRanges(Object.values(fields)), [fields]);
 
   if (ordered.length === 0) {
     return (
@@ -135,7 +133,14 @@ export function CfdPhysicsLab({
               </div>
               <div>
                 <dt>Vf (measured)</dt>
-                <dd>{vf ? formatQuantity(vf.value) : "not in loaded trials"}</dd>
+                <dd>
+                  {vf ? formatQuantity(vf.value) : "not in loaded trials"}
+                  {vf && (
+                    <small className="cfd-dd-note">
+                      {vf.quality} · {vf.provenance.reference}
+                    </small>
+                  )}
+                </dd>
               </div>
               <div>
                 <dt>O₂ context</dt>
@@ -173,7 +178,7 @@ export function CfdPhysicsLab({
               </p>
             )}
             {field ? (
-              <CfdFieldViewer sample={field} sharedVelocityScale={sharedVelocityScale} />
+              <CfdFieldViewer sample={field} geometry={sim.geometry} globalRanges={sharedRanges} />
             ) : (
               <p className="cfd-status unavailable">
                 CFD result not available — solver execution or validation pending

@@ -696,6 +696,17 @@ h3 { font-size: 1.05rem; font-weight: 600; }
   background: #0b0d10;
 }
 .cfd-viewer-meta { margin: 0; color: #93a6a6; font-size: 0.72rem; line-height: 1.45; }
+.cfd-viewer-probe {
+  margin: 0;
+  min-height: 1.4em;
+  color: #e8efec;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+}
+.cfd-canvas { touch-action: none; }
+.cfd-dd-note { display: block; margin-top: 0.2rem; color: #93a6a6; font-size: 0.66rem; line-height: 1.35; }
+.obs-scale-toggle { display: inline-flex; gap: 0.35rem; align-items: center; font-size: 0.72rem; }
+.obs-scale-toggle button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 .cfd-verify {
   padding: 0.85rem 1rem;
   border: 1px solid #3d4f55;

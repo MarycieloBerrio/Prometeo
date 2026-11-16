@@ -1,193 +1,370 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 
-import type { CfdFieldSample } from "@/domain/cfd";
+import {
+  activeRange,
+  buildFieldGrid,
+  clientToLogical,
+  colormap,
+  formatValue,
+  fromCanvas,
+  insideRect,
+  niceTicks,
+  normalise,
+  plotHeightFor,
+  probeReading,
+  toCanvas,
+  windowCenter,
+  zoomWindow,
+  type FieldMode,
+  type PlotRect,
+  type Probe,
+  type Range,
+  type ScaleMode,
+} from "@/domain/cfd-field";
+import type { CfdFieldSample, CfdGeometry } from "@/domain/cfd";
 
-type FieldMode = "u_mag" | "p";
+const LOGICAL_WIDTH = 780;
+const MARGIN = { left: 72, right: 150, top: 44, bottom: 54 };
+const PLOT_WIDTH = LOGICAL_WIDTH - MARGIN.left - MARGIN.right;
+const MAGNIFICATIONS = [1, 2, 3] as const;
+
+const FIELD_LABEL: Record<FieldMode, string> = {
+  u_mag: "|U| velocity magnitude",
+  p: "p kinematic pressure (p/ρ, relative)",
+};
+
+function unitOf(sample: CfdFieldSample, mode: FieldMode): string {
+  return mode === "u_mag" ? (sample.units.velocity ?? "m/s") : "m²/s²";
+}
 
 /**
- * Interactive rz-plane viewer for downsampled OpenFOAM cell samples.
- * Plots a scalar field only (|U| or p). Does not invent streamlines from |U|.
- * When ux/uy/uz are present they are available for probing, not for fabricated glyphs.
+ * Scalar-field viewer for exported OpenFOAM cell-centre samples in the r–z plane.
+ *
+ * - Plots one scalar (|U| or kinematic p) as contiguous tiles; never streamlines (vectors are
+ *   not reconstructed from |U|).
+ * - A decimated export is shown as nearest-sample tiles and declared as such; no interpolation.
+ * - A probe belongs to the case and field it was taken on, so switching either never shows a
+ *   reading from another simulation.
  */
 export function CfdFieldViewer({
   sample,
-  sharedVelocityScale,
+  geometry,
+  globalRanges,
 }: {
   sample: CfdFieldSample;
-  /** Optional fixed |U| color scale across cases (m/s). */
-  sharedVelocityScale?: { min: number; max: number };
+  geometry?: CfdGeometry | null;
+  /** Shared colour ranges across every loaded case, per variable (Global scale mode). */
+  globalRanges: Record<FieldMode, Range | null>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mode, setMode] = useState<FieldMode>("u_mag");
-  const [hover, setHover] = useState<{
-    r: number;
-    z: number;
-    value: number;
-    uz?: number;
-  } | null>(null);
+  const [scale, setScale] = useState<ScaleMode>("local");
+  const [magnification, setMagnification] = useState<number>(2);
   const [zoom, setZoom] = useState(1);
+  const [center, setCenter] = useState<{ r: number; z: number } | null>(null);
+  const [probe, setProbe] = useState<Probe | null>(null);
+  const drag = useRef<{ x: number; y: number; center: { r: number; z: number } } | null>(null);
 
-  const extents = useMemo(() => {
-    const rs = sample.points.map((p) => Math.hypot(p.x, p.y));
-    const zs = sample.points.map((p) => p.z);
-    const vals = sample.points.map((p) => (mode === "u_mag" ? p.u_mag : p.p));
-    let v0 = Math.min(...vals);
-    let v1 = Math.max(...vals);
-    if (mode === "u_mag" && sharedVelocityScale) {
-      v0 = sharedVelocityScale.min;
-      v1 = sharedVelocityScale.max;
-    }
-    return {
-      r0: Math.min(...rs),
-      r1: Math.max(...rs),
-      z0: Math.min(...zs),
-      z1: Math.max(...zs),
-      v0,
-      v1,
-    };
-  }, [sample, mode, sharedVelocityScale]);
+  const grid = useMemo(
+    () => buildFieldGrid(sample.points, sample.n_points_source, geometry),
+    [sample, geometry],
+  );
+  const plotHeight = plotHeightFor(PLOT_WIDTH, grid.domain, magnification);
+  const logicalHeight = plotHeight + MARGIN.top + MARGIN.bottom;
+  const rect: PlotRect = { left: MARGIN.left, top: MARGIN.top, width: PLOT_WIDTH, height: plotHeight };
+  const win = zoomWindow(grid.domain, zoom, center ?? windowCenter(grid.domain));
+  const range = activeRange(sample.points, mode, scale, globalRanges);
+  const unit = unitOf(sample, mode);
+  const reading = probeReading(probe, sample.simulation_id, mode, grid);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
-    ctx.fillStyle = "#0b0d10";
-    ctx.fillRect(0, 0, w, h);
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(LOGICAL_WIDTH * dpr);
+    canvas.height = Math.round(logicalHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawField(ctx, { grid, rect, win, mode, range, unit, scale, logicalHeight, probeTile: reading?.tile ?? null });
+  }, [grid, rect.height, win.zMin, win.zMax, win.rMin, win.rMax, mode, range, unit, scale, logicalHeight, reading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    const pad = 36;
-    const legendW = 18;
-    const { r0, r1, z0, z1, v0, v1 } = extents;
-    const spanR = (r1 - r0) || 1;
-    const spanZ = (z1 - z0) || 1;
-    const spanV = (v1 - v0) || 1;
-    const plotW = w - 2 * pad - 48;
+  const toLogical = (event: PointerEvent<HTMLCanvasElement>) =>
+    clientToLogical(
+      event.clientX,
+      event.clientY,
+      event.currentTarget.getBoundingClientRect(),
+      LOGICAL_WIDTH,
+      logicalHeight,
+    );
 
-    for (const p of sample.points) {
-      const r = Math.hypot(p.x, p.y);
-      const value = mode === "u_mag" ? p.u_mag : p.p;
-      const px = pad + ((r - r0) / spanR) * plotW * zoom;
-      const py = h - pad - ((p.z - z0) / spanZ) * (h - 2 * pad) * zoom;
-      ctx.fillStyle = colorFor((value - v0) / spanV);
-      ctx.fillRect(px - 2, py - 2, 4, 4);
+  const onPointerDown = (event: PointerEvent<HTMLCanvasElement>) => {
+    const { x, y } = toLogical(event);
+    if (zoom > 1 && insideRect(x, y, rect)) {
+      drag.current = { x, y, center: windowCenter(win) };
+      event.currentTarget.setPointerCapture(event.pointerId);
     }
+  };
 
-    // Numeric color legend
-    const lx = w - pad - legendW;
-    for (let i = 0; i < 100; i++) {
-      const t = i / 99;
-      ctx.fillStyle = colorFor(t);
-      ctx.fillRect(lx, pad + (1 - t) * (h - 2 * pad), legendW, (h - 2 * pad) / 100 + 1);
+  const onPointerMove = (event: PointerEvent<HTMLCanvasElement>) => {
+    const { x, y } = toLogical(event);
+    if (drag.current) {
+      const start = drag.current;
+      const dz = ((x - start.x) / rect.width) * (win.zMax - win.zMin);
+      const dr = ((y - start.y) / rect.height) * (win.rMax - win.rMin);
+      // Clamp through zoomWindow so panning can never leave the physical domain.
+      setCenter(windowCenter(zoomWindow(grid.domain, zoom, { z: start.center.z - dz, r: start.center.r + dr })));
+      return;
     }
-    ctx.strokeStyle = "rgba(232,220,200,0.45)";
-    ctx.strokeRect(lx, pad, legendW, h - 2 * pad);
-    ctx.fillStyle = "rgba(232,220,200,0.85)";
-    ctx.font = "11px ui-monospace, monospace";
-    const unit = mode === "u_mag" ? (sample.units.velocity ?? "m/s") : (sample.units.pressure ?? "m²/s²");
-    ctx.fillText(v1.toExponential(2), lx - 4, pad + 10);
-    ctx.textAlign = "right";
-    ctx.fillText(v0.toExponential(2), lx - 4, h - pad);
-    ctx.fillText(unit, lx - 4, pad + (h - 2 * pad) / 2);
-    ctx.textAlign = "left";
+    if (!insideRect(x, y, rect)) return;
+    const { r, z } = fromCanvas(x, y, win, rect);
+    setProbe({ simulationId: sample.simulation_id, mode, r, z });
+  };
 
-    ctx.strokeStyle = "rgba(232,220,200,0.35)";
-    ctx.strokeRect(pad, pad, plotW, h - 2 * pad);
-    ctx.fillStyle = "rgba(232,220,200,0.75)";
-    ctx.font = "12px ui-monospace, monospace";
-    ctx.fillText(`r → (${sample.units.length ?? "m"})`, pad, h - 12);
-    ctx.save();
-    ctx.translate(14, h / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText("z axial →", 0, 0);
-    ctx.restore();
-  }, [sample, mode, extents, zoom]);
+  const endDrag = () => {
+    drag.current = null;
+  };
 
+  const resetView = () => {
+    setZoom(1);
+    setCenter(null);
+  };
+
+  const stride = sample.downsample_stride;
   return (
     <div className="cfd-viewer">
       <div className="cfd-viewer-toolbar">
         <label>
           Field
-          <select value={mode} onChange={(e) => setMode(e.target.value as FieldMode)}>
-            <option value="u_mag">|U| ({sample.units.velocity ?? "m/s"})</option>
-            <option value="p">p ({sample.units.pressure ?? "m²/s²"})</option>
+          <select
+            value={mode}
+            onChange={(e) => {
+              setMode(e.target.value as FieldMode);
+              setProbe(null);
+            }}
+          >
+            <option value="u_mag">|U| (m/s)</option>
+            <option value="p">p kinematic (m²/s²)</option>
           </select>
         </label>
         <label>
-          Zoom
+          Colour scale
+          <select value={scale} onChange={(e) => setScale(e.target.value as ScaleMode)}>
+            <option value="local">Local — this case</option>
+            <option value="global">Global — shared by all cases</option>
+          </select>
+        </label>
+        <label>
+          Radial axis
+          <select value={magnification} onChange={(e) => setMagnification(Number(e.target.value))}>
+            {MAGNIFICATIONS.map((m) => (
+              <option key={m} value={m}>
+                {m === 1 ? "×1 (true scale)" : `×${m} magnified`}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Zoom ×{zoom.toFixed(1)}
           <input
             type="range"
             min={1}
-            max={3}
+            max={4}
             step={0.1}
             value={zoom}
+            aria-label="Zoom factor"
             onChange={(e) => setZoom(Number(e.target.value))}
           />
         </label>
-        <button type="button" onClick={() => setZoom(1)}>
+        <button type="button" onClick={resetView}>
           Reset view
         </button>
       </div>
+
       <canvas
         ref={canvasRef}
-        width={720}
-        height={420}
         className="cfd-canvas"
-        aria-label="CFD scalar field sample in r-z plane"
-        onMouseMove={(event) => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          const mx = event.clientX - rect.left;
-          const my = event.clientY - rect.top;
-          const pad = 36;
-          const w = event.currentTarget.width;
-          const h = event.currentTarget.height;
-          const plotW = w - 2 * pad - 48;
-          const { r0, r1, z0, z1 } = extents;
-          const r = r0 + ((mx - pad) / (plotW * zoom || 1)) * (r1 - r0);
-          const z = z0 + ((h - pad - my) / ((h - 2 * pad) * zoom || 1)) * (z1 - z0);
-          let best = sample.points[0];
-          let bestD = Number.POSITIVE_INFINITY;
-          for (const p of sample.points) {
-            const pr = Math.hypot(p.x, p.y);
-            const d = (pr - r) ** 2 + (p.z - z) ** 2;
-            if (d < bestD) {
-              bestD = d;
-              best = p;
-            }
-          }
-          setHover({
-            r: Math.hypot(best.x, best.y),
-            z: best.z,
-            value: mode === "u_mag" ? best.u_mag : best.p,
-            uz: best.uz,
-          });
-        }}
+        style={{ aspectRatio: `${LOGICAL_WIDTH} / ${logicalHeight}`, cursor: zoom > 1 ? "grab" : "crosshair" }}
+        aria-label={`CFD ${FIELD_LABEL[mode]} in the r–z plane, ${sample.simulation_id}`}
+        data-simulation-id={sample.simulation_id}
+        data-field={mode}
+        data-scale={scale}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
       />
-      <p className="cfd-viewer-meta">
-        Scalar field from downsampled OpenFOAM cell centres · {sample.points.length} of{" "}
-        {sample.n_points_source} cells (stride {sample.downsample_stride}). No streamlines —
-        directions are not inferred from |U| alone.
-        {sample.viewer_note ? ` ${sample.viewer_note}` : ""}
-        {hover && (
+
+      <p className="cfd-viewer-probe" aria-live="polite" data-testid="cfd-probe">
+        {reading ? (
           <>
-            {" "}
-            Probe: r={hover.r.toExponential(3)} m, z={hover.z.toExponential(3)} m, value=
-            {hover.value.toExponential(3)}
-            {hover.uz != null ? `, uz=${hover.uz.toExponential(3)} m/s` : ""}
+            Probe · {sample.simulation_id} · r = {reading.tile.r.toFixed(2)} mm, z ={" "}
+            {reading.tile.z.toFixed(2)} mm → {mode === "u_mag" ? "|U|" : "p"} ={" "}
+            {reading.value.toExponential(3)} {unit}
+            {mode === "u_mag" && reading.tile.point.uz != null
+              ? ` (uz = ${reading.tile.point.uz.toExponential(3)} m/s)`
+              : ""}{" "}
+            — exported cell-centre value, not interpolated.
           </>
+        ) : (
+          <>Probe: hover the field to read the nearest exported cell-centre value of this case.</>
         )}
+      </p>
+
+      <p className="cfd-viewer-meta">
+        {magnification === 1
+          ? "True geometric scale (×1): 1 mm radial = 1 mm axial on screen. "
+          : `Radial axis visually magnified ×${magnification} for boundary-layer inspection — not a to-scale geometry. `}
+        Domain: r = {grid.domain.rMin.toFixed(1)}–{grid.domain.rMax.toFixed(1)} mm (rod surface → circularised duct
+        wall), z = {grid.domain.zMin.toFixed(0)}–{grid.domain.zMax.toFixed(0)} mm.{" "}
+        {grid.decimated
+          ? `Export holds ${grid.exported} of ${grid.sourceCells} mesh cells (${grid.rCenters.length} radial × ${grid.zCenters.length} axial samples, stride ${stride}); each tile shows the nearest exported sample — the skipped cells are not reconstructed or interpolated.`
+          : `Full resolution: ${grid.exported} cells (${grid.rCenters.length} radial × ${grid.zCenters.length} axial); each tile is one OpenFOAM cell.`}{" "}
+        Scalar map only: no streamlines are drawn from |U|.{" "}
+        {mode === "p"
+          ? "p is kinematic pressure relative to the outlet (p = 0 there), not the absolute BASS-II cabin pressure."
+          : ""}
       </p>
     </div>
   );
 }
 
-function colorFor(t: number): string {
-  const x = Math.max(0, Math.min(1, t));
-  const r = Math.round(20 + 200 * x);
-  const g = Math.round(40 + 80 * (1 - Math.abs(x - 0.5) * 2));
-  const b = Math.round(180 - 120 * x);
-  return `rgb(${r},${g},${b})`;
+function drawField(
+  ctx: CanvasRenderingContext2D,
+  o: {
+    grid: ReturnType<typeof buildFieldGrid>;
+    rect: PlotRect;
+    win: ReturnType<typeof zoomWindow>;
+    mode: FieldMode;
+    range: Range | null;
+    unit: string;
+    scale: ScaleMode;
+    logicalHeight: number;
+    probeTile: ReturnType<typeof buildFieldGrid>["tiles"][number] | null;
+  },
+) {
+  const { grid, rect, win, mode, range, unit, scale, logicalHeight, probeTile } = o;
+  const ink = "rgba(232,220,200,0.88)";
+  const faint = "rgba(232,220,200,0.35)";
+  ctx.fillStyle = "#0b0d10";
+  ctx.fillRect(0, 0, LOGICAL_WIDTH, logicalHeight);
+
+  // ---- field tiles, clipped to the plot area so zoom never spills over axes or legend
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(rect.left, rect.top, rect.width, rect.height);
+  ctx.clip();
+  if (range) {
+    for (const t of grid.tiles) {
+      if (t.z1 < win.zMin || t.z0 > win.zMax || t.r1 < win.rMin || t.r0 > win.rMax) continue;
+      const a = toCanvas(t.r1, t.z0, win, rect);
+      const b = toCanvas(t.r0, t.z1, win, rect);
+      ctx.fillStyle = colormap(normalise(mode === "u_mag" ? t.point.u_mag : t.point.p, range));
+      // +0.6 px overlap hides anti-aliasing seams between contiguous tiles.
+      ctx.fillRect(a.x, a.y, b.x - a.x + 0.6, b.y - a.y + 0.6);
+    }
+  }
+  if (probeTile) {
+    const c = toCanvas(probeTile.r, probeTile.z, win, rect);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, 7, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, 7, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.strokeStyle = faint;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(rect.left, rect.top, rect.width, rect.height);
+
+  // ---- physical boundaries (only where visible in the current window)
+  ctx.font = "11px ui-monospace, monospace";
+  ctx.textBaseline = "alphabetic";
+  if (win.rMin <= grid.domain.rMin + 1e-9) {
+    ctx.fillStyle = "#8a8f98";
+    ctx.fillRect(rect.left, rect.top + rect.height + 1, rect.width, 4);
+  }
+  if (win.rMax >= grid.domain.rMax - 1e-9) {
+    ctx.fillStyle = "#5c6168";
+    ctx.fillRect(rect.left, rect.top - 5, rect.width, 4);
+  }
+  ctx.fillStyle = ink;
+  ctx.textAlign = "left";
+  ctx.fillText("inlet z = 0: uniform U = Vg  ·  flow →", rect.left, 16);
+  ctx.textAlign = "right";
+  ctx.fillText("outlet: p = 0", rect.left + rect.width, 16);
+  ctx.textAlign = "left";
+  ctx.fillStyle = faint;
+  ctx.fillText("top edge: duct wall (no-slip) · bottom edge: PMMA rod surface (no-slip)", rect.left, 32);
+
+  // ---- axes with numeric ticks (mm)
+  ctx.fillStyle = ink;
+  ctx.strokeStyle = faint;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  for (const z of niceTicks(win.zMin, win.zMax, 6)) {
+    const { x } = toCanvas(win.rMin, z, win, rect);
+    ctx.beginPath();
+    ctx.moveTo(x, rect.top + rect.height + 5);
+    ctx.lineTo(x, rect.top + rect.height + 9);
+    ctx.stroke();
+    ctx.fillText(formatTick(z), x, rect.top + rect.height + 11);
+  }
+  ctx.fillText("z — axial position along the rod [mm]", rect.left + rect.width / 2, logicalHeight - 16);
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  for (const r of niceTicks(win.rMin, win.rMax, Math.max(3, Math.round(rect.height / 55)))) {
+    const { y } = toCanvas(r, win.zMin, win, rect);
+    ctx.beginPath();
+    ctx.moveTo(rect.left - 5, y);
+    ctx.lineTo(rect.left - 1, y);
+    ctx.stroke();
+    ctx.fillText(formatTick(r), rect.left - 8, y);
+  }
+  ctx.save();
+  ctx.translate(16, rect.top + rect.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.textAlign = "center";
+  ctx.fillText("r — radius [mm]", 0, 0);
+  ctx.restore();
+
+  // ---- legend: bar plus labels OUTSIDE the bar, variable, unit, min, max and scale mode
+  if (range) {
+    const barX = rect.left + rect.width + 26;
+    const barW = 14;
+    const barTop = rect.top;
+    const barH = Math.max(rect.height, 60);
+    for (let i = 0; i < 100; i++) {
+      ctx.fillStyle = colormap(1 - i / 99);
+      ctx.fillRect(barX, barTop + (i / 100) * barH, barW, barH / 100 + 1);
+    }
+    ctx.strokeStyle = faint;
+    ctx.strokeRect(barX, barTop, barW, barH);
+    const labelX = barX + barW + 8;
+    ctx.fillStyle = ink;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText(formatValue(range.max), labelX, barTop);
+    ctx.textBaseline = "bottom";
+    ctx.fillText(formatValue(range.min), labelX, barTop + barH);
+    ctx.textBaseline = "middle";
+    ctx.fillText(unit, labelX, barTop + barH / 2);
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(mode === "u_mag" ? "|U|" : "p (kinematic)", barX, barTop - 8);
+    ctx.textBaseline = "top";
+    ctx.fillStyle = faint;
+    ctx.fillText(scale === "global" ? "global scale" : "local scale", barX - 4, barTop + barH + 8);
+    ctx.fillText(scale === "global" ? "(all cases)" : "(this case)", barX - 4, barTop + barH + 21);
+  }
+}
+
+function formatTick(v: number): string {
+  return Number(v.toPrecision(4)).toString();
 }

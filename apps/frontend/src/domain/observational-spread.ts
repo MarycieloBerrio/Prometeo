@@ -1,6 +1,7 @@
 import type { Trial } from "@prometeo/contracts";
 
 import { formatQuantity } from "@/domain/format";
+import { deltaTSeconds } from "@/domain/spread-axis";
 
 export type SeriesId = "B16" | "B19";
 export type ObservedPoint = {
@@ -11,6 +12,8 @@ export type ObservedPoint = {
   spread: number;
   spreadUnit: string;
   oxygenLabel: string | null;
+  /** Δt stated in the measurement provenance (Link et al. Table S1), seconds; null if absent. */
+  deltaTSeconds: number | null;
 };
 
 /** Select recorded B16/B19 condition points only; no fitted or inferred values. */
@@ -29,6 +32,7 @@ export function observationalSpreadPoints(trials: Trial[]): ObservedPoint[] {
       spread: result.value.value,
       spreadUnit: result.value.unit,
       oxygenLabel: formatQuantity(trial.oxygen),
+      deltaTSeconds: deltaTSeconds(result.provenance.page) ?? deltaTSeconds(result.provenance.reference),
     });
   }
   return points.sort((a, b) => a.flow - b.flow || a.series.localeCompare(b.series));
