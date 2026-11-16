@@ -189,12 +189,20 @@ def assess_compatibility(
         )
 
     if a.geometry.type is GeometryType.CYLINDER and b.geometry.type is GeometryType.CYLINDER:
+        explicit = a.geometry.diameter is not None and b.geometry.diameter is not None
         issues.append(
             CompatibilityIssue(
                 Variable.THICKNESS,
                 Severity.INFO,
-                "For cylinders, geometry.thickness currently stores rod diameter "
-                "(not sheet thickness); do not interpret as film thickness",
+                (
+                    "For cylinders, geometry.thickness repeats the rod diameter "
+                    "(geometry.diameter) for backward compatibility; it is not a film thickness"
+                )
+                if explicit
+                else (
+                    "For cylinders, geometry.thickness currently stores rod diameter "
+                    "(not sheet thickness); do not interpret as film thickness"
+                ),
             )
         )
 

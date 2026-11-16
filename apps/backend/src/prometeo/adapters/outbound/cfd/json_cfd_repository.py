@@ -5,7 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from prometeo.domain.cfd.model import CfdSimulation, CfdValidationStatus, ConvergenceStatus
+from prometeo.domain.cfd.model import (
+    CfdGeometry,
+    CfdSimulation,
+    CfdValidationStatus,
+    ConvergenceStatus,
+)
 
 
 class JsonCfdRepository:
@@ -68,4 +73,33 @@ class JsonCfdRepository:
                 if raw.get("continuity_global_abs") is not None
                 else None
             ),
+            geometry=_geometry(raw.get("geometry")),
         )
+
+
+def _geometry(raw: object) -> CfdGeometry | None:
+    """Numeric domain bounds; None when the manifest lacks any required dimension."""
+    if not isinstance(raw, dict):
+        return None
+    try:
+        rod = float(raw["rod_radius_m"])
+        outer = float(raw["duct_outer_radius_m"])
+        length = float(raw["domain_length_m"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if not 0 < rod < outer or length <= 0:
+        return None
+    res = raw.get("mesh_resolution_nr_ntheta_nz")
+    resolution = (
+        (int(res[0]), int(res[1]), int(res[2]))
+        if isinstance(res, list) and len(res) == 3
+        else None
+    )
+    wedge = raw.get("wedge_degrees")
+    return CfdGeometry(
+        rod_radius_m=rod,
+        duct_outer_radius_m=outer,
+        domain_length_m=length,
+        wedge_degrees=float(wedge) if wedge is not None else None,
+        mesh_resolution=resolution,
+    )

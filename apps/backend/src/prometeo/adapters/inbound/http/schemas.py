@@ -59,7 +59,9 @@ class TrialOut(BaseModel):
     material: str
     composition: str | None
     geometry: str
+    # For legacy cylinder records this holds the rod diameter; prefer `diameter` when present.
     thickness: QuantityOut | None
+    diameter: QuantityOut | None = None
     thermal_regime: str
     oxygen: QuantityOut | None
     flow_speed: QuantityOut | None
@@ -235,6 +237,7 @@ def trial_out(t: Trial) -> TrialOut:
         composition=t.fuel.composition,
         geometry=t.geometry.type.value,
         thickness=q_out(t.geometry.thickness),
+        diameter=q_out(t.geometry.diameter),
         thermal_regime=t.geometry.thermal_regime.value,
         oxygen=q_out(t.oxygen),
         flow_speed=q_out(t.ventilation.speed),
@@ -289,6 +292,16 @@ def coverage_out(c: CoverageMap) -> CoverageResponse:
     )
 
 
+class CfdGeometryOut(BaseModel):
+    """Numerical domain (SI units). The circular duct approximates BASS-II's square duct."""
+
+    rod_radius_m: float
+    duct_outer_radius_m: float
+    domain_length_m: float
+    wedge_degrees: float | None = None
+    mesh_resolution: list[int] | None = None
+
+
 class CfdSimulationOut(BaseModel):
     simulation_id: str
     reference_trial_id: str
@@ -313,6 +326,7 @@ class CfdSimulationOut(BaseModel):
     convergence_evidence: str = ""
     mesh_quality_status: str = "not_verified"
     continuity_global_abs: float | None = None
+    geometry: CfdGeometryOut | None = None
 
 
 class CfdFieldPointOut(BaseModel):
@@ -372,6 +386,19 @@ def cfd_out(s: object) -> CfdSimulationOut:
         convergence_evidence=s.convergence_evidence,
         mesh_quality_status=s.mesh_quality_status,
         continuity_global_abs=s.continuity_global_abs,
+        geometry=(
+            CfdGeometryOut(
+                rod_radius_m=s.geometry.rod_radius_m,
+                duct_outer_radius_m=s.geometry.duct_outer_radius_m,
+                domain_length_m=s.geometry.domain_length_m,
+                wedge_degrees=s.geometry.wedge_degrees,
+                mesh_resolution=(
+                    list(s.geometry.mesh_resolution) if s.geometry.mesh_resolution else None
+                ),
+            )
+            if s.geometry is not None
+            else None
+        ),
     )
 
 

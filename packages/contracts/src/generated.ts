@@ -339,6 +339,22 @@ export interface components {
             /** Viewer Note */
             viewer_note?: string | null;
         };
+        /**
+         * CfdGeometryOut
+         * @description Numerical domain (SI units). The circular duct approximates BASS-II's square duct.
+         */
+        CfdGeometryOut: {
+            /** Rod Radius M */
+            rod_radius_m: number;
+            /** Duct Outer Radius M */
+            duct_outer_radius_m: number;
+            /** Domain Length M */
+            domain_length_m: number;
+            /** Wedge Degrees */
+            wedge_degrees?: number | null;
+            /** Mesh Resolution */
+            mesh_resolution?: number[] | null;
+        };
         /** CfdInterpretationOut */
         CfdInterpretationOut: {
             /** Question */
@@ -413,6 +429,7 @@ export interface components {
             mesh_quality_status: string;
             /** Continuity Global Abs */
             continuity_global_abs?: number | null;
+            geometry?: components["schemas"]["CfdGeometryOut"] | null;
         };
         /** CompareRequest */
         CompareRequest: {
@@ -606,6 +623,7 @@ export interface components {
             /** Geometry */
             geometry: string;
             thickness: components["schemas"]["QuantityOut"] | null;
+            diameter?: components["schemas"]["QuantityOut"] | null;
             /** Thermal Regime */
             thermal_regime: string;
             oxygen: components["schemas"]["QuantityOut"] | null;

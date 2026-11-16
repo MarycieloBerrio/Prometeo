@@ -52,6 +52,7 @@ def trial_from_json(raw: Json) -> Trial:
             GeometryType(geom["type"]),
             _q(geom.get("thickness")),
             ThermalRegime(geom.get("thermal_regime", "unknown")),
+            _q(geom.get("diameter")),
         ),
         oxygen=_q(raw.get("oxygen")),
         ventilation=Ventilation(
