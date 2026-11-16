@@ -80,6 +80,21 @@ def test_nonzero_exit_is_solver_failed() -> None:
     assert result.validation_status == "pending_execution"
 
 
+def test_iteration_counter_is_not_reported_as_seconds() -> None:
+    """Steady SIMPLE prints 'Time = 400s'; that is an iteration count, not physical time."""
+    result = classify_foam_run(log=MAX_ITERS_LOG, returncode=0, configured_end_time=400)
+    assert result.final_iteration == 400
+    assert "Final SIMPLE iteration: 400" in result.evidence
+    assert "not seconds" in result.evidence
+    assert "400s" not in result.evidence
+    assert "Final Time" not in result.evidence
+
+
+def test_velocity_criterion_is_described_as_largest_component() -> None:
+    result = classify_foam_run(log=MAX_ITERS_LOG, returncode=0, configured_end_time=400)
+    assert "largest velocity-component residual" in result.evidence
+
+
 def test_not_run() -> None:
     result = classify_foam_run(log="", returncode=None)
     assert result.outcome == RunOutcome.NOT_RUN

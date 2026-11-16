@@ -107,8 +107,9 @@ def test_field_sample_loads_for_converged_cases(repo: JsonCfdRepository) -> None
     sample = use_case.field_sample("CFD-B16-Vg072")
     assert sample is not None
     assert sample.n_points_source == 1920
-    assert sample.downsample_stride == 2
-    assert len(sample.points) > 0
+    # Full-resolution export since 2026-11-16 (was stride 2, reproduced exactly).
+    assert sample.downsample_stride == 1
+    assert len(sample.points) == 1920
     assert "u_mag" in sample.points[0]
     assert sample.units["velocity"] == "m/s"
 

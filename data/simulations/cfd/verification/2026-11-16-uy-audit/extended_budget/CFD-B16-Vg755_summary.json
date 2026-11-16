@@ -1,0 +1,48 @@
+{
+  "experiment": "extended_budget",
+  "simulation_id": "CFD-B16-Vg755",
+  "inlet_velocity_m_s": 0.0755,
+  "residualControl": {
+    "p": 0.0001,
+    "U": 0.0001
+  },
+  "configured_end_iteration": 30000,
+  "returncode": 0,
+  "solver_announced_convergence": false,
+  "convergence_status": "max_iterations_reached",
+  "evidence": "No 'SIMPLE solution converged' announcement in log; run finished at endTime / max iterations. Final Time=30000s; configured endTime=30000. Final Uy initial residual=0.000479905 (residualControl U=1e-4).",
+  "final_simple_iteration": 30000,
+  "final_initial_residuals": {
+    "Ux": 3.4072481e-15,
+    "Uy": 0.00047990516,
+    "Uz": 1.2832714e-15,
+    "p": 5.7719926e-09
+  },
+  "final_continuity_global_abs": 4.0596253e-11,
+  "max_abs_uy_m_s": 9.235367e-17,
+  "uy_over_vg": 1.2232274172185431e-15,
+  "patch_flux": {
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -4.71725928e-06,
+    "outlet_phi_m3_s": 4.71725928e-06,
+    "status": "computed",
+    "sign_convention_ok": true,
+    "imbalance_m3_s": 0.0,
+    "relative_imbalance": 0.0
+  },
+  "analytic_inlet_flux_m3_s": 4.723248418990598e-06,
+  "stationarity": {
+    "window_iterations": 1000,
+    "available": true,
+    "iterations_in_window": 1000,
+    "dp_max_relative_change": 0.0,
+    "outlet_flux_max_relative_change": 0.0,
+    "max_initial_residual_in_window": {
+      "Ux": 3.4072481e-15,
+      "Uy": 0.00066433846,
+      "Uz": 1.3453788e-15,
+      "p": 5.7719941e-09
+    }
+  },
+  "history_csv": "extended_budget/CFD-B16-Vg755_history.csv"
+}

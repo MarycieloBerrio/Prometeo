@@ -46,7 +46,8 @@
   "solver_controls": {
     "endTime": 5000,
     "residualControl_U": 0.0001,
-    "residualControl_p": 0.0001
+    "residualControl_p": 0.0001,
+    "endTime_meaning": "SIMPLE iteration budget (deltaT = 1 pseudo-time), not seconds"
   },
   "mesh_cell_count": 1920,
   "mesh_quality": {
@@ -65,13 +66,19 @@
   },
   "continuity_global_abs": 8.9702962e-12,
   "continuity_global_note": "Absolute value of OpenFOAM SIMPLE 'time step continuity errors ... global' from the final iteration \u2014 not a patch-integrated mass/volume flux balance.",
-  "mass_balance_error": null,
-  "mass_balance_status": "not_verified",
+  "mass_balance_error": 3.85664006444096e-09,
+  "mass_balance_status": "verified",
   "patch_flow_balance": {
-    "status": "not_verified",
-    "reason": "could not parse surfaceFieldValue phi sums",
-    "inlet_phi": null,
-    "outlet_phi": null
+    "quantity": "volumetric flux sum(phi) [m^3/s] through the 5-degree wedge sector",
+    "inlet_phi_m3_s": -5.1858612e-07,
+    "outlet_phi_m3_s": 5.18586118e-07,
+    "imbalance_m3_s": -2.0000000072549875e-15,
+    "relative_imbalance": 3.85664006444096e-09,
+    "sign_convention_ok": true,
+    "status": "computed",
+    "tolerance": 1e-06,
+    "method": "foamPostProcess -func 'patchFlowRate(patch=inlet|outlet)' on a copy of the published final iteration (619); see data/simulations/cfd/verification/",
+    "precision_note": "Fluxes are written with 9 significant digits, so relative imbalances near 1e-8 are at the output-precision floor."
   },
   "mesh_independence": "not_demonstrated",
   "convergence_status": "converged",
@@ -87,7 +94,7 @@
     "Does not predict temperature, pyrolysis, or oxygen consumption.",
     "Cannot claim 0g vs 1g differences (isothermal forced flow).",
     "Absolute B16 cabin pressure remains unverified in curated data \u2014 not invented here.",
-    "SIMPLE 'continuity errors ... global' is not a patch mass-flux balance.",
+    "SIMPLE 'continuity errors ... global' is not a patch flux balance; the patch balance is a volumetric flux (no density) through the 5\u00b0 wedge sector.",
     "Mesh independence is not demonstrated for the published base mesh."
   ],
   "provenance": {
@@ -95,5 +102,13 @@
     "url": "https://www.nature.com/articles/s41598-017-18398-4",
     "vg_source": "curated BASS-II B16 opposed-flow condition points / Table S1",
     "log_excerpt": "  ClockTime = 10 s\n\nTime = 618s\n\nsmoothSolver:  Solving for Ux, Initial residual = 6.9806357e-10, Final residual = 6.9806357e-10, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 0.00010816098, Final residual = 2.5938448e-06, No Iterations 2\nsmoothSolver:  Solving for Uz, Initial residual = 1.8699077e-10, Final residual = 1.8699077e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 9.8074571e-09, Final residual = 9.8074571e-09, No Iterations 0\nGAMG:  Solving for p, Initial residual = 9.8074571e-09, Final residual = 9.8074571e-09, No Iterations 0\ntime step continuity errors : sum local = 1.4290152e-09, global = -9.5373908e-12, cumulative = 1.9921205e-07\nExecutionTime = 3.815036 s  ClockTime = 10 s\n\nTime = 619s\n\nsmoothSolver:  Solving for Ux, Initial residual = 6.6626151e-10, Final residual = 6.6626151e-10, No Iterations 0\nsmoothSolver:  Solving for Uy, Initial residual = 9.8931798e-05, Final residual = 2.3682526e-06, No Iterations 2\nsmoothSolver:  Solving for Uz, Initial residual = 1.7998233e-10, Final residual = 1.7998233e-10, No Iterations 0\nGAMG:  Solving for p, Initial residual = 1.0565815e-08, Final residual = 1.1482849e-09, No Iterations 1\nGAMG:  Solving for p, Initial residual = 1.1482849e-09, Final residual = 1.1482849e-09, No Iterations 0\ntime step continuity errors : sum local = 1.6731317e-10, global = 8.9702962e-12, cumulative = 1.9922102e-07\nExecutionTime = 3.820565 s  ClockTime = 10 s\n\n\nSIMPLE solution converged in 619 iterations\n\nEnd\n\n"
-  }
+  },
+  "final_simple_iteration": 619,
+  "field_export": {
+    "cells_exported": 1920,
+    "mesh_cells": 1920,
+    "downsample_stride": 1,
+    "previous_export": "stride 2 (960 cells), reproduced exactly"
+  },
+  "artifacts_refreshed_at": "2026-11-16T04:21:50.810908+00:00"
 }
