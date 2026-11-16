@@ -79,12 +79,19 @@ def interpretation(
     """Deterministic contextual explanation — not an LLM causal claim from CFD."""
     sim = use_case.execute(simulation_id)
     return CfdInterpretationOut(
-        question="Why does measured flame spread peak at an intermediate opposed flow speed?",
+        question=(
+            "Why does measured flame spread appear to peak at an intermediate opposed-flow speed?"
+        ),
         nasa_measured=[
-            f"Linked experimental trial: {sim.reference_trial_id}.",
-            "Opposed-flow flame spread rates for B16 come from Link et al. 2018 / Table S1 "
-            "(curated measured Vf vs Vg).",
-            "B16 oxygen context is 18.2% mole fraction as an experimental identifier.",
+            f"Linked experimental condition point: {sim.reference_trial_id}.",
+            "B16 Vf values come from Link et al. 2018, Supplementary Table S1, which tabulates "
+            "10³·Vf in cm/s (e.g. 5.68 → Vf = 5.68×10⁻³ cm/s = 0.0568 mm/s).",  # noqa: RUF001
+            "The B16 points are condition points on ONE rod: the opposed flow was stepped down "
+            "from 7.55 to 0.72 cm/s during a single burn (≥ 1 min per step, Link et al. 2018). "
+            "They are not independent ignitions; no replicates or uncertainty bars exist.",
+            "Within that sequence Vf is non-monotonic in Vg: an apparent maximum at an "
+            "intermediate speed, observed once — not a statistically demonstrated peak.",
+            "B16 oxygen context is 18.2% (volume fraction), an experimental identifier.",
             "Absolute pressure for these rod rows remains undocumented in the curated set.",
         ],
         simulation_computed=[
@@ -93,7 +100,7 @@ def interpretation(
                 f"Vg = {sim.inlet_velocity_cm_s:g} cm/s."
             ),
             "Solved fields: velocity and relative kinematic pressure (incompressible).",
-            "No temperature, O₂ species, pyrolysis, or flame-spread rate is computed.",
+            "No temperature, O₂ species, pyrolysis, radiation or flame-spread rate is computed.",
             f"Validation status: {sim.validation_status.value}; "
             f"convergence: {sim.convergence_status.value}.",
             (
@@ -102,12 +109,24 @@ def interpretation(
             ),
         ],
         literature_mechanisms=[
-            "Link et al. 2018 attribute non-monotonic Vf(Vg) in microgravity to competing "
-            "thermal-regime heat transfer and chemical-regime Damköhler effects.",
-            "Forced ventilation changes boundary-layer thickness and oxygen supply to the flame.",
+            "Link et al. 2018 (Discussion) describe a thermal regime: at low opposed flow, a "
+            "faster flow moves the flame closer to the surface, raises heat transfer to the "
+            "solid ahead and increases Vf.",
+            "They describe a chemical regime: at larger flow (or lower O₂), the flow cools the "
+            "gas-phase reaction, the flame weakens and spread slows, eventually to blow-off. They "
+            "characterise it with a convective Damköhler number written Da = t_chem / t_flow "
+            "(their Eq. 1). Quoted only: Prometeo does not evaluate Da or its trend with Vg.",
+            "At very low flow they attribute slow spread and extinction (no spread below "
+            "~0.6 cm/s) to surface radiative losses and slow oxygen transport, and state that "
+            "better diagnostics are needed to separate the two. Blow-off at high flow was not "
+            "observed in the ISS tests.",
         ],
         cannot_conclude=[
-            "This non-reactive CFD cannot by itself prove which mechanism caused the Vf peak.",
+            "This non-reactive, isothermal CFD has no combustion, radiation or species: it "
+            "cannot demonstrate either regime or which one produced the apparent maximum.",
+            "The apparent maximum rests on single values from one sample burned in one "
+            "sequence, so Vg is confounded with time and position along the rod; causality "
+            "of Vg alone is not demonstrated.",
             "Do not treat the velocity field as a simulated flame or as predicted Vf.",
             "Isothermal forced flow cannot demonstrate 0g vs 1g buoyancy differences.",
             "Mesh independence is not demonstrated for the MVP annular wedge mesh.",

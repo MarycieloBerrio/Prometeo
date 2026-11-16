@@ -82,8 +82,12 @@ class Fuel:
 @dataclass(frozen=True, slots=True)
 class Geometry:
     type: GeometryType
+    # Sheets/films: material thickness. Legacy cylinder records also store the rod DIAMETER
+    # here; it is kept unchanged for backward compatibility. New code should read `diameter`.
     thickness: Quantity | None = None
     thermal_regime: ThermalRegime = ThermalRegime.UNKNOWN
+    # Explicit outer diameter for cylinders/rods (None when not a rod or not recorded).
+    diameter: Quantity | None = None
 
 
 @dataclass(frozen=True, slots=True)

@@ -24,6 +24,16 @@ export type CfdSimulation = {
   convergence_evidence?: string;
   mesh_quality_status?: string;
   continuity_global_abs?: number | null;
+  /** Numerical domain in SI units (null for manifests that do not record it). */
+  geometry?: CfdGeometry | null;
+};
+
+export type CfdGeometry = {
+  rod_radius_m: number;
+  duct_outer_radius_m: number;
+  domain_length_m: number;
+  wedge_degrees?: number | null;
+  mesh_resolution?: number[] | null;
 };
 
 export type CfdFieldSample = {

@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { Trial } from "@prometeo/contracts";
 
 import { observationalSpreadPoints, type SeriesId } from "@/domain/observational-spread";
+import { axisScale, logTicks, paddedDomain, type AxisKind } from "@/domain/spread-axis";
 
 const SERIES = ["B16", "B19"] as const;
 
@@ -32,6 +33,7 @@ export function ObservationalSpreadChart({
   onSelectTrial?: (trialId: string) => void;
 }) {
   const points = observationalSpreadPoints(trials);
+  const [xKind, setXKind] = useState<AxisKind>("linear");
   const [internalId, setInternalId] = useState(highlight[0] ?? points[0]?.trialId ?? "");
   const activeId = activeTrialId ?? internalId;
   const setActiveId = (trialId: string) => {
@@ -55,25 +57,38 @@ export function ObservationalSpreadChart({
   const maxX = Math.max(...flows);
   const minY = Math.min(...spreads);
   const maxY = Math.max(...spreads);
-  const xPad = (maxX - minX) * 0.08 || 0.5;
   const yPad = (maxY - minY) * 0.15 || 0.01;
-  const x0 = minX - xPad;
-  const x1 = maxX + xPad;
+  const [x0, x1] = paddedDomain(xKind, minX, maxX);
   const y0 = Math.max(0, minY - yPad);
   const y1 = maxY + yPad;
 
-  const xScale = (v: number) => pad.left + ((v - x0) / (x1 - x0)) * innerW;
+  const xScale = axisScale(xKind, x0, x1, pad.left, pad.left + innerW);
   const yScale = (v: number) => pad.top + innerH - ((v - y0) / (y1 - y0)) * innerH;
 
   const flowUnit = points[0]?.flowUnit ?? "cm/s";
   const spreadUnit = points[0]?.spreadUnit ?? "mm/s";
   const highlightSet = new Set(highlight);
 
-  const xTicks = uniqueTicks([minX, (minX + maxX) / 2, maxX]);
+  const xTicks =
+    xKind === "log" ? logTicks(x0, x1, minX, maxX) : uniqueTicks([minX, (minX + maxX) / 2, maxX]);
   const yTicks = uniqueTicks([y0, (y0 + y1) / 2, y1]);
 
   return (
     <figure className="obs-chart">
+      <div className="obs-scale-toggle" role="group" aria-label="Horizontal axis scale">
+        <span className="muted">Vg axis:</span>
+        {(["linear", "log"] as const).map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            className="btn btn-small"
+            aria-pressed={xKind === kind}
+            onClick={() => setXKind(kind)}
+          >
+            {kind === "linear" ? "Linear" : "Log"}
+          </button>
+        ))}
+      </div>
       <div className="obs-workbench">
       <div className="obs-plot">
       <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label="Select an observed BASS-II condition point">
@@ -109,7 +124,7 @@ export function ObservationalSpreadChart({
         ))}
 
         <text className="obs-axis-label" x={width / 2} y={height - 8} textAnchor="middle">
-          Ventilation / flow speed ({flowUnit})
+          Ventilation / flow speed Vg ({flowUnit}){xKind === "log" ? " · log scale" : ""}
         </text>
         <text
           className="obs-axis-label"
@@ -186,6 +201,10 @@ export function ObservationalSpreadChart({
           <div><dt>VENTILATION</dt><dd>{active.flow} {active.flowUnit}</dd></div>
           <div><dt>FLAME SPREAD</dt><dd>{active.spread} {active.spreadUnit}</dd></div>
           <div><dt>OXYGEN</dt><dd>{active.oxygenLabel ?? "Not recorded"}</dd></div>
+          <div>
+            <dt>Δt (TABLE S1)</dt>
+            <dd>{active.deltaTSeconds != null ? `${active.deltaTSeconds} s` : "Not recorded"}</dd>
+          </div>
         </dl>
         <p className="small muted">{activeTrial?.results.find((item) => item.name === "flame_spread_rate")?.quality ?? "Recorded"} result. This point is a condition on sample {active.series}, not an independent ignition.</p>
         <div className="obs-inspector-actions">
@@ -211,9 +230,12 @@ export function ObservationalSpreadChart({
         )}
       </figcaption>
       <p className="muted small">
-        Observed condition points from curated BASS-II records (Link et al., Table S1). Lines connect
-        measurements in the same sample series for readability only — they are not a fitted model and
-        do not replace the Physics Validator verdict or withheld causal deltas.
+        Observed condition points from curated BASS-II records (Link et al. 2018, Table S1). Each series
+        is ONE rod burned while the opposed flow was stepped down (7.55 → 0.72 cm/s): points within a
+        series are not independent replicates and carry no uncertainty bars, so an apparent maximum is
+        an observation, not a statistically demonstrated peak. Lines connect measurements in the same
+        sample series for readability only — they are not a fitted model and do not replace the
+        Physics Validator verdict or withheld causal deltas.
       </p>
     </figure>
   );

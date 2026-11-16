@@ -85,3 +85,28 @@ def test_cfd_simulations_list_and_field(client: TestClient) -> None:
     joined = " ".join(interp["cannot_conclude"]).lower()
     assert "non-reactive" in joined or "cannot" in joined
     assert client.get("/api/v1/cfd/simulations/CFD-MISSING").status_code == 404
+
+
+def test_cfd_simulation_exposes_numeric_geometry(client: TestClient) -> None:
+    sim = client.get("/api/v1/cfd/simulations/CFD-B16-Vg072").json()
+    geo = sim["geometry"]
+    assert geo is not None
+    assert geo["rod_radius_m"] == 0.0032
+    assert geo["duct_outer_radius_m"] == 0.038
+    assert geo["domain_length_m"] == 0.12
+    assert geo["mesh_resolution"] == [24, 1, 80]
+
+
+def test_cfd_interpretation_wording_stays_within_evidence(client: TestClient) -> None:
+    interp = client.get("/api/v1/cfd/simulations/CFD-B16-Vg755/interpretation").json()
+    assert "appear to peak" in interp["question"]
+    measured = " ".join(interp["nasa_measured"])
+    assert "not a statistically demonstrated peak" in measured
+    assert "not independent ignitions" in measured
+    assert "10³·Vf" in measured and "0.0568 mm/s" in measured
+    literature = " ".join(interp["literature_mechanisms"])
+    # Da is quoted exactly as Link et al. write it, and its trend is NOT asserted.
+    assert "Da = t_chem / t_flow" in literature
+    assert "does not evaluate Da" in literature
+    cannot = " ".join(interp["cannot_conclude"]).lower()
+    assert "causality" in cannot and "cannot demonstrate" in cannot

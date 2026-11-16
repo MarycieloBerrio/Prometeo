@@ -1036,6 +1036,55 @@
         ],
         "title": "CfdFieldSampleOut"
       },
+      "CfdGeometryOut": {
+        "properties": {
+          "rod_radius_m": {
+            "type": "number",
+            "title": "Rod Radius M"
+          },
+          "duct_outer_radius_m": {
+            "type": "number",
+            "title": "Duct Outer Radius M"
+          },
+          "domain_length_m": {
+            "type": "number",
+            "title": "Domain Length M"
+          },
+          "wedge_degrees": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wedge Degrees"
+          },
+          "mesh_resolution": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mesh Resolution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rod_radius_m",
+          "duct_outer_radius_m",
+          "domain_length_m"
+        ],
+        "title": "CfdGeometryOut",
+        "description": "Numerical domain (SI units). The circular duct approximates BASS-II's square duct."
+      },
       "CfdInterpretationOut": {
         "properties": {
           "question": {
@@ -1222,6 +1271,16 @@
               }
             ],
             "title": "Continuity Global Abs"
+          },
+          "geometry": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CfdGeometryOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -1821,6 +1880,16 @@
             "title": "Geometry"
           },
           "thickness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuantityOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "diameter": {
             "anyOf": [
               {
                 "$ref": "#/components/schemas/QuantityOut"

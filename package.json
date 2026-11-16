@@ -20,6 +20,7 @@
     "db:diagnose": "cd apps/backend && uv run prometeo diagnose-db",
     "kb:build": "cd apps/backend && uv run --extra knowledge prometeo build-knowledge-base",
     "kb:search": "cd apps/backend && uv run --extra knowledge prometeo search-knowledge-base",
-    "check": "pnpm check:api && pnpm lint:web && pnpm typecheck:web"
+    "check": "pnpm check:api && pnpm lint:web && pnpm typecheck:web && pnpm test:web",
+    "test:web": "pnpm --filter @prometeo/frontend test"
   }
 }
